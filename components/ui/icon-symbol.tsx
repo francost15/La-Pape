@@ -23,6 +23,8 @@ const MAPPING = {
   'clock.fill': 'history',
   'doc.text': 'description',
   'qrcode': 'qr-code-scanner',
+  'plus.circle.fill': 'add-circle',
+  'magnifyingglass': 'search',
 } as IconMapping;
 
 /**
