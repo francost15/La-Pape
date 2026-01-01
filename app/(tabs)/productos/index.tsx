@@ -1,9 +1,12 @@
-
+import BadgeCategoryProducts from '@/components/badges/BadgeCategoryProducts';
 import CardProducts from '@/components/cards/card-products';
+import SearchProducts from '@/components/search/SearchProducts';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductosScreen() {
+  const isWeb = Platform.OS === 'web';
+  //estas constantes se quitaran cuando se tenga la data real
   const product = {
     id: '1',
     nombre: 'Producto de Ejemplo 1',
@@ -18,7 +21,17 @@ export default function ProductosScreen() {
     stock: true,
   };
 
-  const isWeb = Platform.OS === 'web';
+
+  const categories = [
+    { id: '1', nombre: 'Electrónica' },
+    { id: '2', nombre: 'Hogar' },
+    { id: '3', nombre: 'Accesorios' },
+    { id: '4', nombre: 'Bebidas' },
+    { id: '5', nombre: 'Alimentos' },
+    { id: '6', nombre: 'Limpieza' },
+    { id: '7', nombre: 'Higiene' },
+    { id: '8', nombre: 'Otros' },
+  ];
 
   return (
     <ScrollView
@@ -28,14 +41,7 @@ export default function ProductosScreen() {
     >
       {/* Barra de búsqueda */}
       <View className="flex-row gap-3 mb-4">
-        <View className="flex-1 bg-white dark:bg-neutral-800 rounded-lg px-4 py-3 flex-row items-center ">
-          <IconSymbol name="magnifyingglass" size={20} color={isWeb ? '#6b7280' : '#9ca3af'} />
-          <TextInput
-            className="flex-1 ml-3 text-gray-900 dark:text-white"
-            placeholder="Buscar productos..."
-            placeholderTextColor={isWeb ? '#9ca3af' : '#6b7280'}
-          />
-        </View>
+        <SearchProducts />
         {/* boton para agregar producto */}
         <TouchableOpacity
           className="bg-blue-500 px-4 py-3 rounded-lg justify-center items-center flex-row gap-2"
@@ -45,6 +51,9 @@ export default function ProductosScreen() {
           <Text className="text-white font-semibold">Agregar</Text>
         </TouchableOpacity>
       </View>
+      {/* Categorias de productos ordenadas por nombre asc */}
+      <BadgeCategoryProducts categories={categories} />
+      {/* Productos */}
       <View className="flex-row flex-wrap gap-4 justify-center">
         {Array.from({ length: 5 }).map((_, index) => (
           <View key={index} className={isWeb ? 'w-80' : 'w-44'}>
