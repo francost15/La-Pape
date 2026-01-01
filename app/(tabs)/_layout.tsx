@@ -9,39 +9,44 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <Tabs  
       screenOptions={{
+        //desaparecer el borde superior de la barra de tabs
+        headerShown: false,
+        //esto es para desaparecer el texto de las tabs
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
           borderTopWidth: 0,
         },
       }}>
+      {/* Asi se llaman las carpetas de las tabs carpeta/index.tsx */}
       <Tabs.Screen
-        name="index"
+        name="ventas/index"
         options={{
           title: 'Ventas',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={32} name="cart.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Productos',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bag.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={32} name="bag.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'Historial',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={32} name="clock.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="summary"
         options={{
           title: 'Resumen',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={32} name="doc.text" color={color} />,
         }}
       />
 
