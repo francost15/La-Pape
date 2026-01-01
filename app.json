@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "la-pape",
+    "name": "La Pape - Sistema de Ventas",
     "slug": "la-pape",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,7 +24,8 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "La Pape - Sistema de Ventas"
     },
     "plugins": [
       "expo-router",
