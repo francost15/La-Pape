@@ -25,18 +25,24 @@ export default function CardProducts({ product, className = '' }: CardProductsPr
       </View>
 
       <View className="p-2">
-        {product.categoria && (
-          <Text className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            {product.categoria.nombre}
-          </Text>
-        )}
-
+        <View className="flex-row justify-between items-center gap-2 mb-1">
+          {product.categoria && (
+            <Text className="text-sm text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-neutral-700 px-2 py-1 rounded-full">
+              {product.categoria.nombre}
+            </Text>
+          )}
+          {product.marca && (
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
+              {product.marca}
+            </Text>
+          )}
+        </View>
         <Text className={`${isWeb ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white mb-2`} numberOfLines={2}>
           {product.nombre}
         </Text>
 
         <View className="flex-row items-baseline gap-2">
-          <Text className={`${isWeb ? 'text-lg' : 'text-base'} font-bold text-blue-600 dark:text-blue-400`}>
+          <Text className={`${isWeb ? 'text-lg' : 'text-base'} font-bold text-orange-600`}>
             ${product.precio.toLocaleString()}
           </Text>
           <Text className={`${isWeb ? 'text-sm' : 'text-xs'} text-gray-500 dark:text-gray-400`}>

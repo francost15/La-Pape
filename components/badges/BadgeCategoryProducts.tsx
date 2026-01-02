@@ -9,7 +9,7 @@ interface BadgeCategoryProductsProps {
 function BadgeItem({ category }: { category: ProductoCategoria }) {
   return (
     // el px sirve para el espacio horizontal y el py para el espacio vertical
-    <TouchableOpacity className="bg-blue-500 px-4 py-3 rounded-full">
+    <TouchableOpacity className="bg-orange-600 px-4 py-3 rounded-full">
       <Text className="text-white text-sm font-medium">{category.nombre}</Text>
     </TouchableOpacity>
   );

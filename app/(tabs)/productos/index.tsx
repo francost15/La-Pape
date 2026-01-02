@@ -10,6 +10,7 @@ export default function ProductosScreen() {
   const product = {
     id: '1',
     nombre: 'Producto de Ejemplo 1',
+    marca: 'Norma',
     precio: 29.99,
     precio_mayoreo: 25.99,
     imagen: 'https://imgs.search.brave.com/DX_wldWWiJSIPvT_VyfBeHcd_b7rr6rRQNUVQz3k29E/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jbXMu/amliZWNkbi5jb20v/cHJvZC9naXRodWJp/bmMtY2FyZWVycy9h/c3NldHMvTFAtU0tV/LUQ0LUlNRy1lbi11/cy0xNzAxODU2ODgz/NjA2LnBuZw',
@@ -44,7 +45,7 @@ export default function ProductosScreen() {
         <SearchProducts />
         {/* boton para agregar producto */}
         <TouchableOpacity
-          className="bg-blue-500 px-4 py-3 rounded-lg justify-center items-center flex-row gap-2"
+          className="bg-orange-600 px-4 py-3 rounded-lg justify-center items-center flex-row gap-2"
           onPress={() => {}}
         >
           <IconSymbol name="plus.circle.fill" size={20} color="white" />
@@ -55,8 +56,8 @@ export default function ProductosScreen() {
       <BadgeCategoryProducts categories={categories} />
       {/* Productos */}
       <View className="flex-row flex-wrap gap-4 justify-center">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <View key={index} className={isWeb ? 'w-80' : 'w-44'}>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <View key={index} className={isWeb ? 'w-80' : 'w-52'}>
             <CardProducts product={product} />
           </View>
         ))}

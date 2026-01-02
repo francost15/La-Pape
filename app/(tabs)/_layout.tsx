@@ -11,13 +11,13 @@ export default function TabLayout() {
   return (
     <Tabs  
       screenOptions={{
-        //desaparecer el borde superior de la barra de tabs
         headerShown: false,
-        //esto es para desaparecer el texto de las tabs
-        tabBarShowLabel: true,
+        tabBarShowLabel: true, // esto es para mostrar el texto de las tabs
+        tabBarActiveTintColor: '#ea580c', // orange-600 de Tailwind
+        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault, // esto es para el color de las tabs inactivas
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
-          borderTopWidth: 0,
+          backgroundColor: Colors[colorScheme ?? 'light'].background, // esto es para el color de fondo de las tabs
+          borderTopWidth: 0, // esto es para desaparecer el borde superior de las tabs
         },
       }}>
       {/* Asi se llaman las carpetas de las tabs carpeta/index.tsx */}
