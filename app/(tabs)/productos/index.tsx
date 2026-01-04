@@ -2,6 +2,7 @@ import BadgeCategoryProducts from '@/components/badges/BadgeCategoryProducts';
 import CardProducts from '@/components/cards/card-products';
 import SearchProducts from '@/components/search/SearchProducts';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { router } from 'expo-router';
 import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductosScreen() {
@@ -9,17 +10,18 @@ export default function ProductosScreen() {
   //estas constantes se quitaran cuando se tenga la data real
   const product = {
     id: '1',
+    negocio_id: 'negocio-1',
     nombre: 'Producto de Ejemplo 1',
-    marca: 'Norma',
-    precio: 29.99,
+    categoria_id: '1',
+    precio_venta: 29.99,
     precio_mayoreo: 25.99,
+    costo_promedio: 15.50,
+    cantidad: 100,
     imagen: 'https://imgs.search.brave.com/DX_wldWWiJSIPvT_VyfBeHcd_b7rr6rRQNUVQz3k29E/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jbXMu/amliZWNkbi5jb20v/cHJvZC9naXRodWJp/bmMtY2FyZWVycy9h/c3NldHMvTFAtU0tV/LUQ0LUlNRy1lbi11/cy0xNzAxODU2ODgz/NjA2LnBuZw',
     descripcion: 'Descripción breve del producto',
-    categoria: {
-      id: '1',
-      nombre: 'Electrónica',
-    },
-    stock: true,
+    marca: 'Norma',
+    stock_minimo: 10,
+    activo: true,
   };
 
 
@@ -46,7 +48,9 @@ export default function ProductosScreen() {
         {/* boton para agregar producto */}
         <TouchableOpacity
           className="bg-orange-600 px-4 py-3 rounded-lg justify-center items-center flex-row gap-2"
-          onPress={() => {}}
+          onPress={() => {
+            router.push('/productos/create');
+          }}
         >
           <IconSymbol name="plus.circle.fill" size={20} color="white" />
           <Text className="text-white font-semibold">Agregar</Text>
