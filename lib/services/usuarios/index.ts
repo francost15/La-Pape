@@ -1,17 +1,17 @@
-import { CreateUsuarioInput, UpdateUsuarioInput, Usuario } from '@/interface/usuarios';
+import { CreateUsuarioInput, UpdateUsuarioInput, Usuario } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 /**
@@ -114,7 +114,10 @@ export const updateUsuario = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'usuarios', id);
-    await updateDoc(docRef, usuarioData);
+    await updateDoc(docRef, {
+      ...usuarioData,
+      updatedAt: Timestamp.now(),
+    });
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
     throw new Error('No se pudo actualizar el usuario');

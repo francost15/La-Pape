@@ -1,4 +1,4 @@
-import { Product } from '@/interface/products';
+import { Product } from '@/interface';
 import { getProductById } from '@/lib/services/productos';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ export default function ProductoById() {
   const navigation = useNavigation();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   // Cargar producto desde parámetros o Firestore
   useEffect(() => {
@@ -67,20 +68,27 @@ export default function ProductoById() {
     <View className="flex-1 p-4">
       <Text className="text-2xl font-bold text-black dark:text-white mb-4">{product.nombre}</Text>
       
-      {product.imagen && product.imagen.trim() !== '' ? (
+      {product.imagen && product.imagen.trim() !== '' && !imageError ? (
         <View className="w-full h-64 bg-gray-200 dark:bg-neutral-700 rounded-lg mb-4 overflow-hidden">
           <Image
             source={{ uri: product.imagen }}
             resizeMode="cover"
             style={{ width: '100%', height: '100%' }}
-            onError={() => {
-              console.warn('Error al cargar imagen del producto:', product.nombre);
+            onError={(error) => {
+              setImageError(true);
+              // Solo mostrar información útil del error
+              if (__DEV__) {
+                const errorMessage = error?.nativeEvent?.error || 'Error desconocido';
+                console.warn(`Error al cargar imagen: ${product.nombre} - ${errorMessage}`);
+              }
             }}
           />
         </View>
       ) : (
         <View className="w-full h-64 bg-gray-200 dark:bg-neutral-700 rounded-lg mb-4 justify-center items-center">
-          <Text className="text-gray-400 dark:text-gray-500">Sin imagen</Text>
+          <Text className="text-gray-400 dark:text-gray-500">
+            {imageError ? 'Error al cargar imagen' : 'Sin imagen'}
+          </Text>
         </View>
       )}
       

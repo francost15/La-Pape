@@ -1,16 +1,16 @@
-import { CreateVentaPagoInput, UpdateVentaPagoInput, VentaPago } from '@/interface/ventas-pagos';
+import { CreateVentaPagoInput, UpdateVentaPagoInput, VentaPago } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 /**
@@ -86,7 +86,10 @@ export const updateVentaPago = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'ventas_pagos', id);
-    await updateDoc(docRef, pagoData);
+    await updateDoc(docRef, {
+      ...pagoData,
+      updatedAt: Timestamp.now(),
+    });
   } catch (error) {
     console.error('Error al actualizar pago de venta:', error);
     throw new Error('No se pudo actualizar el pago de venta');

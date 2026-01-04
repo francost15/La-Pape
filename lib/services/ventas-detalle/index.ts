@@ -1,20 +1,20 @@
 import {
-    CreateVentaDetalleInput,
-    UpdateVentaDetalleInput,
-    VentaDetalle,
-} from '@/interface/ventas-detalle';
+  CreateVentaDetalleInput,
+  UpdateVentaDetalleInput,
+  VentaDetalle,
+} from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 /**
@@ -92,7 +92,10 @@ export const updateVentaDetalle = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'ventas_detalle', id);
-    await updateDoc(docRef, detalleData);
+    await updateDoc(docRef, {
+      ...detalleData,
+      updatedAt: Timestamp.now(),
+    });
   } catch (error) {
     console.error('Error al actualizar detalle de venta:', error);
     throw new Error('No se pudo actualizar el detalle de venta');

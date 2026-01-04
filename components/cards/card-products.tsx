@@ -1,10 +1,13 @@
 import { CardProductsProps } from '@/interface/products';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import React, { useState } from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
 
 export default function CardProducts({ product, className = '' }: CardProductsProps) {
   const isWeb = Platform.OS === 'web';
+  const [imageError, setImageError] = useState(false);
+
   const handlePress = () => {
     router.push({
       pathname: '/productos/producto/[id]' as any,
@@ -14,6 +17,9 @@ export default function CardProducts({ product, className = '' }: CardProductsPr
       },
     });
   };
+
+  const hasImage = product.imagen && product.imagen.trim() !== '';
+
   return (
     <TouchableOpacity
     activeOpacity={0.8}
@@ -23,30 +29,20 @@ export default function CardProducts({ product, className = '' }: CardProductsPr
       className={`bg-white dark:bg-neutral-800 rounded-lg overflow-hidden shadow-md ${className}`}
     >
       <View className={`${isWeb ? 'h-48' : 'h-38'} w-full bg-gray-200 dark:bg-neutral-700 overflow-hidden`}>
-        {product.imagen && product.imagen.trim() !== '' ? (
+        {hasImage && !imageError ? (
           <Image
             source={{ uri: product.imagen }}
             resizeMode="cover"
             style={{ width: '100%', height: '100%' }}
             onError={(error) => {
-              if (__DEV__) {
-                console.warn('Error al cargar imagen:', product.nombre, 'URL:', product.imagen, error);
-              }
-            }}
-            onLoad={() => {
-              if (__DEV__) {
-                console.log('✓ Imagen cargada:', product.nombre);
-              }
+              setImageError(true);
             }}
           />
         ) : (
           <View className="w-full h-full bg-gray-200 dark:bg-neutral-700 justify-center items-center">
-            <Text className="text-gray-400 dark:text-gray-500 text-xs">Sin imagen</Text>
-            {__DEV__ && product.imagen === undefined && (
-              <Text className="text-gray-400 dark:text-gray-500 text-xs mt-1">
-                Campo imagen no existe
-              </Text>
-            )}
+            <Text className="text-gray-400 dark:text-gray-500 text-xs">
+              {imageError ? 'Error al cargar' : 'Sin imagen'}
+            </Text>
           </View>
         )}
       </View>

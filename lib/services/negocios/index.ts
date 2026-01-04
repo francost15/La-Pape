@@ -1,16 +1,16 @@
-import { CreateNegocioInput, Negocio, UpdateNegocioInput } from '@/interface/negocios';
+import { CreateNegocioInput, Negocio, UpdateNegocioInput } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    Timestamp,
-    updateDoc,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
 } from 'firebase/firestore';
 
 /**

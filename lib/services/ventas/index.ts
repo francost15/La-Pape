@@ -1,16 +1,16 @@
-import { CreateVentaInput, UpdateVentaInput, Venta } from '@/interface/ventas';
+import { CreateVentaInput, UpdateVentaInput, Venta } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 /**

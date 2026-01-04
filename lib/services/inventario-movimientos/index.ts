@@ -1,15 +1,15 @@
-import { CreateInventarioMovimientoInput, InventarioMovimiento } from '@/interface/inventario-movimientos';
+import { CreateInventarioMovimientoInput, InventarioMovimiento } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    Timestamp,
-    where,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+  where,
 } from 'firebase/firestore';
 
 /**

@@ -2,7 +2,7 @@ import {
   CreateUsuarioNegocioInput,
   UpdateUsuarioNegocioInput,
   UsuarioNegocio,
-} from '@/interface/usuarios-negocios';
+} from '@/interface';
 import { db } from '@/lib/firebase';
 import {
   addDoc,

@@ -1,4 +1,4 @@
-import { CreateProductInput, Product, UpdateProductInput } from '@/interface/products';
+import { Categoria, CreateProductInput, Product, UpdateProductInput } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
   addDoc,
@@ -12,6 +12,8 @@ import {
   updateDoc,
   where
 } from 'firebase/firestore';
+import { getCategoriasByNegocio } from '../categorias';
+import { getNegocioIdByUsuario } from '../usuarios-negocios';
 
 /**
  * Crear un nuevo producto
@@ -128,10 +130,11 @@ export const getProductsByNegocio = async (negocio_id: string): Promise<Product[
 /**
  * Obtener productos por categoria_id
  */
-export const getProductsByCategoria = async (categoria_id: string): Promise<Product[]> => {
+export const getProductsByCategoria = async (negocio_id: string, categoria_id: string): Promise<Product[]> => {
   try {
     const q = query(
       collection(db, 'productos'),
+      where('negocio_id', '==', negocio_id),
       where('categoria_id', '==', categoria_id),
       where('activo', '==', true)
     );
@@ -185,4 +188,27 @@ export const deleteProduct = async (id: string): Promise<void> => {
     console.error('Error al eliminar producto:', error);
     throw new Error('No se pudo eliminar el producto');
   }
+};
+
+/**
+ * Obtener datos completos para la pantalla de productos
+ * Incluye productos y categorías del negocio del usuario
+ * Es un disparador de varios servicios para obtener los datos completos para la pantalla de productos
+ */
+export const getProductosScreenData = async (
+  userId: string,
+  email?: string
+): Promise<{ products: Product[]; categories: Categoria[] }> => {
+  const negocioId = await getNegocioIdByUsuario(userId, email || '');
+
+  if (!negocioId) {
+    throw new Error('No tienes un negocio asignado');
+  }
+
+  const [products, categories] = await Promise.all([
+    getProductsByNegocio(negocioId),
+    getCategoriasByNegocio(negocioId),
+  ]);
+
+  return { products, categories };
 };

@@ -1,4 +1,4 @@
-import { Categoria, CreateCategoriaInput, UpdateCategoriaInput } from '@/interface/categorias';
+import { Categoria, CreateCategoriaInput, UpdateCategoriaInput } from '@/interface';
 import { db } from '@/lib/firebase';
 import {
   addDoc,

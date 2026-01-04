@@ -1,13 +1,8 @@
-import { useState, useMemo } from 'react';
-import { Product } from '@/interface/products';
-import { Categoria } from '@/interface/categorias';
+import { useProductosStore } from '@/store/productos-store';
+import { useMemo } from 'react';
 
-export const useProductSearch = (
-  products: Product[],
-  categories: Categoria[]
-) => {
-  const [searchText, setSearchText] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+export const useProductSearch = () => {
+  const { products, categories, searchText, selectedCategoryId, setSearchText, setSelectedCategoryId } = useProductosStore();
 
   const filteredProducts = useMemo(() => {
     let filtered = products;

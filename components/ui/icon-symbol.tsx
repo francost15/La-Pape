@@ -25,6 +25,8 @@ const MAPPING = {
   'qrcode': 'qr-code-scanner',
   'plus.circle.fill': 'add-circle',
   'magnifyingglass': 'search',
+  'camera.fill': 'camera-alt',
+  'photo.fill': 'photo-library',
 } as IconMapping;
 
 /**

@@ -5,12 +5,20 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useProductSearch } from '@/hooks/use-product-search';
 import { useProductosScreen } from '@/hooks/use-productos-screen';
 import { router } from 'expo-router';
-import { ActivityIndicator, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductosScreen() {
   const isWeb = Platform.OS === 'web';
-  const { products, categories, loading, error, retry } = useProductosScreen();
-  const { setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch(products, categories);
+  const { products, categories, loading, error, retry, refresh } = useProductosScreen();
+  const { setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch();
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  }, [refresh]);
 
   if (loading) {
     return (
@@ -40,7 +48,14 @@ export default function ProductosScreen() {
       className="flex-1 bg-gray-100 dark:bg-neutral-900"
       contentContainerStyle={{ padding: isWeb ? 21 : 12 }}
       showsVerticalScrollIndicator={false}
-      refreshControl={<View />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#ea580c"
+          colors={['#ea580c']}
+        />
+      }
     >
       {/* Barra de búsqueda */}
       <View className="flex-row gap-3 mb-4">
