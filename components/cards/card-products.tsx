@@ -22,15 +22,32 @@ export default function CardProducts({ product, className = '' }: CardProductsPr
     onPress={handlePress}
       className={`bg-white dark:bg-neutral-800 rounded-lg overflow-hidden shadow-md ${className}`}
     >
-      <View className={`${isWeb ? 'h-48' : 'h-38'} w-full bg-gray-200 dark:bg-neutral-700`}>
-        {product.imagen ? (
+      <View className={`${isWeb ? 'h-48' : 'h-38'} w-full bg-gray-200 dark:bg-neutral-700 overflow-hidden`}>
+        {product.imagen && product.imagen.trim() !== '' ? (
           <Image
             source={{ uri: product.imagen }}
             resizeMode="cover"
             style={{ width: '100%', height: '100%' }}
+            onError={(error) => {
+              if (__DEV__) {
+                console.warn('Error al cargar imagen:', product.nombre, 'URL:', product.imagen, error);
+              }
+            }}
+            onLoad={() => {
+              if (__DEV__) {
+                console.log('✓ Imagen cargada:', product.nombre);
+              }
+            }}
           />
         ) : (
-          <View className="w-full h-full bg-gray-200 dark:bg-neutral-700" />
+          <View className="w-full h-full bg-gray-200 dark:bg-neutral-700 justify-center items-center">
+            <Text className="text-gray-400 dark:text-gray-500 text-xs">Sin imagen</Text>
+            {__DEV__ && product.imagen === undefined && (
+              <Text className="text-gray-400 dark:text-gray-500 text-xs mt-1">
+                Campo imagen no existe
+              </Text>
+            )}
+          </View>
         )}
       </View>
 

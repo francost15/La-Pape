@@ -87,12 +87,11 @@ export const getProductsByNegocio = async (negocio_id: string): Promise<Product[
     const q = query(
       collection(db, 'productos'),
       where('negocio_id', '==', negocio_id),
-      where('activo', '==', true),
-      orderBy('nombre', 'asc')
+      where('activo', '==', true)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
+    const productos = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -101,6 +100,9 @@ export const getProductsByNegocio = async (negocio_id: string): Promise<Product[
         updatedAt: data.updatedAt?.toDate(),
       } as Product;
     });
+    
+    // Ordenar en memoria para evitar necesidad de índice compuesto
+    return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
   } catch (error) {
     console.error('Error al obtener productos por negocio:', error);
     throw new Error('No se pudieron obtener los productos');
@@ -115,12 +117,11 @@ export const getProductsByCategoria = async (categoria_id: string): Promise<Prod
     const q = query(
       collection(db, 'productos'),
       where('categoria_id', '==', categoria_id),
-      where('activo', '==', true),
-      orderBy('nombre', 'asc')
+      where('activo', '==', true)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
+    const productos = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -129,6 +130,9 @@ export const getProductsByCategoria = async (categoria_id: string): Promise<Prod
         updatedAt: data.updatedAt?.toDate(),
       } as Product;
     });
+    
+    // Ordenar en memoria para evitar necesidad de índice compuesto
+    return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
   } catch (error) {
     console.error('Error al obtener productos por categoría:', error);
     throw new Error('No se pudieron obtener los productos');

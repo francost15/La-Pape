@@ -126,7 +126,9 @@ export const updateUsuarioNegocio = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'usuarios_negocios', id);
-    await updateDoc(docRef, usuarioNegocioData);
+    await updateDoc(docRef, {
+      ...usuarioNegocioData,
+    } as any);
   } catch (error) {
     console.error('Error al actualizar relación usuario-negocio:', error);
     throw new Error('No se pudo actualizar la relación usuario-negocio');
