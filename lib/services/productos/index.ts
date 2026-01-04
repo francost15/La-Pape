@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -167,10 +168,40 @@ export const updateProduct = async (
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'productos', id);
-    await updateDoc(docRef, {
-      ...productData,
+    
+    // Construir el objeto de actualización
+    const updateData: any = {
       updatedAt: Timestamp.now(),
+    };
+
+    // Procesar cada campo del producto
+    Object.keys(productData).forEach((key) => {
+      const value = (productData as any)[key];
+      
+      // Si el valor es undefined, omitirlo completamente
+      if (value === undefined) {
+        return;
+      }
+      
+      // Si el valor es null, usar deleteField para eliminar el campo del documento
+      if (value === null) {
+        updateData[key] = deleteField();
+      } 
+      // Si es cadena vacía, también eliminar el campo (solo para campos opcionales como imagen, descripcion, marca)
+      else if (value === '' && (key === 'imagen' || key === 'descripcion' || key === 'marca')) {
+        updateData[key] = deleteField();
+      }
+      // Para valores numéricos 0, mantenerlos (no eliminar)
+      else if (typeof value === 'number' && value === 0) {
+        updateData[key] = value;
+      }
+      // Para otros valores válidos, agregarlos
+      else {
+        updateData[key] = value;
+      }
     });
+
+    await updateDoc(docRef, updateData);
   } catch (error) {
     console.error('Error al actualizar producto:', error);
     throw new Error('No se pudo actualizar el producto');

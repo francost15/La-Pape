@@ -60,7 +60,7 @@ export default function CampoCategoria({
                 >
                   <Text className={value ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}>
                     {value
-                      ? categories.find((c) => c.id === value)?.nombre || 'Selecciona una categoría'
+                      ? (categories.find((c) => c.id === value)?.nombre || 'Selecciona una categoría')
                       : 'Selecciona una categoría'}
                   </Text>
                   <Text className="text-gray-400 dark:text-gray-500">▼</Text>

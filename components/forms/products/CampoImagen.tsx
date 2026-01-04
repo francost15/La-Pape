@@ -111,7 +111,9 @@ export default function CampoImagen({ control, errors, isWeb = false }: CampoIma
                 />
                 <TouchableOpacity
                   className="mt-2 bg-red-500 px-4 py-2 rounded-lg"
-                  onPress={() => onChange('')}
+                  onPress={() => {
+                    onChange('');
+                  }}
                 >
                   <Text className="text-white text-center font-semibold">Eliminar Imagen</Text>
                 </TouchableOpacity>

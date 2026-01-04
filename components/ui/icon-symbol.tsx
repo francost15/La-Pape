@@ -27,6 +27,9 @@ const MAPPING = {
   'magnifyingglass': 'search',
   'camera.fill': 'camera-alt',
   'photo.fill': 'photo-library',
+  'pencil': 'edit',
+  'pencil.circle.fill': 'edit',
+  'exclamationmark.triangle.fill': 'warning',
 } as IconMapping;
 
 /**
