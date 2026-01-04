@@ -1,20 +1,20 @@
 import {
-    CreateUsuarioNegocioInput,
-    UpdateUsuarioNegocioInput,
-    UsuarioNegocio,
+  CreateUsuarioNegocioInput,
+  UpdateUsuarioNegocioInput,
+  UsuarioNegocio,
 } from '@/interface/usuarios-negocios';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 /**
@@ -145,5 +145,35 @@ export const deleteUsuarioNegocio = async (id: string): Promise<void> => {
   } catch (error) {
     console.error('Error al eliminar relación usuario-negocio:', error);
     throw new Error('No se pudo eliminar la relación usuario-negocio');
+  }
+};
+
+/**
+ * Obtener el negocio del usuario por UID de Auth o email
+ * Intenta primero con el UID de Auth, si no encuentra, busca por email en Firestore
+ */
+export const getNegocioIdByUsuario = async (
+  userId: string,
+  userEmail: string
+): Promise<string | null> => {
+  try {
+    // Intentar primero con UID de Auth
+    let negociosUsuario = await getNegociosByUsuario(userId);
+    
+    // Si no encuentra, buscar el usuario en Firestore por email
+    if (!negociosUsuario.length) {
+      const usuariosSnapshot = await getDocs(
+        query(collection(db, 'usuarios'), where('email', '==', userEmail))
+      );
+      
+      if (!usuariosSnapshot.empty) {
+        negociosUsuario = await getNegociosByUsuario(usuariosSnapshot.docs[0].id);
+      }
+    }
+    
+    return negociosUsuario.length > 0 ? negociosUsuario[0].negocio_id : null;
+  } catch (error) {
+    console.error('Error al obtener negocio del usuario:', error);
+    throw new Error('No se pudo obtener el negocio del usuario');
   }
 };

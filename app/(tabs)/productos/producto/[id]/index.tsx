@@ -1,16 +1,41 @@
 import { Product } from '@/interface/products';
+import { getProductById } from '@/lib/services/productos';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Text, View } from 'react-native';
 
 export default function ProductoById() {
-  const { product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
+  const { id, product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
   const navigation = useNavigation();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Parsear el producto desde los parámetros
-  const product: Product | null = productParam 
-    ? JSON.parse(productParam) 
-    : null;
+  // Cargar producto desde parámetros o Firestore
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        // Intentar parsear desde parámetros primero
+        if (productParam) {
+          const parsedProduct = JSON.parse(productParam);
+          setProduct(parsedProduct);
+          setLoading(false);
+          return;
+        }
+
+        // Si no hay en params, cargar desde Firestore
+        if (id) {
+          const productData = await getProductById(id);
+          setProduct(productData);
+        }
+      } catch (error) {
+        console.error('Error al cargar producto:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id, productParam]);
 
   useEffect(() => {
     // Actualizar el título cuando se carga el producto
@@ -21,9 +46,18 @@ export default function ProductoById() {
     }
   }, [product?.nombre, navigation]);
 
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-gray-100 dark:bg-neutral-900">
+        <ActivityIndicator size="large" color="#ea580c" />
+        <Text className="text-gray-500 dark:text-gray-400 mt-4">Cargando producto...</Text>
+      </View>
+    );
+  }
+
   if (!product) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 justify-center items-center bg-gray-100 dark:bg-neutral-900">
         <Text className="text-lg text-gray-500 dark:text-gray-400">Producto no encontrado</Text>
       </View>
     );
@@ -33,8 +67,21 @@ export default function ProductoById() {
     <View className="flex-1 p-4">
       <Text className="text-2xl font-bold text-black dark:text-white mb-4">{product.nombre}</Text>
       
-      {product.imagen && (
-        <View className="w-full h-64 bg-gray-200 dark:bg-neutral-700 rounded-lg mb-4" />
+      {product.imagen && product.imagen.trim() !== '' ? (
+        <View className="w-full h-64 bg-gray-200 dark:bg-neutral-700 rounded-lg mb-4 overflow-hidden">
+          <Image
+            source={{ uri: product.imagen }}
+            resizeMode="cover"
+            style={{ width: '100%', height: '100%' }}
+            onError={() => {
+              console.warn('Error al cargar imagen del producto:', product.nombre);
+            }}
+          />
+        </View>
+      ) : (
+        <View className="w-full h-64 bg-gray-200 dark:bg-neutral-700 rounded-lg mb-4 justify-center items-center">
+          <Text className="text-gray-400 dark:text-gray-500">Sin imagen</Text>
+        </View>
       )}
       
       {product.descripcion && (

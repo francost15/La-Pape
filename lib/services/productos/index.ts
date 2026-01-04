@@ -1,17 +1,16 @@
 import { CreateProductInput, Product, UpdateProductInput } from '@/interface/products';
 import { db } from '@/lib/firebase';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  Timestamp,
+  updateDoc,
+  where
 } from 'firebase/firestore';
 
 /**
@@ -20,12 +19,29 @@ import {
  */
 export const createProduct = async (productData: CreateProductInput): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, 'productos'), {
-      ...productData,
+    // Filtrar campos undefined para evitar errores en Firestore
+    const cleanData: any = {
+      negocio_id: productData.negocio_id,
+      nombre: productData.nombre,
+      categoria_id: productData.categoria_id,
+      precio_venta: productData.precio_venta,
+      precio_mayoreo: productData.precio_mayoreo,
+      costo_promedio: productData.costo_promedio,
+      cantidad: productData.cantidad,
       activo: productData.activo ?? true,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
+    };
+
+    // Agregar campos opcionales solo si tienen valor
+    if (productData.imagen) cleanData.imagen = productData.imagen;
+    if (productData.descripcion) cleanData.descripcion = productData.descripcion;
+    if (productData.marca) cleanData.marca = productData.marca;
+    if (productData.stock_minimo !== undefined && productData.stock_minimo !== null) {
+      cleanData.stock_minimo = productData.stock_minimo;
+    }
+
+    const docRef = await addDoc(collection(db, 'productos'), cleanData);
     // El ID del documento es el UUID que se usa como código de barras
     return docRef.id;
   } catch (error) {

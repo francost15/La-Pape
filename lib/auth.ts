@@ -1,38 +1,7 @@
 import { FirebaseError } from 'firebase/app';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
 import { auth } from './firebase';
-
-// Validaciones
-const validateEmail = (email: string): string | null => {
-  if (!email.trim()) {
-    return 'El email es requerido';
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return 'El email no es válido';
-  }
-  return null;
-};
-
-const validatePassword = (password: string): string | null => {
-  if (!password) {
-    return 'La contraseña es requerida';
-  }
-  if (password.length < 6) {
-    return 'La contraseña debe tener al menos 6 caracteres';
-  }
-  return null;
-};
-
-const validateAuthForm = (email: string, password: string): string | null => {
-  const emailError = validateEmail(email);
-  if (emailError) return emailError;
-  
-  const passwordError = validatePassword(password);
-  if (passwordError) return passwordError;
-  
-  return null;
-};
+import { loginSchema, signUpSchema } from './validations/auth-schema';
 
 // Traducir errores de Firebase a español
 const getAuthErrorMessage = (error: unknown): string => {
@@ -66,9 +35,11 @@ const getAuthErrorMessage = (error: unknown): string => {
 
 // Funciones de autenticación
 const signInWithFirebase = async (email: string, password: string): Promise<UserCredential> => {
-  const validationError = validateAuthForm(email, password);
-  if (validationError) {
-    throw new Error(validationError);
+  // Validar con Zod
+  const result = loginSchema.safeParse({ email, password });
+  if (!result.success) {
+    const firstError = result.error.issues[0];
+    throw new Error(firstError.message);
   }
   
   try {
@@ -79,9 +50,11 @@ const signInWithFirebase = async (email: string, password: string): Promise<User
 };
 
 const signUpWithFirebase = async (email: string, password: string): Promise<UserCredential> => {
-  const validationError = validateAuthForm(email, password);
-  if (validationError) {
-    throw new Error(validationError);
+  // Validar con Zod
+  const result = signUpSchema.safeParse({ email, password });
+  if (!result.success) {
+    const firstError = result.error.issues[0];
+    throw new Error(firstError.message);
   }
   
   try {
