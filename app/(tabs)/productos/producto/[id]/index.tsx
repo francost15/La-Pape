@@ -1,9 +1,10 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { getProductById } from '@/lib/services/productos';
+import { auth, getProductosScreenData } from '@/lib';
+import { deleteProduct, getProductById } from '@/lib/services/productos';
 import { useProductosStore } from '@/store/productos-store';
 import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useCallback, useEffect } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductoById() {
   const { id, product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
@@ -17,7 +18,9 @@ export default function ProductoById() {
     setProductLoading,
     setProductImageError,
     categories,
+    setProducts,
   } = useProductosStore();
+  const [deleting, setDeleting] = useState(false);
 
   // Cargar producto desde parámetros, store o Firestore
   useFocusEffect(
@@ -161,6 +164,48 @@ export default function ProductoById() {
     router.push(`/productos/producto/${product.id}/edit` as any);
   };
 
+  const handleDelete = () => {
+    if (!product) return;
+
+    Alert.alert(
+      'Confirmar Eliminación',
+      `¿Estás seguro de que deseas eliminar el producto "${product.nombre}"? Esta acción no se puede deshacer.`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              await deleteProduct(product.id);
+
+              // Refrescar la lista de productos en el store
+              const user = auth.currentUser;
+              if (user) {
+                const storeData = await getProductosScreenData(user.uid, user.email || '');
+                setProducts(storeData.products);
+              }
+
+              // Limpiar el producto actual del store
+              setCurrentProduct(null);
+
+              // Navegar de vuelta a la lista de productos
+              router.replace('/productos' as any);
+            } catch (error: any) {
+              Alert.alert('Error', error?.message || 'No se pudo eliminar el producto');
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View className="flex-1 bg-gray-100 dark:bg-neutral-900">
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }} showsVerticalScrollIndicator={false}>
@@ -265,14 +310,29 @@ export default function ProductoById() {
         </View>
       </ScrollView>
 
-      {/* Botón de editar fijo en la parte inferior */}
-      <View className="p-4 bg-gray-100 dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-800">
+      {/* Botones de acción fijos en la parte inferior */}
+      <View className="p-4 bg-gray-100 dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-800 gap-3">
         <TouchableOpacity
           className="bg-orange-600 px-6 py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg"
           onPress={handleEdit}
+          disabled={deleting}
         >
           <IconSymbol name="pencil.circle.fill" size={20} color="white" />
           <Text className="text-white font-semibold text-lg">Editar Producto</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="bg-red-600 px-6 py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg"
+          onPress={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <>
+              <IconSymbol name="trash.fill" size={20} color="white" />
+              <Text className="text-white font-semibold text-lg">Eliminar Producto</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>

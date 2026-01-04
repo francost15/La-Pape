@@ -30,6 +30,7 @@ const MAPPING = {
   'pencil': 'edit',
   'pencil.circle.fill': 'edit',
   'exclamationmark.triangle.fill': 'warning',
+  'trash.fill': 'delete',
 } as IconMapping;
 
 /**
