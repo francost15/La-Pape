@@ -5,7 +5,7 @@ export default function VentasScreen() {
   return (
     <View className="flex-1 flex-row bg-white dark:bg-neutral-900">
       {/* ================= PRODUCTOS ================= */}
-      <View className="flex-2 bg-white dark:bg-neutral-900">
+      <View className="flex-4 bg-white dark:bg-neutral-900">
         {/* Aquí va el contenido de productos */}
       </View>
 
@@ -18,7 +18,6 @@ export default function VentasScreen() {
           {/* Header */}
           <View className="px-4 py-5 border-b border-gray-200 dark:border-neutral-800">
             <View className="flex-row items-center gap-2">
-              <IconSymbol size={24} name="cart.fill" color="#FF6B35" />
               <Text className="text-xl font-bold text-black dark:text-white">
                 Carrito (0)
               </Text>
@@ -29,7 +28,7 @@ export default function VentasScreen() {
           <View className="flex-1 items-center justify-center py-16 px-4">
             <View className="items-center gap-3">
               <View className="w-16 h-16 rounded-full bg-gray-200 dark:bg-neutral-700 items-center justify-center">
-                <IconSymbol size={28} name="cart.fill" color="#CCCCCC" />
+                <IconSymbol size={32} name="cart.fill" color="#CCCCCC" />
               </View>
               <Text className="text-center text-gray-400 dark:text-gray-500 text-sm">
                 El carrito está vacío
@@ -47,9 +46,9 @@ export default function VentasScreen() {
             <Text className="text-lg font-bold text-orange-500">$0.00</Text>
           </View>
 
-          <TouchableOpacity className="bg-orange-400 rounded-lg py-3 items-center justify-center active:bg-orange-500">
+          <TouchableOpacity className="bg-orange-500 rounded-lg py-3 items-center justify-center ">
             <Text className="text-base font-semibold text-white">
-              $ Completar Venta
+              Completar Venta
             </Text>
           </TouchableOpacity>
         </View>
