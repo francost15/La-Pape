@@ -4,49 +4,56 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 export default function VentasScreen() {
   return (
     <View className="flex-1 flex-row bg-white dark:bg-neutral-900">
-      <View className="flex-1" />
-      <ScrollView className="bg-white dark:bg-neutral-900 w-64 border-l border-gray-200 dark:border-neutral-800">
-        {/* Header */}
-        <View className="px-4 py-4 border-b border-gray-200 dark:border-neutral-800">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-xl font-bold text-black dark:text-white">
-              Carrito (0)
-            </Text>
-          </View>
-        </View>
+      {/* ================= PRODUCTOS ================= */}
+      <View className="flex-2 bg-white dark:bg-neutral-900">
+        {/* Aquí va el contenido de productos */}
+      </View>
 
-        {/* Empty State */}
-        <View className="flex-1 items-center justify-center py-20">
-          <View className="items-center gap-4">
-            <View className="w-20 h-20 rounded-full bg-gray-200 dark:bg-neutral-800 items-center justify-center">
-              <IconSymbol size={32} name="cart.fill" color="#999999" />
-            </View>
-            <Text className="text-center text-gray-500 dark:text-gray-400 text-base">
-              El carrito está vacío
-            </Text>
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View className="px-4 py-6 gap-4 border-t border-gray-200 dark:border-neutral-800">
-          {/* Total */}
-          <View className="flex-row justify-between items-center py-4">
-            <Text className="text-lg font-semibold text-black dark:text-white">
-              Total:
-            </Text>
-            <Text className="text-lg font-semibold text-orange-500">$0.00</Text>
-          </View>
-
-          {/* Button */}
-          <TouchableOpacity className="bg-orange-400 rounded-lg py-4 items-center justify-center">
+      {/* ================= CARRITO ================= */}
+      <View className="flex-1 border-l border-gray-200 dark:border-neutral-800">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          className="bg-white dark:bg-neutral-900"
+        >
+          {/* Header */}
+          <View className="px-4 py-5 border-b border-gray-200 dark:border-neutral-800">
             <View className="flex-row items-center gap-2">
-              <Text className="text-lg font-semibold text-white">
-                $ Completar Venta
+              <IconSymbol size={24} name="cart.fill" color="#FF6B35" />
+              <Text className="text-xl font-bold text-black dark:text-white">
+                Carrito (0)
               </Text>
             </View>
+          </View>
+
+          {/* Empty State */}
+          <View className="flex-1 items-center justify-center py-16 px-4">
+            <View className="items-center gap-3">
+              <View className="w-16 h-16 rounded-full bg-gray-200 dark:bg-neutral-700 items-center justify-center">
+                <IconSymbol size={28} name="cart.fill" color="#CCCCCC" />
+              </View>
+              <Text className="text-center text-gray-400 dark:text-gray-500 text-sm">
+                El carrito está vacío
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Footer fijo */}
+        <View className="px-4 py-5 gap-4 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+          <View className="flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-black dark:text-white">
+              Total:
+            </Text>
+            <Text className="text-lg font-bold text-orange-500">$0.00</Text>
+          </View>
+
+          <TouchableOpacity className="bg-orange-400 rounded-lg py-3 items-center justify-center active:bg-orange-500">
+            <Text className="text-base font-semibold text-white">
+              $ Completar Venta
+            </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
