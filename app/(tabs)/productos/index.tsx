@@ -6,11 +6,11 @@ import { useProductSearch } from '@/hooks/use-product-search';
 import { useProductosScreen } from '@/hooks/use-productos-screen';
 import { router } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProductosScreen() {
   const isWeb = Platform.OS === 'web';
-  const { products, categories, loading, error, retry, refresh } = useProductosScreen();
+  const { products, categories, error, retry, refresh } = useProductosScreen();
   const { setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -20,14 +20,6 @@ export default function ProductosScreen() {
     setRefreshing(false);
   }, [refresh]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-gray-100 dark:bg-neutral-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#ea580c" />
-        <Text className="text-gray-500 dark:text-gray-400 mt-4">Cargando productos...</Text>
-      </View>
-    );
-  }
 
   if (error) {
     return (

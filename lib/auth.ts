@@ -1,9 +1,12 @@
 import { FirebaseError } from 'firebase/app';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  UserCredential,
+} from 'firebase/auth';
 import { auth } from './firebase';
-import { loginSchema, signUpSchema } from './validations/auth-schema';
 
-// Traducir errores de Firebase a español
+// Traducción de errores Firebase
 const getAuthErrorMessage = (error: unknown): string => {
   if (!(error instanceof FirebaseError)) {
     return 'Ocurrió un error inesperado';
@@ -29,19 +32,15 @@ const getAuthErrorMessage = (error: unknown): string => {
     case 'auth/invalid-credential':
       return 'Email o contraseña incorrectos';
     default:
-      return error.message || 'Error al autenticar';
+      return 'Error al autenticar';
   }
 };
 
-// Funciones de autenticación
-const signInWithFirebase = async (email: string, password: string): Promise<UserCredential> => {
-  // Validar con Zod
-  const result = loginSchema.safeParse({ email, password });
-  if (!result.success) {
-    const firstError = result.error.issues[0];
-    throw new Error(firstError.message);
-  }
-  
+//  LOGIN
+export const signIn = async (
+  email: string,
+  password: string
+): Promise<UserCredential> => {
   try {
     return await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
@@ -49,46 +48,14 @@ const signInWithFirebase = async (email: string, password: string): Promise<User
   }
 };
 
-const signUpWithFirebase = async (email: string, password: string): Promise<UserCredential> => {
-  // Validar con Zod
-  const result = signUpSchema.safeParse({ email, password });
-  if (!result.success) {
-    const firstError = result.error.issues[0];
-    throw new Error(firstError.message);
-  }
-  
+//  REGISTER
+export const signUp = async (
+  email: string,
+  password: string
+): Promise<UserCredential> => {
   try {
     return await createUserWithEmailAndPassword(auth, email, password);
   } catch (error) {
     throw new Error(getAuthErrorMessage(error));
-  }
-};
-
-// Handlers completos con navegación
-export const handleSignIn = async (email: string, password: string, router: any): Promise<string | null> => {
-  try {
-    const userCredential = await signInWithFirebase(email, password);
-    if (userCredential.user) {
-      router.replace('/ventas');
-      return null;
-    }
-    return 'Error al iniciar sesión';
-  } catch (error: any) {
-    console.log(error);
-    return error.message || 'Error al iniciar sesión';
-  }
-};
-
-export const handleSignUp = async (email: string, password: string, router: any): Promise<string | null> => {
-  try {
-    const userCredential = await signUpWithFirebase(email, password);
-    if (userCredential.user) {
-      router.replace('/ventas');
-      return null;
-    }
-    return 'Error al registrar';
-  } catch (error: any) {
-    console.log(error);
-    return error.message || 'Error al registrar';
   }
 };

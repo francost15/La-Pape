@@ -1,55 +1,99 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
+import Navbar from '@/components/navbar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { auth } from '@/lib/firebase';
+import { Tabs, useRouter } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.replace('/');
+      }
+      setCheckingAuth(false);
+    });
+
+    return unsubscribe;
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+        <View className="flex-1 justify-center items-center bg-white dark:bg-neutral-900">
+          <ActivityIndicator size="large" color="#ea580c" />
+        </View>
+    );
+  }
 
   return (
-    <Tabs  
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: true, // esto es para mostrar el texto de las tabs
-        tabBarActiveTintColor: '#ea580c', // orange-600 de Tailwind
-        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault, // esto es para el color de las tabs inactivas
-        tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background, // esto es para el color de fondo de las tabs
-          borderTopWidth: 0, // esto es para desaparecer el borde superior de las tabs
-        },
-      }}>
-      {/* Asi se llaman las carpetas de las tabs carpeta/index.tsx */}
+    <View style={{ flex: 1 }}>
+      <Navbar />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: '#ea580c', // orange-600
+          tabBarInactiveTintColor:
+            Colors[colorScheme ?? 'light'].tabIconDefault,
+          tabBarStyle: {
+            backgroundColor:
+              Colors[colorScheme ?? 'light'].background,
+            borderTopWidth: 0,
+          },
+        }}
+      >
+      {/* Ventas */}
       <Tabs.Screen
-        name="ventas/index"
+        name="ventas"
         options={{
           title: 'Ventas',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="cart.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={32} name="cart.fill" color={color} />
+          ),
         }}
       />
+
+      {/* Productos */}
       <Tabs.Screen
         name="productos"
         options={{
           title: 'Productos',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="bag.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={32} name="bag.fill" color={color} />
+          ),
         }}
       />
+
+      {/* Historial */}
       <Tabs.Screen
         name="history"
         options={{
           title: 'Historial',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="clock.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="summary"
-        options={{
-          title: 'Resumen',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="doc.text" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={32} name="clock.fill" color={color} />
+          ),
         }}
       />
 
+      {/* Resumen */}
+      <Tabs.Screen
+        name="resumen"
+        options={{
+          title: 'Resumen',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={32} name="doc.text" color={color} />
+          ),
+        }}
+      />
     </Tabs>
+    </View>
   );
 }

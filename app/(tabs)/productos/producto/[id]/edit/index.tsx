@@ -9,14 +9,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function EditProduct() {
@@ -161,7 +161,7 @@ export default function EditProduct() {
 
   const onSubmit = async (data: CreateProductFormData) => {
     if (!id) {
-      Alert.alert('Error', 'ID del producto no encontrado');
+      Alert.alert('Error', 'Id del producto no encontrado');
       return;
     }
 
