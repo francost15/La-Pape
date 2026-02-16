@@ -11,7 +11,7 @@ import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } fr
 export default function ProductosScreen() {
   const isWeb = Platform.OS === 'web';
   const { products, categories, error, retry, refresh } = useProductosScreen();
-  const { setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch();
+  const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {
@@ -50,10 +50,12 @@ export default function ProductosScreen() {
       }
     >
       {/* Barra de búsqueda */}
-      <View className="flex-row gap-3 mb-4">
-        <SearchProducts onSearchChange={setSearchText} />
-        {/* boton para agregar producto */}
+      <View className="flex-row gap-3 mb-4" style={{ alignItems: 'stretch' }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <SearchProducts searchText={searchText} onSearchChange={setSearchText} />
+        </View>
         <TouchableOpacity
+          style={{ flexShrink: 0 }}
           className={`bg-orange-600 ${isWeb ? 'px-4 py-3' : 'px-3 py-2'} rounded-lg justify-center items-center flex-row gap-2`}
           onPress={() => router.push('/productos/create')}
         >

@@ -3,6 +3,7 @@ import PeriodFilter, {
   type Periodo,
   type RangoFechas,
 } from "@/components/search/PeriodFilter";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Product, Venta, VentaDetalle } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { useProductosStore } from "@/store/productos-store";
@@ -126,7 +127,7 @@ export default function ResumenScreen() {
         Math.floor(Math.random() * 12) + 8,
         Math.floor(Math.random() * 60),
         0,
-        0
+        0,
       );
 
       const numProductos = Math.floor(Math.random() * 3) + 1;
@@ -287,14 +288,14 @@ export default function ResumenScreen() {
     const ventasTotales = ventasPagadas.reduce((sum, v) => sum + v.total, 0);
     const transacciones = ventasPagadas.length;
     const devoluciones = ventasFiltradas.filter(
-      (v) => v.estado === "REEMBOLSO"
+      (v) => v.estado === "REEMBOLSO",
     ).length;
     const totalDevoluciones = ventasFiltradas
       .filter((v) => v.estado === "REEMBOLSO")
       .reduce((sum, v) => sum + v.total, 0);
 
     const detallesFiltrados = detalles.filter((d) =>
-      ventasPagadas.some((v) => v.id === d.venta_id)
+      ventasPagadas.some((v) => v.id === d.venta_id),
     );
 
     let costoTotal = 0;
@@ -328,7 +329,7 @@ export default function ResumenScreen() {
   // Productos más y menos vendidos
   const productosVentas = useMemo(() => {
     const detallesFiltrados = detalles.filter((d) =>
-      ventasFiltradas.some((v) => v.id === d.venta_id && v.estado === "PAGADA")
+      ventasFiltradas.some((v) => v.id === d.venta_id && v.estado === "PAGADA"),
     );
 
     const productosMap = new Map<string, ProductoVenta>();
@@ -414,7 +415,7 @@ export default function ResumenScreen() {
         const mesSiguiente = new Date(
           fecha.getFullYear(),
           fecha.getMonth() + 1,
-          0
+          0,
         );
 
         const total = ventasPagadas
@@ -454,7 +455,7 @@ export default function ResumenScreen() {
   // Datos para gráfico de categorías
   const datosCategorias = useMemo(() => {
     const detallesFiltrados = detalles.filter((d) =>
-      ventasFiltradas.some((v) => v.id === d.venta_id && v.estado === "PAGADA")
+      ventasFiltradas.some((v) => v.id === d.venta_id && v.estado === "PAGADA"),
     );
 
     const categoriasMap = new Map<string, number>();
@@ -463,7 +464,7 @@ export default function ResumenScreen() {
       const producto = products.find((p) => p.id === detalle.producto_id);
       if (producto && producto.categoria_id) {
         const categoria = categories.find(
-          (c) => c.id === producto.categoria_id
+          (c) => c.id === producto.categoria_id,
         );
         if (categoria) {
           const total = categoriasMap.get(categoria.nombre) || 0;
@@ -504,7 +505,7 @@ export default function ResumenScreen() {
   return (
     <>
       <ScrollView
-        className="flex-1 bg-gray-50 dark:bg-neutral-900"
+        className="flex-1 bg-gray-50 dark:bg-neutral-900 p-4 lg:p-8"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
         <View className="px-4 py-6">
@@ -525,28 +526,40 @@ export default function ResumenScreen() {
               title="Ventas Totales"
               value={metricas.ventasTotales}
               transactions={metricas.transacciones}
-              icon="💰"
+              icon={
+                <IconSymbol
+                  name="dollarsign.circle.fill"
+                  size={24}
+                  color="white"
+                />
+              }
               className="bg-orange-500"
             />
             <KpisCard
               title="Ganancia Neta"
               value={metricas.gananciaNeta}
               transactions={metricas.transacciones}
-              icon="💰"
+              icon={
+                <IconSymbol
+                  name="dollarsign.circle.fill"
+                  size={24}
+                  color="white"
+                />
+              }
               className="bg-green-500"
             />
             <KpisCard
               title="Transacciones"
               value={metricas.transacciones}
               transactions={metricas.transacciones}
-              icon="🛒"
+              icon={<IconSymbol name="cart.fill" size={24} color="white" />}
               className="bg-purple-500"
             />
             <KpisCard
               title="Devoluciones"
               value={metricas.devoluciones}
               transactions={metricas.transacciones}
-              icon="🛒"
+              icon={<IconSymbol name="cart.fill" size={24} color="white" />}
               className="bg-red-500"
             />
           </View>

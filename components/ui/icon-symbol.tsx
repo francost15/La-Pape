@@ -1,12 +1,11 @@
 // Fallback for using MaterialIcons on Android and web.
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolViewProps, SymbolWeight } from 'expo-symbols';
+import { SymbolWeight } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
-
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+type IconMapping = Record<string, ComponentProps<typeof MaterialIcons>['name']>;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -24,14 +23,23 @@ const MAPPING = {
   'doc.text': 'description',
   'qrcode': 'qr-code-scanner',
   'plus.circle.fill': 'add-circle',
+  'minus.circle.fill': 'remove-circle',
   'magnifyingglass': 'search',
   'camera.fill': 'camera-alt',
   'photo.fill': 'photo-library',
   'pencil': 'edit',
   'pencil.circle.fill': 'edit',
   'exclamationmark.triangle.fill': 'warning',
+  'trash': 'delete',
   'trash.fill': 'delete',
-} as IconMapping;
+  'chevron.up': 'keyboard-arrow-up',
+  'xmark': 'close',
+  'checkmark.circle.fill': 'check-circle',
+  'square.and.arrow.down': 'file-download',
+  'eye.fill': 'visibility',
+  'arrow.uturn.backward': 'replay',
+  'dollarsign.circle.fill': 'attach-money',
+} as const satisfies IconMapping;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
