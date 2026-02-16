@@ -2,6 +2,7 @@ import ProductListContent from "@/components/ventas/ProductListContent";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useVentasStore } from "@/store/ventas-store";
+import { useVentasUIStore } from "@/store/ventas-ui-store";
 import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   PanResponder,
   Platform,
   Pressable,
+  StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
@@ -20,6 +22,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SHEET_HEIGHT_PERCENT = 0.72;
 const DISMISS_THRESHOLD = 80;
+
+const toastContainerStyle = StyleSheet.create({
+  base: {
+    pointerEvents: "none",
+  },
+});
 
 /**
  * Vista de productos para móvil: FAB "Agregar productos" + sheet modal
@@ -32,8 +40,11 @@ export default function FooterProducts() {
   const itemCount = useVentasStore((s) => s.getItemCount());
 
   const sheetBg = colorScheme === "dark" ? "#171717" : "#f3f4f6";
-  const [sheetVisible, setSheetVisible] = React.useState(false);
-  const [toastMessage, setToastMessage] = React.useState<{ text: string } | null>(null);
+  const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
+  const openSheet = useVentasUIStore((s) => s.openSheet);
+  const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
+  const showToast = useVentasUIStore((s) => s.showToast);
+  const toastMessage = useVentasUIStore((s) => s.toastMessage);
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const dragOffsetRef = useRef(0);
@@ -45,10 +56,10 @@ export default function FooterProducts() {
       ? Math.min(baseSheetHeight, spaceAboveKeyboard - 24)
       : baseSheetHeight;
 
-  const showProductAddedToast = useCallback((productName: string) => {
-    setToastMessage({ text: `${productName} agregado` });
-    setTimeout(() => setToastMessage(null), 2000);
-  }, []);
+  const showProductAddedToast = useCallback(
+    (productName: string) => showToast(`${productName} agregado`),
+    [showToast]
+  );
 
   const closeSheet = useCallback(() => {
     if (Platform.OS !== "web") {
@@ -58,18 +69,18 @@ export default function FooterProducts() {
       toValue: height,
       duration: 250,
       useNativeDriver: Platform.OS !== "web",
-    }).start(() => setSheetVisible(false));
-  }, [height, slideAnim]);
+    }).start(() => closeSheetStore());
+  }, [height, slideAnim, closeSheetStore]);
 
   const closeSheetRef = useRef(closeSheet);
   closeSheetRef.current = closeSheet;
 
-  const openSheet = useCallback(() => {
+  const handleOpenSheet = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSheetVisible(true);
-  }, []);
+    openSheet();
+  }, [openSheet]);
 
   useEffect(() => {
     if (sheetVisible) {
@@ -130,7 +141,7 @@ export default function FooterProducts() {
     <>
       {!sheetVisible && (
         <Pressable
-          onPress={openSheet}
+          onPress={handleOpenSheet}
           className="absolute bottom-0 left-0 right-0 z-20 mx-4 mb-6 rounded-2xl bg-orange-500 shadow-lg shadow-orange-900/30 flex-row items-center justify-between px-5 py-4"
         >
           <View className="flex-row items-center gap-3">
@@ -259,6 +270,7 @@ export default function FooterProducts() {
 
               <View style={{ flex: 1, minHeight: 0, paddingHorizontal: 12 }}>
                 <ProductListContent
+                  searchContextId="ventas"
                   onProductAdded={showProductAddedToast}
                   searchSize="large"
                   listKey="mobile"
@@ -273,8 +285,9 @@ export default function FooterProducts() {
 
             {toastMessage && (
               <View
-                style={{
-                  pointerEvents: "none",
+                style={[
+                  toastContainerStyle.base,
+                  {
                   position: "absolute",
                   left: 16,
                   right: 16,
@@ -296,7 +309,8 @@ export default function FooterProducts() {
                         shadowRadius: 8,
                         elevation: 8,
                       }),
-                }}
+                },
+                ]}
               >
                 <IconSymbol
                   name="checkmark.circle.fill"
@@ -312,7 +326,7 @@ export default function FooterProducts() {
                   }}
                   numberOfLines={2}
                 >
-                  {toastMessage.text}
+                  {toastMessage}
                 </Text>
               </View>
             )}

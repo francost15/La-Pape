@@ -16,18 +16,12 @@ interface ProductosStore {
   loading: boolean;
   error: string | null;
   
-  // Búsqueda y filtrado
-  searchText: string;
-  selectedCategoryId: string | null;
-  
   // Setters
   setNegocioId: (id: string | null) => void;
   setCategories: (categories: Categoria[]) => void;
   setProducts: (products: Product[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  setSearchText: (text: string) => void;
-  setSelectedCategoryId: (categoryId: string | null) => void;
   
   // Setters para producto actual
   setCurrentProduct: (product: Product | null) => void;
@@ -48,8 +42,6 @@ const initialState = {
   productImageError: false,
   loading: false,
   error: null,
-  searchText: '',
-  selectedCategoryId: null,
 };
 
 export const useProductosStore = create<ProductosStore>((set) => ({
@@ -60,8 +52,6 @@ export const useProductosStore = create<ProductosStore>((set) => ({
   setProducts: (products) => set({ products }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
-  setSearchText: (text) => set({ searchText: text }),
-  setSelectedCategoryId: (categoryId) => set({ selectedCategoryId: categoryId }),
   
   // Setters para producto actual
   setCurrentProduct: (product) => set({ currentProduct: product }),

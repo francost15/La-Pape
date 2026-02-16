@@ -11,7 +11,7 @@ import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } fr
 export default function ProductosScreen() {
   const isWeb = Platform.OS === 'web';
   const { products, categories, error, retry, refresh } = useProductosScreen();
-  const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch();
+  const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } = useProductSearch('productos');
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {

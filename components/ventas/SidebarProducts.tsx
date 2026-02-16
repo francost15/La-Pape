@@ -10,7 +10,7 @@ export default function SidebarProducts() {
   return (
     <View className="flex-3 border-r border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50">
       <View className="flex-1 mt-3 min-h-0">
-        <ProductListContent listKey="desktop" />
+        <ProductListContent searchContextId="ventas" listKey="desktop" />
       </View>
     </View>
   );

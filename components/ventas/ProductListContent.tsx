@@ -1,3 +1,4 @@
+import type { SearchContextId } from "@/store/product-search-store";
 import BadgeCategoryProducts from "@/components/badges/BadgeCategoryProducts";
 import SearchProducts from "@/components/search/SearchProducts";
 import { useProductSearch } from "@/hooks/use-product-search";
@@ -13,6 +14,8 @@ import {
 import ProductItemVenta from "./ProductItemVenta";
 
 interface ProductListContentProps {
+  /** Contexto de búsqueda: "productos" (tab) o "ventas" (sheet/sidebar) */
+  searchContextId: SearchContextId;
   onProductAdded?: (productName: string) => void;
   searchSize?: "default" | "large";
   listKey?: string;
@@ -26,6 +29,7 @@ interface ProductListContentProps {
  * Usado por SidebarProducts (PC) y FooterProducts (mobile).
  */
 export default function ProductListContent({
+  searchContextId,
   onProductAdded,
   searchSize = "default",
   listKey = "list",
@@ -40,7 +44,7 @@ export default function ProductListContent({
     selectedCategoryId,
     setSelectedCategoryId,
     filteredProducts,
-  } = useProductSearch();
+  } = useProductSearch(searchContextId);
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {
