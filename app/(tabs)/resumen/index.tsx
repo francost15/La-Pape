@@ -1,11 +1,9 @@
 import KpisCard from "@/components/resumen/kpisCard";
-import PeriodFilter, {
-  type Periodo,
-  type RangoFechas,
-} from "@/components/search/PeriodFilter";
+import PeriodFilter from "@/components/search/PeriodFilter";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Product, Venta, VentaDetalle } from "@/interface";
 import { auth } from "@/lib/firebase";
+import { useFiltrosStore, type Periodo } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useMemo, useState } from "react";
@@ -16,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import Svg, { Circle, G, Path, Text as SvgText } from "react-native-svg";
 
 interface ProductoVenta {
@@ -28,11 +27,12 @@ export default function ResumenScreen() {
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [detalles, setDetalles] = useState<VentaDetalle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [periodo, setPeriodo] = useState<Periodo>("semana");
-  const [rangoPersonalizado, setRangoPersonalizado] = useState<RangoFechas>({
-    inicio: null,
-    fin: null,
-  });
+  const {
+    periodo,
+    rangoPersonalizado,
+    setPeriodo,
+    setRangoPersonalizado,
+  } = useFiltrosStore();
   const { products, categories } = useProductosStore();
 
   useEffect(() => {
@@ -478,9 +478,6 @@ export default function ResumenScreen() {
       .sort((a, b) => b.total - a.total);
   }, [detalles, ventasFiltradas, products, categories]);
 
-  const handlePeriodoChange = (p: Periodo) => {
-    setPeriodo(p);
-  };
 
   const formatDate = (date: Date | null): string => {
     if (!date) return "Seleccionar";
@@ -503,15 +500,18 @@ export default function ResumenScreen() {
   const isTablet = screenWidth >= 768;
 
   return (
-    <>
+    <Animated.View
+      entering={FadeIn.duration(220)}
+      style={{ flex: 1 }}
+    >
       <ScrollView
         className="flex-1 bg-gray-50 dark:bg-neutral-900 p-4 lg:p-8"
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View className="px-4 py-6">
           <PeriodFilter
             periodo={periodo}
-            onPeriodoChange={handlePeriodoChange}
+            onPeriodoChange={setPeriodo}
             rangoPersonalizado={rangoPersonalizado}
             onRangoPersonalizadoChange={setRangoPersonalizado}
             formatDate={formatDate}
@@ -706,7 +706,7 @@ export default function ResumenScreen() {
           </View>
         </View>
       </ScrollView>
-    </>
+    </Animated.View>
   );
 }
 

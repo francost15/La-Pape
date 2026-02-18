@@ -1,7 +1,9 @@
+import { notify } from "@/lib/notify";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useVentasStore } from "@/store/ventas-store";
+import { useVentasUIStore } from "@/store/ventas-ui-store";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
+import React from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import ConfirmAlert from "../ui/ConfirmAlert";
 import { IconSymbol } from "../ui/icon-symbol";
@@ -18,25 +20,27 @@ export default function CartPanel() {
     setSuccessVenta,
     closeSuccess,
   } = useCheckoutStore();
+  const {
+    deleteConfirmItem,
+    openDeleteConfirm,
+    closeDeleteConfirm,
+  } = useVentasUIStore();
   const total = getTotal();
-  const [alertItem, setAlertItem] = useState<{
-    productId: string;
-    nombre: string;
-  } | null>(null);
 
   const handleMinus = (item: (typeof items)[0]) => {
     if (item.quantity === 1) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setAlertItem({ productId: item.productId, nombre: item.product.nombre });
+      openDeleteConfirm({ productId: item.productId, nombre: item.product.nombre });
     } else {
       updateQuantity(item.productId, item.quantity - 1);
     }
   };
 
   const handleConfirmRemove = () => {
-    if (alertItem) {
-      removeItem(alertItem.productId);
-      setAlertItem(null);
+    if (deleteConfirmItem) {
+      removeItem(deleteConfirmItem.productId);
+      notify.warning({ title: `${deleteConfirmItem.nombre} eliminado del carrito` });
+      closeDeleteConfirm();
     }
   };
 
@@ -53,6 +57,10 @@ export default function CartPanel() {
       second: "2-digit",
     });
     clearCart();
+    notify.success({
+      title: "Venta completada",
+      description: `Total: $${totalVenta.toLocaleString()}`,
+    });
     setSuccessVenta({ id, fecha, total: totalVenta });
   };
 
@@ -152,13 +160,13 @@ export default function CartPanel() {
       </ScrollView>
 
       <ConfirmAlert
-        visible={!!alertItem}
+        visible={!!deleteConfirmItem}
         title="Eliminar del carrito"
-        message={alertItem ? `¿Quitar "${alertItem.nombre}" del carrito?` : ""}
+        message={deleteConfirmItem ? `¿Quitar "${deleteConfirmItem.nombre}" del carrito?` : ""}
         confirmText="Eliminar"
         cancelText="Cancelar"
         onConfirm={handleConfirmRemove}
-        onCancel={() => setAlertItem(null)}
+        onCancel={closeDeleteConfirm}
         danger
       />
 
@@ -183,7 +191,7 @@ export default function CartPanel() {
         />
       )}
 
-      <View className="px-4 py-4 gap-4 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+      <View className="px-4 py-3 gap-3 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
         <View className="flex-row justify-between items-center">
           <Text className="text-base font-semibold text-gray-900 dark:text-white">
             Total:
@@ -194,7 +202,7 @@ export default function CartPanel() {
         </View>
 
         <TouchableOpacity
-          className="bg-orange-500 rounded-xl py-4 items-center justify-center active:opacity-90"
+          className="bg-orange-500 rounded-xl py-3.5 items-center justify-center active:opacity-90"
           activeOpacity={0.9}
           onPress={openConfirm}
         >

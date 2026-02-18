@@ -1,16 +1,22 @@
-import type { VentaCompletada } from "@/store/checkout-store";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import type { VentaCompletada } from "@/store/checkout-store";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import {
   Modal,
   Platform,
   Pressable,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { IconSymbol } from "../ui/icon-symbol";
+
+const SUCCESS_GREEN = "#34C759";
+const ORANGE_PRIMARY = "#ea580c";
+const TOTAL_HIGHLIGHT = "#f97316";
 
 interface VentaExitosaModalProps {
   visible: boolean;
@@ -31,15 +37,12 @@ export default function VentaExitosaModal({
   const isDark = colorScheme === "dark";
 
   const handleClose = () => {
-    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== "web")
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
   };
 
-  const bgCard = isDark ? "#262626" : "#ffffff";
-  const borderColor = isDark ? "#404040" : "#e5e7eb";
-  const labelColor = isDark ? "#a3a3a3" : "#6b7280";
-  const valueColor = isDark ? "#fafafa" : "#111827";
-  const secondaryBg = isDark ? "#404040" : "#f3f4f6";
+  const styles = useStyles(isDark);
 
   return (
     <Modal
@@ -48,214 +51,308 @@ export default function VentaExitosaModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <Pressable
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 24,
-        }}
-        onPress={handleClose}
-      >
-        <Pressable
-          style={{
-            width: "100%",
-            maxWidth: 360,
-            backgroundColor: bgCard,
-            borderRadius: 20,
-            overflow: "hidden",
-            borderWidth: 1,
-            borderColor,
-          }}
-          onPress={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
-              paddingTop: 20,
-              paddingBottom: 16,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  backgroundColor: "#dcfce7",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <IconSymbol
-                  name="checkmark.circle.fill"
-                  size={26}
-                  color="#16a34a"
-                />
-              </View>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: "#16a34a",
-                }}
-              >
-                ¡Venta Exitosa!
-              </Text>
+      <Pressable style={styles.backdrop} onPress={handleClose}>
+        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
+          {/* Header con ícono de éxito */}
+          <View style={styles.header}>
+            <View style={styles.successBadge}>
+              <IconSymbol
+                name="checkmark.circle.fill"
+                size={56}
+                color={SUCCESS_GREEN}
+              />
             </View>
-            <TouchableOpacity
-              onPress={handleClose}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: secondaryBg,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <IconSymbol name="xmark" size={18} color={labelColor} />
-            </TouchableOpacity>
+            <Text style={styles.title}>¡Venta Exitosa!</Text>
+            <Text style={styles.subtitle}>
+              La venta se completó correctamente
+            </Text>
           </View>
 
-          {/* Detalles */}
-          <View
-            style={{
-              paddingHorizontal: 20,
-              paddingVertical: 16,
-              gap: 14,
-              borderTopWidth: 1,
-              borderTopColor: borderColor,
-            }}
-          >
-            <Row label="ID de venta" value={venta.id} valueColor={valueColor} labelColor={labelColor} />
-            <Row label="Fecha" value={venta.fecha} valueColor={valueColor} labelColor={labelColor} />
-            <Row
+          {/* Grupo tipo Settings de Apple */}
+          <View style={styles.detailsGroup}>
+            <DetailRow
+              label="Fecha"
+              value={venta.fecha}
+              isLast={false}
+              labelColor={styles.labelColor}
+              valueColor={styles.valueColor}
+              dividerColor={styles.dividerColor}
+              rowStyle={styles.rowStyle}
+              labelStyle={styles.labelStyle}
+              valueStyle={styles.valueStyle}
+            />
+            <DetailRow
               label="Total"
               value={`$${venta.total.toLocaleString()}`}
-              valueColor="#ea580c"
+              isLast
               valueBold
-              labelColor={labelColor}
+              valueHighlight
+              valueLarge
+              labelColor={styles.labelColor}
+              valueColor={styles.valueColor}
+              dividerColor={styles.dividerColor}
+              rowStyle={[styles.rowStyle, styles.rowTotal]}
+              labelStyle={styles.labelStyle}
+              valueStyle={styles.valueStyle}
             />
           </View>
 
-          {/* Botones */}
-          <View
-            style={{
-              padding: 20,
-              paddingTop: 8,
-              gap: 12,
-            }}
-          >
+          {/* Acciones */}
+          <View style={styles.actions}>
             <TouchableOpacity
               onPress={() => {
-                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (Platform.OS !== "web")
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onDescargarRecibo?.();
               }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                backgroundColor: "#ea580c",
-                paddingVertical: 14,
-                borderRadius: 12,
-              }}
+              style={[styles.button, styles.buttonPrimary]}
               activeOpacity={0.85}
             >
-              <IconSymbol name="square.and.arrow.down" size={22} color="#fff" />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
-                Descargar Recibo
-              </Text>
+              <IconSymbol name="square.and.arrow.down" size={20} color="#fff" />
+              <Text style={styles.buttonPrimaryText}>Descargar Recibo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => {
-                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (Platform.OS !== "web")
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onEnviarRecibo?.();
               }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                backgroundColor: "#16a34a",
-                paddingVertical: 14,
-                borderRadius: 12,
-              }}
+              style={[styles.button, styles.buttonSecondary]}
               activeOpacity={0.85}
             >
-              <IconSymbol name="paperplane.fill" size={20} color="#fff" />
-              <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
-                Enviar Recibo
-              </Text>
+              <IconSymbol name="paperplane.fill" size={18} color="#fff" />
+              <Text style={styles.buttonSecondaryText}>Enviar Recibo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleClose}
-              style={{
-                backgroundColor: secondaryBg,
-                paddingVertical: 14,
-                borderRadius: 12,
-                alignItems: "center",
-              }}
-              activeOpacity={0.85}
+              style={styles.buttonTertiary}
+              activeOpacity={0.7}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  color: labelColor,
-                }}
-              >
-                Ahora no
-              </Text>
+              <Text style={styles.buttonTertiaryText}>Continuar</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            onPress={handleClose}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+            style={styles.closeButton}
+          >
+            <IconSymbol name="xmark" size={14} color={styles.labelColor} />
+          </TouchableOpacity>
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
 
-function Row({
+function DetailRow({
   label,
   value,
+  isLast,
+  valueBold,
+  valueHighlight,
+  valueLarge,
   labelColor,
   valueColor,
-  valueBold,
+  dividerColor,
+  rowStyle,
+  labelStyle,
+  valueStyle,
 }: {
   label: string;
   value: string;
+  isLast: boolean;
+  valueBold?: boolean;
+  valueHighlight?: boolean;
+  valueLarge?: boolean;
   labelColor: string;
   valueColor: string;
-  valueBold?: boolean;
+  dividerColor: string;
+  rowStyle: object | object[];
+  labelStyle: object;
+  valueStyle: object;
 }) {
+  const highlightColor = valueLarge ? TOTAL_HIGHLIGHT : ORANGE_PRIMARY;
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Text style={{ fontSize: 15, color: labelColor }}>{label}</Text>
-      <Text
-        style={{
-          fontSize: 15,
-          color: valueColor,
-          fontWeight: valueBold ? "700" : "500",
-        }}
-        numberOfLines={1}
-      >
-        {value}
-      </Text>
-    </View>
+    <>
+      <View style={rowStyle}>
+        <Text
+          style={[
+            labelStyle,
+            { color: labelColor },
+            valueLarge && { fontSize: 16, fontWeight: "600" },
+          ]}
+        >
+          {label}
+        </Text>
+        <Text
+          style={[
+            valueStyle,
+            {
+              color: valueHighlight ? highlightColor : valueColor,
+              fontSize: valueLarge ? 22 : undefined,
+              fontWeight: valueBold || valueLarge ? "700" : undefined,
+            },
+          ]}
+          numberOfLines={1}
+        >
+          {value}
+        </Text>
+      </View>
+      {!isLast && (
+        <View
+          style={{
+            height: StyleSheet.hairlineWidth,
+            backgroundColor: dividerColor,
+          }}
+        />
+      )}
+    </>
   );
+}
+
+function useStyles(isDark: boolean) {
+  const bgCard = isDark ? "#1C1C1E" : "#FFFFFF";
+  const labelColor = isDark ? "#8E8E93" : "#6B7280";
+  const valueColor = isDark ? "#F5F5F7" : "#1D1D1F";
+  const dividerColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const tertiaryBg = isDark ? "#2C2C2E" : "#F2F2F7";
+
+  return {
+    labelColor,
+    valueColor,
+    backdrop: {
+      flex: 1,
+      backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 24,
+    } as const,
+    card: {
+      width: "100%",
+      maxWidth: Platform.OS === "web" ? 480 : 340,
+      backgroundColor: bgCard,
+      borderRadius: 14,
+      overflow: "hidden",
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: isDark ? 0.5 : 0.12,
+          shadowRadius: 24,
+        },
+        android: { elevation: 16 },
+        web: {
+          boxShadow: isDark
+            ? "0 8px 32px rgba(0,0,0,0.4)"
+            : "0 8px 32px rgba(0,0,0,0.12)",
+        },
+      }),
+    } as const,
+    header: {
+      alignItems: "center",
+      paddingTop: 32,
+      paddingBottom: 24,
+      paddingHorizontal: 24,
+    } as const,
+    successBadge: {
+      marginBottom: 12,
+    } as const,
+    title: {
+      fontSize: 22,
+      fontWeight: "700",
+      color: valueColor,
+      letterSpacing: -0.4,
+    } as const,
+    subtitle: {
+      fontSize: 15,
+      fontWeight: "400",
+      color: labelColor,
+      marginTop: 4,
+      letterSpacing: -0.2,
+    } as const,
+    detailsGroup: {
+      marginHorizontal: 16,
+      backgroundColor: tertiaryBg,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      overflow: "hidden",
+    } as const,
+    rowStyle: {
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "center" as const,
+      paddingVertical: 14,
+    } as const,
+    rowTotal: {
+      paddingVertical: 18,
+    } as const,
+    labelStyle: {
+      fontSize: 15,
+      fontWeight: "400",
+      letterSpacing: -0.2,
+    } as const,
+    valueStyle: {
+      fontSize: 15,
+      fontWeight: "500",
+      letterSpacing: -0.2,
+      maxWidth: "60%",
+    } as const,
+    dividerColor,
+    actions: {
+      padding: 20,
+      paddingTop: 20,
+      gap: 10,
+    } as const,
+    button: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      gap: 8,
+      paddingVertical: 14,
+      borderRadius: 12,
+    } as const,
+    buttonPrimary: {
+      backgroundColor: ORANGE_PRIMARY,
+    } as const,
+    buttonPrimaryText: {
+      fontSize: 17,
+      fontWeight: "600",
+      color: "#fff",
+      letterSpacing: -0.2,
+    } as const,
+    buttonSecondary: {
+      backgroundColor: SUCCESS_GREEN,
+    } as const,
+    buttonSecondaryText: {
+      fontSize: 17,
+      fontWeight: "600",
+      color: "#fff",
+      letterSpacing: -0.2,
+    } as const,
+    buttonTertiary: {
+      paddingVertical: 14,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    } as const,
+    buttonTertiaryText: {
+      fontSize: 17,
+      fontWeight: "600",
+      color: isDark ? "#0A84FF" : "#007AFF",
+      letterSpacing: -0.2,
+    } as const,
+    closeButton: {
+      position: "absolute" as const,
+      top: 12,
+      right: 12,
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: tertiaryBg,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    } as const,
+  };
 }

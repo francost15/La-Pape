@@ -7,6 +7,7 @@ import { useProductosScreen } from '@/hooks/use-productos-screen';
 import { router } from 'expo-router';
 import React from 'react';
 import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 export default function ProductosScreen() {
   const isWeb = Platform.OS === 'web';
@@ -36,9 +37,13 @@ export default function ProductosScreen() {
   }
 
   return (
+    <Animated.View
+      entering={FadeIn.duration(220)}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       className="flex-1 bg-gray-100 dark:bg-neutral-900"
-      contentContainerStyle={{ padding: isWeb ? 21 : 12 }}
+      contentContainerStyle={{ padding: isWeb ? 21 : 12, paddingBottom: isWeb ? 21 : 120 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
@@ -100,5 +105,6 @@ export default function ProductosScreen() {
         )}
       </View>
     </ScrollView>
+    </Animated.View>
   );
 }

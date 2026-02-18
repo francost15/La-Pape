@@ -1,6 +1,7 @@
 import FormProductos from '@/components/forms/FormProductos';
 import { auth, CreateProductFormData, createProductSchema, getProductosScreenData } from '@/lib';
 import { getCategoriasByNegocio } from '@/lib/services/categorias';
+import { notify } from '@/lib/notify';
 import { createProduct } from '@/lib/services/productos';
 import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
 import { useProductosStore } from '@/store/productos-store';
@@ -109,10 +110,10 @@ export default function CreateProduct() {
         setProducts(storeData.products);
       }
       
-      // Navegar directamente al producto creado
+      notify.success({ title: 'Producto creado' });
       router.replace(`/productos/producto/${productId}`);
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'No se pudo crear el producto');
+      notify.error({ title: 'Error', description: error?.message || 'No se pudo crear el producto' });
     } finally {
       setLoading(false);
     }

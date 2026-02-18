@@ -33,6 +33,7 @@ const MAPPING = {
   'trash': 'delete',
   'trash.fill': 'delete',
   'chevron.up': 'keyboard-arrow-up',
+  'chevron.down': 'keyboard-arrow-down',
   'xmark': 'close',
   'checkmark.circle.fill': 'check-circle',
   'square.and.arrow.down': 'file-download',

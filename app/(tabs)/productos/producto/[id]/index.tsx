@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { auth, getProductosScreenData } from '@/lib';
+import { notify } from '@/lib/notify';
 import { deleteProduct, getProductById } from '@/lib/services/productos';
 import { useProductosStore } from '@/store/productos-store';
 import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
@@ -190,13 +191,11 @@ export default function ProductoById() {
                 setProducts(storeData.products);
               }
 
-              // Limpiar el producto actual del store
               setCurrentProduct(null);
-
-              // Navegar de vuelta a la lista de productos
+              notify.success({ title: `${product.nombre} eliminado` });
               router.replace('/productos' as any);
             } catch (error: any) {
-              Alert.alert('Error', error?.message || 'No se pudo eliminar el producto');
+              notify.error({ title: 'Error', description: error?.message || 'No se pudo eliminar el producto' });
             } finally {
               setDeleting(false);
             }

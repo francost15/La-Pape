@@ -1,6 +1,7 @@
 import ProductListContent from "@/components/ventas/ProductListContent";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { notify } from "@/lib/notify";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import * as Haptics from "expo-haptics";
@@ -12,7 +13,6 @@ import {
   PanResponder,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
@@ -22,12 +22,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SHEET_HEIGHT_PERCENT = 0.72;
 const DISMISS_THRESHOLD = 80;
-
-const toastContainerStyle = StyleSheet.create({
-  base: {
-    pointerEvents: "none",
-  },
-});
 
 /**
  * Vista de productos para móvil: FAB "Agregar productos" + sheet modal
@@ -43,8 +37,6 @@ export default function FooterProducts() {
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const openSheet = useVentasUIStore((s) => s.openSheet);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
-  const showToast = useVentasUIStore((s) => s.showToast);
-  const toastMessage = useVentasUIStore((s) => s.toastMessage);
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const dragOffsetRef = useRef(0);
@@ -57,8 +49,9 @@ export default function FooterProducts() {
       : baseSheetHeight;
 
   const showProductAddedToast = useCallback(
-    (productName: string) => showToast(`${productName} agregado`),
-    [showToast]
+    (productName: string) =>
+      notify.success({ title: `${productName} agregado` }),
+    []
   );
 
   const closeSheet = useCallback(() => {
@@ -137,31 +130,34 @@ export default function FooterProducts() {
     })
   ).current;
 
+  const TAB_BAR_CLEARANCE = 90 + insets.bottom;
+
   return (
     <>
       {!sheetVisible && (
         <Pressable
           onPress={handleOpenSheet}
-          className="absolute bottom-0 left-0 right-0 z-20 mx-4 mb-6 rounded-2xl bg-orange-500 shadow-lg shadow-orange-900/30 flex-row items-center justify-between px-5 py-4"
+          style={{ bottom: TAB_BAR_CLEARANCE }}
+          className="absolute left-0 right-0 z-20 mx-4 rounded-2xl bg-orange-500 shadow-lg shadow-orange-900/30 flex-row items-center justify-between px-4 py-3"
         >
-          <View className="flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center">
-              <IconSymbol name="bag.fill" size={22} color="white" />
+          <View className="flex-row items-center gap-2.5">
+            <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center">
+              <IconSymbol name="bag.fill" size={18} color="white" />
             </View>
-            <Text className="text-white font-semibold text-base">
+            <Text className="text-white font-semibold text-sm">
               Agregar productos
             </Text>
           </View>
           <View className="flex-row items-center gap-2">
-            {itemCount > 0 && (
-              <View className="bg-white rounded-full px-3 py-1">
-                <Text className="text-orange-600 font-bold text-sm">
+            {itemCount > 0 ? (
+              <View className="bg-white rounded-full px-2.5 py-0.5">
+                <Text className="text-orange-600 font-bold text-xs">
                   {itemCount} en carrito
                 </Text>
               </View>
-            )}
-            <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center">
-              <IconSymbol name="chevron.up" size={18} color="white" />
+            ) : null}
+            <View className="w-7 h-7 rounded-full bg-white/20 items-center justify-center">
+              <IconSymbol name="chevron.up" size={16} color="white" />
             </View>
           </View>
         </Pressable>
@@ -283,53 +279,6 @@ export default function FooterProducts() {
               </View>
             </View>
 
-            {toastMessage && (
-              <View
-                style={[
-                  toastContainerStyle.base,
-                  {
-                  position: "absolute",
-                  left: 16,
-                  right: 16,
-                  bottom: 16 + insets.bottom,
-                  zIndex: 9999,
-                  backgroundColor: "#ea580c",
-                  borderRadius: 12,
-                  paddingVertical: 14,
-                  paddingHorizontal: 16,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 10,
-                  ...(Platform.OS === "web"
-                    ? { boxShadow: "0px 4px 8px 0px rgba(0,0,0,0.25)" }
-                    : {
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.25,
-                        shadowRadius: 8,
-                        elevation: 8,
-                      }),
-                },
-                ]}
-              >
-                <IconSymbol
-                  name="checkmark.circle.fill"
-                  size={22}
-                  color="white"
-                />
-                <Text
-                  style={{
-                    color: "white",
-                    fontWeight: "600",
-                    fontSize: 15,
-                    flex: 1,
-                  }}
-                  numberOfLines={2}
-                >
-                  {toastMessage}
-                </Text>
-              </View>
-            )}
           </Animated.View>
         </View>
       </Modal>

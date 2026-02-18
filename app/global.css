@@ -4,6 +4,7 @@
 
 @import "nativewind/theme";
 
+
 /* Quitar outline de inputs en web */
 input:focus,
 textarea:focus {

@@ -1,6 +1,7 @@
 import FormProductos from '@/components/forms/FormProductos';
 import { auth, CreateProductFormData, createProductSchema, getProductosScreenData } from '@/lib';
 import { getCategoriasByNegocio } from '@/lib/services/categorias';
+import { notify } from '@/lib/notify';
 import { getProductById, updateProduct } from '@/lib/services/productos';
 import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
 import { useProductosStore } from '@/store/productos-store';
@@ -203,11 +204,10 @@ export default function EditProduct() {
         setCurrentProduct(updatedProduct);
       }
 
-      // Navegar de vuelta al detalle del producto
-      // Usar back() en lugar de replace para mantener el historial de navegación
+      notify.success({ title: 'Producto actualizado' });
       router.back();
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'No se pudo actualizar el producto');
+      notify.error({ title: 'Error', description: error?.message || 'No se pudo actualizar el producto' });
     } finally {
       setLoading(false);
     }

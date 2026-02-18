@@ -1,16 +1,15 @@
-import PeriodFilter, {
-  type Periodo,
-  type RangoFechas,
-} from "@/components/search/PeriodFilter";
+import PeriodFilter from "@/components/search/PeriodFilter";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Product, Venta, VentaDetalle } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
 import { getVentasByNegocio } from "@/lib/services/ventas";
 import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
+import { useFiltrosStore } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { onAuthStateChanged } from "firebase/auth";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import * as Haptics from "expo-haptics";
 import {
   ActivityIndicator,
   Platform,
@@ -20,6 +19,12 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 function formatearMoneda(valor: number): string {
   return `$${valor.toLocaleString("es-CL", {
@@ -183,8 +188,6 @@ function generateMockData(): {
   return { ventas, detalles, productos };
 }
 
-const PRODUCTOS_VISIBLES_INICIAL = 4;
-
 function VentaCard({
   venta,
   detalles,
@@ -205,121 +208,150 @@ function VentaCard({
   onReembolso: (v: Venta) => void;
 }) {
   const [expandido, setExpandido] = useState(false);
-  const hayMas = detalles.length > PRODUCTOS_VISIBLES_INICIAL;
-  const mostrarDetalles = expandido
-    ? detalles
-    : detalles.slice(0, PRODUCTOS_VISIBLES_INICIAL);
+  const height = useSharedValue(0);
+
+  useEffect(() => {
+    height.value = withTiming(expandido ? 400 : 0, {
+      duration: 280,
+    });
+  }, [expandido, height]);
+
+  const animatedContentStyle = useAnimatedStyle(() => ({
+    maxHeight: height.value,
+    overflow: "hidden" as const,
+  }));
+
+  const toggleExpand = () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setExpandido((p) => !p);
+  };
 
   return (
     <View
       className="bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700"
       style={
         Platform.OS === "web"
-          ? { boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }
+          ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }
           : { elevation: 2 }
       }
     >
-      <View className="flex-row flex-wrap items-center justify-between gap-2 p-4 pb-2">
-        <View className="flex-row flex-wrap items-center gap-2">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">
-            {formatearFecha(fecha)}
-          </Text>
-          <Text className="text-sm text-gray-500 dark:text-gray-400">
-            {formatearHora(fecha)}
-          </Text>
-          <Text className="text-xs text-gray-400 dark:text-gray-500">
+      <TouchableOpacity
+        onPress={toggleExpand}
+        className="flex-row items-center justify-between px-4 py-3.5"
+        activeOpacity={0.7}
+      >
+        <View className="flex-1 min-w-0">
+          <View className="flex-row items-center gap-2 flex-wrap">
+            <Text className="text-sm text-gray-500 dark:text-gray-400">
+              {formatearFecha(fecha)}
+            </Text>
+            <Text className="text-xs text-gray-400 dark:text-gray-500">
+              {formatearHora(fecha)}
+            </Text>
+          </View>
+          <Text className="text-xs text-gray-400 dark:text-gray-500 mt-0.5" numberOfLines={1}>
             ID: {venta.id}
           </Text>
         </View>
         <Text
-          className={`text-lg font-bold ${
+          className={`text-lg font-bold mr-2 ${
             isReembolso
               ? "text-red-600 dark:text-red-400"
-              : "text-gray-700 dark:text-white"
+              : "text-gray-900 dark:text-white"
           }`}
         >
           {formatearMoneda(venta.total)}
         </Text>
-      </View>
-
-      <View className="px-4 pb-3">
-        <Text className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-          Productos:
-        </Text>
-        <View className="gap-1">
-          {mostrarDetalles.map((d) => {
-            const nombre =
-              productNames[d.producto_id] ??
-              products.find((p) => p.id === d.producto_id)?.nombre ??
-              "Producto";
-            return (
-              <View
-                key={d.id}
-                className="flex-row justify-between items-center py-0.5"
-              >
-                <Text
-                  className="text-gray-700 dark:text-gray-300 flex-1"
-                  numberOfLines={1}
-                >
-                  {d.cantidad}x {nombre}
-                </Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-sm">
-                  {formatearMoneda(d.total_linea)}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-        {hayMas && (
-          <TouchableOpacity
-            onPress={() => setExpandido(!expandido)}
-            className="mt-2 py-1"
-            activeOpacity={0.7}
-          >
-            <Text className="text-sm font-medium text-orange-600 dark:text-orange-400">
-              {expandido
-                ? "Mostrar menos"
-                : `Mostrar más (+${detalles.length - PRODUCTOS_VISIBLES_INICIAL})`}
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      <View className="flex-row gap-3 p-4 pt-2 border-t border-gray-100 dark:border-neutral-700">
-        <TouchableOpacity
-          onPress={() => onVerRecibo(venta)}
-          className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl bg-orange-600"
-          activeOpacity={0.8}
-        >
-          <IconSymbol name="eye.fill" size={18} color="white" />
-          <Text className="text-white font-semibold">Ver Recibo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onReembolso(venta)}
-          disabled={isReembolso}
-          className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl ${
-            isReembolso
-              ? "bg-gray-200 dark:bg-neutral-600"
-              : "bg-red-100 dark:bg-red-900/30"
-          }`}
-          activeOpacity={0.8}
+        <View
+          className="w-8 h-8 rounded-full bg-gray-100 dark:bg-neutral-700 items-center justify-center"
         >
           <IconSymbol
-            name="arrow.uturn.backward"
-            size={18}
-            color={isReembolso ? "#9ca3af" : "#dc2626"}
+            name={expandido ? "chevron.up" : "chevron.down"}
+            size={14}
+            color="#78716c"
           />
-          <Text
-            className={`font-semibold ${
-              isReembolso
-                ? "text-gray-500 dark:text-gray-400"
-                : "text-red-700 dark:text-red-300"
-            }`}
-          >
-            Reembolso
+        </View>
+      </TouchableOpacity>
+
+      <Animated.View style={animatedContentStyle}>
+        <View
+          className="border-t border-gray-100 dark:border-neutral-700 px-4 pt-3 pb-4"
+          pointerEvents={expandido ? "auto" : "none"}
+        >
+          <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+            Productos ({detalles.length})
           </Text>
-        </TouchableOpacity>
-      </View>
+          <View className="gap-2 mb-4">
+            {detalles.map((d) => {
+              const nombre =
+                productNames[d.producto_id] ??
+                products.find((p) => p.id === d.producto_id)?.nombre ??
+                "Producto";
+              return (
+                <View
+                  key={d.id}
+                  className="flex-row justify-between items-center py-1.5"
+                >
+                  <Text
+                    className="text-gray-700 dark:text-gray-300 flex-1 mr-2"
+                    numberOfLines={1}
+                  >
+                    {d.cantidad}× {nombre}
+                  </Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm tabular-nums">
+                    {formatearMoneda(d.total_linea)}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onVerRecibo(venta);
+              }}
+              className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl bg-orange-600"
+              activeOpacity={0.85}
+            >
+              <IconSymbol name="eye.fill" size={18} color="white" />
+              <Text className="text-white font-semibold text-[15px]">Ver Recibo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onReembolso(venta);
+              }}
+              disabled={isReembolso}
+              style={isReembolso ? { opacity: 0.6 } : undefined}
+              className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl ${
+                isReembolso
+                  ? "bg-gray-100 dark:bg-neutral-700"
+                  : "bg-red-50 dark:bg-red-900/20"
+              }`}
+              activeOpacity={0.85}
+            >
+              <IconSymbol
+                name="arrow.uturn.backward"
+                size={18}
+                color={isReembolso ? "#9ca3af" : "#dc2626"}
+              />
+              <Text
+                className={`font-semibold text-[15px] ${
+                  isReembolso
+                    ? "text-gray-500 dark:text-gray-500"
+                    : "text-red-700 dark:text-red-300"
+                }`}
+              >
+                Reembolso
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -333,11 +365,12 @@ export default function HistoryScreen() {
     Record<string, VentaDetalle[]>
   >({});
   const [loading, setLoading] = useState(true);
-  const [periodo, setPeriodo] = useState<Periodo>("semana");
-  const [rangoPersonalizado, setRangoPersonalizado] = useState<RangoFechas>({
-    inicio: null,
-    fin: null,
-  });
+  const {
+    periodo,
+    rangoPersonalizado,
+    setPeriodo,
+    setRangoPersonalizado,
+  } = useFiltrosStore();
 
   const loadData = useCallback(async (uid: string, email: string) => {
     try {
@@ -483,12 +516,16 @@ export default function HistoryScreen() {
   }
 
   return (
+    <Animated.View
+      entering={FadeIn.duration(220)}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       className="flex-1 bg-gray-50 dark:bg-neutral-900"
       contentContainerStyle={{
         paddingHorizontal: isTablet ? 32 : 16,
         paddingVertical: 20,
-        paddingBottom: 40,
+        paddingBottom: 120,
       }}
     >
       <View className={isTablet ? "max-w-5xl mx-auto w-full" : ""}>
@@ -543,5 +580,6 @@ export default function HistoryScreen() {
         )}
       </View>
     </ScrollView>
+    </Animated.View>
   );
 }

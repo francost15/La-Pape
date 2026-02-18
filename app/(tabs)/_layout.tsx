@@ -1,7 +1,6 @@
+import { DynamicIslandTabBar } from '@/components/DynamicIslandTabBar';
 import Navbar from '@/components/navbar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { auth } from '@/lib/firebase';
 import { Tabs, useRouter } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -9,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
 
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -37,17 +35,12 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Navbar />
       <Tabs
+        tabBar={(props) => <DynamicIslandTabBar {...props} />}
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: '#ea580c', // orange-600
-          tabBarInactiveTintColor:
-            Colors[colorScheme ?? 'light'].tabIconDefault,
-          tabBarStyle: {
-            backgroundColor:
-              Colors[colorScheme ?? 'light'].background,
-            borderTopWidth: 0,
-          },
+          tabBarActiveTintColor: '#c2410c',
+          tabBarInactiveTintColor: '#78716c',
         }}
       >
       {/* Ventas */}
