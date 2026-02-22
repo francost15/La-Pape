@@ -1,580 +1,786 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useLayoutStore } from "@/store/layout-store";
+import * as Haptics from "expo-haptics";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Modal,
-    Platform,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  LayoutChangeEvent,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+  ZoomIn,
+  ZoomOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
-/**
- * Tipo que define los períodos disponibles para filtrar
- */
-export type Periodo = 'semana' | 'mes' | 'año' | 'personalizado';
+export type Periodo = "semana" | "mes" | "año" | "personalizado";
 
-/**
- * Interfaz que define el rango de fechas personalizado
- */
 export interface RangoFechas {
   inicio: Date | null;
   fin: Date | null;
 }
 
-/**
- * Props del componente PeriodFilter
- */
 export interface PeriodFilterProps {
-  /** Período actualmente seleccionado */
   periodo: Periodo;
-  /** Función que se ejecuta cuando se cambia el período */
   onPeriodoChange: (periodo: Periodo) => void;
-  /** Rango de fechas personalizado (solo necesario si se usa 'personalizado') */
   rangoPersonalizado?: RangoFechas;
-  /** Función que se ejecuta cuando se cambia el rango personalizado */
   onRangoPersonalizadoChange?: (rango: RangoFechas) => void;
-  /** Función para formatear fechas (opcional, tiene un formato por defecto) */
   formatDate?: (date: Date | null) => string;
-  /** Clase CSS adicional para el contenedor principal */
-  containerClassName?: string;
-  /** Clase CSS adicional para los botones */
-  buttonClassName?: string;
-  /** Clase CSS adicional para el texto de rango personalizado */
-  rangeTextClassName?: string;
 }
 
-/**
- * Opciones de períodos disponibles
- */
-const PERIODOS: Periodo[] = ['semana', 'mes', 'año', 'personalizado'];
+const PERIODOS: Periodo[] = ["semana", "mes", "año", "personalizado"];
 
-/**
- * Formatea un período para mostrarlo en la UI
- */
-const formatPeriodoLabel = (periodo: Periodo): string => {
-  const labels: Record<Periodo, string> = {
-    semana: 'Semana',
-    mes: 'Mes',
-    año: 'Año',
-    personalizado: 'Personalizado',
-  };
-  return labels[periodo] || periodo.charAt(0).toUpperCase() + periodo.slice(1);
+const LABELS: Record<Periodo, string> = {
+  semana: "Semana",
+  mes: "Mes",
+  año: "Año",
+  personalizado: "Personalizado",
 };
 
-/**
- * Formatea una fecha a string (formato por defecto)
- */
+const MONTH_NAMES = [
+  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+];
+
+const MONTH_FULL = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+const DAY_HEADERS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+
+const SPRING_CONFIG = { damping: 18, stiffness: 200, mass: 0.8 };
+
 const defaultFormatDate = (date: Date | null): string => {
-  if (!date) return 'Seleccionar';
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  if (!date) return "—";
+  return date.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
   });
 };
 
-/**
- * Componente Selector de Fecha Optimizado - Tipo Wheel Picker
- */
-function DatePicker({
-  date,
-  onDateChange,
-  minDate,
+const shortFormatDate = (date: Date | null): string => {
+  if (!date) return "Seleccionar";
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+function sameDay(a: Date | null, b: Date): boolean {
+  if (!a) return false;
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function toDateOnly(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+// ─── Period Badges ───────────────────────────────────────────────────
+
+function PeriodBadges({
+  periodo,
+  onSelect,
+  isMobile,
 }: {
-  date: Date | null;
-  onDateChange: (date: Date) => void;
-  minDate?: Date | null;
+  periodo: Periodo;
+  onSelect: (p: Periodo) => void;
+  isMobile: boolean;
 }) {
-  const ahora = new Date();
-  const initialDate = date || ahora;
-  const [selectedYear, setSelectedYear] = useState(initialDate.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(initialDate.getMonth());
-  const [selectedDay, setSelectedDay] = useState(initialDate.getDate());
+  const colorScheme = useColorScheme();
+  const isDark = (colorScheme ?? "light") === "dark";
 
-  const yearScrollRef = React.useRef<ScrollView>(null);
-  const monthScrollRef = React.useRef<ScrollView>(null);
-  const dayScrollRef = React.useRef<ScrollView>(null);
+  const indicatorX = useSharedValue(0);
+  const indicatorW = useSharedValue(0);
 
-  const years = Array.from({ length: 20 }, (_, i) => ahora.getFullYear() - 10 + i);
-  const months = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-  ];
+  const layoutsRef = useRef<Record<string, { x: number; width: number }>>({});
+  const initializedRef = useRef(false);
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const days = Array.from(
-    { length: getDaysInMonth(selectedYear, selectedMonth) },
-    (_, i) => i + 1
+  const syncIndicator = useCallback(
+    (p: Periodo, animate: boolean) => {
+      const layout = layoutsRef.current[p];
+      if (!layout) return;
+      if (animate) {
+        indicatorX.value = withSpring(layout.x, SPRING_CONFIG);
+        indicatorW.value = withSpring(layout.width, SPRING_CONFIG);
+      } else {
+        indicatorX.value = layout.x;
+        indicatorW.value = layout.width;
+      }
+    },
+    [indicatorX, indicatorW],
   );
 
-  // Ajustar día si es inválido para el mes seleccionado
-  useEffect(() => {
-    const maxDay = getDaysInMonth(selectedYear, selectedMonth);
-    if (selectedDay > maxDay) {
-      setSelectedDay(maxDay);
-    }
-  }, [selectedYear, selectedMonth, selectedDay]);
-
-  useEffect(() => {
-    if (date) {
-      setSelectedYear(date.getFullYear());
-      setSelectedMonth(date.getMonth());
-      setSelectedDay(date.getDate());
-    }
-  }, [date]);
-
-  // Posicionar scrolls en los valores seleccionados cuando cambia la fecha inicial
-  useEffect(() => {
-    if (!date) return;
-    
-    const yearIndex = years.indexOf(selectedYear);
-    const monthIndex = selectedMonth;
-    const currentDays = Array.from(
-      { length: getDaysInMonth(selectedYear, selectedMonth) },
-      (_, i) => i + 1
-    );
-    const dayIndex = currentDays.indexOf(selectedDay);
-
-    setTimeout(() => {
-      if (yearIndex >= 0 && yearScrollRef.current) {
-        yearScrollRef.current.scrollTo({ y: yearIndex * 40, animated: false });
+  const handleLayout = useCallback(
+    (p: Periodo) => (e: LayoutChangeEvent) => {
+      const { x, width } = e.nativeEvent.layout;
+      layoutsRef.current[p] = { x, width };
+      if (!initializedRef.current) {
+        const allMeasured = PERIODOS.every((k) => layoutsRef.current[k]);
+        if (allMeasured) {
+          initializedRef.current = true;
+          syncIndicator(periodo, false);
+        }
       }
-      if (monthIndex >= 0 && monthScrollRef.current) {
-        monthScrollRef.current.scrollTo({ y: monthIndex * 40, animated: false });
-      }
-      if (dayIndex >= 0 && dayScrollRef.current) {
-        dayScrollRef.current.scrollTo({ y: dayIndex * 40, animated: false });
-      }
-    }, 150);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+    },
+    [periodo, syncIndicator],
+  );
 
   useEffect(() => {
-    const newDate = new Date(selectedYear, selectedMonth, selectedDay);
-    if (!minDate || newDate >= minDate) {
-      onDateChange(newDate);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedYear, selectedMonth, selectedDay]);
+    if (initializedRef.current) syncIndicator(periodo, true);
+  }, [periodo, syncIndicator]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    position: "absolute" as const,
+    left: indicatorX.value,
+    width: indicatorW.value,
+    top: 0,
+    bottom: 0,
+    borderRadius: isMobile ? 10 : 12,
+  }));
+
+  const handlePress = useCallback(
+    (p: Periodo) => {
+      if (Platform.OS !== "web")
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onSelect(p);
+    },
+    [onSelect],
+  );
 
   return (
-    <View className="bg-white dark:bg-neutral-800 rounded-2xl p-4 border border-gray-200 dark:border-neutral-700">
-      <View className="flex-row gap-2">
-        {/* Año */}
-        <View className="flex-1">
-          <View className="h-10 items-center justify-center mb-2">
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">
-              Año
-            </Text>
-          </View>
-          <View className="relative h-40 bg-gray-50 dark:bg-neutral-900 rounded-xl overflow-hidden">
-            {/* Indicador de selección */}
-            <View className="absolute top-1/2 left-0 right-0 h-10 bg-orange-100 dark:bg-orange-900/40 rounded -translate-y-5 border border-orange-500/50" />
-            
-            <ScrollView
-              ref={yearScrollRef}
-              showsVerticalScrollIndicator={false}
-              snapToInterval={40}
-              decelerationRate="fast"
-              onScroll={(e) => {
-                const offsetY = e.nativeEvent.contentOffset.y;
-                const index = Math.round(offsetY / 40);
-                if (index >= 0 && index < years.length) {
-                  setSelectedYear(years[index]);
-                }
-              }}
-              scrollEventThrottle={16}
-              contentContainerStyle={{ paddingVertical: 80 }}
+    <View
+      className={`flex-row relative ${
+        isMobile
+          ? "rounded-xl p-1 bg-gray-100 dark:bg-neutral-800"
+          : "rounded-2xl p-1.5 bg-gray-100 dark:bg-neutral-800/80"
+      }`}
+    >
+      <Animated.View
+        style={[
+          indicatorStyle,
+          {
+            backgroundColor: "#ea580c",
+            ...(Platform.OS === "web"
+              ? { boxShadow: "0 2px 8px rgba(234,88,12,0.35)" }
+              : {
+                  shadowColor: "#ea580c",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: isDark ? 0.5 : 0.35,
+                  shadowRadius: 6,
+                  elevation: 4,
+                }),
+          },
+        ]}
+      />
+      {PERIODOS.map((p) => {
+        const isSelected = periodo === p;
+        return (
+          <Pressable
+            key={p}
+            onLayout={handleLayout(p)}
+            onPress={() => handlePress(p)}
+            style={{ flex: 1, zIndex: 1 }}
+            className={`items-center justify-center ${
+              isMobile ? "py-2.5" : "py-3 px-5"
+            }`}
+            accessibilityLabel={`Filtrar por ${LABELS[p]}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSelected }}
+          >
+            <Text
+              className={`font-semibold ${isMobile ? "text-[13px]" : "text-sm"} ${
+                isSelected
+                  ? "text-white"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
             >
-              {years.map((year) => {
-                const isSelected = selectedYear === year;
-                return (
-                  <View
-                    key={year}
-                    style={{ height: 40 }}
-                    className="items-center justify-center"
-                  >
-                    <Text
-                      className={`text-base ${
-                        isSelected
-                          ? 'text-orange-600 dark:text-orange-500 font-bold'
-                          : 'text-gray-400 dark:text-gray-600'
-                      }`}
-                    >
-                      {year}
-                    </Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          </View>
-          <View className="h-10 items-center justify-center mt-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-            <Text className="text-base text-orange-600 dark:text-orange-500 font-bold">
-              {selectedYear}
+              {LABELS[p]}
             </Text>
-          </View>
-        </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
-        {/* Mes */}
-        <View className="flex-1">
-          <View className="h-10 items-center justify-center mb-2">
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">
-              Mes
-            </Text>
-          </View>
-          <View className="relative h-40 bg-gray-50 dark:bg-neutral-900 rounded-xl overflow-hidden">
-            {/* Indicador de selección */}
-            <View className="absolute top-1/2 left-0 right-0 h-10 bg-orange-100 dark:bg-orange-900/40 rounded -translate-y-5 border border-orange-500/50" />
-            
-            <ScrollView
-              ref={monthScrollRef}
-              showsVerticalScrollIndicator={false}
-              snapToInterval={40}
-              decelerationRate="fast"
-              onScroll={(e) => {
-                const offsetY = e.nativeEvent.contentOffset.y;
-                const index = Math.round(offsetY / 40);
-                if (index >= 0 && index < months.length) {
-                  setSelectedMonth(index);
-                }
-              }}
-              scrollEventThrottle={16}
-              contentContainerStyle={{ paddingVertical: 80 }}
-            >
-              {months.map((month, index) => {
-                const isSelected = selectedMonth === index;
-                return (
-                  <View
-                    key={index}
-                    style={{ height: 40 }}
-                    className="items-center justify-center"
-                  >
-                    <Text
-                      className={`text-sm ${
-                        isSelected
-                          ? 'text-orange-600 dark:text-orange-500 font-bold'
-                          : 'text-gray-400 dark:text-gray-600'
-                      }`}
-                    >
-                      {month}
-                    </Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          </View>
-          <View className="h-10 items-center justify-center mt-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-            <Text className="text-base text-orange-600 dark:text-orange-500 font-bold">
-              {months[selectedMonth]}
-            </Text>
-          </View>
-        </View>
+// ─── Range Calendar ──────────────────────────────────────────────────
 
-        {/* Día */}
-        <View className="flex-1">
-          <View className="h-10 items-center justify-center mb-2">
-            <Text className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">
-              Día
-            </Text>
-          </View>
-          <View className="relative h-40 bg-gray-50 dark:bg-neutral-900 rounded-xl overflow-hidden">
-            {/* Indicador de selección */}
-            <View className="absolute top-1/2 left-0 right-0 h-10 bg-orange-100 dark:bg-orange-900/40 rounded -translate-y-5 border border-orange-500/50" />
-            
-            <ScrollView
-              ref={dayScrollRef}
-              showsVerticalScrollIndicator={false}
-              snapToInterval={40}
-              decelerationRate="fast"
-              onScroll={(e) => {
-                const offsetY = e.nativeEvent.contentOffset.y;
-                const index = Math.round(offsetY / 40);
-                if (index >= 0 && index < days.length) {
-                  setSelectedDay(days[index]);
-                }
-              }}
-              scrollEventThrottle={16}
-              contentContainerStyle={{ paddingVertical: 80 }}
-            >
-              {days.map((day) => {
-                const isSelected = selectedDay === day;
-                return (
-                  <View
-                    key={day}
-                    style={{ height: 40 }}
-                    className="items-center justify-center"
-                  >
-                    <Text
-                      className={`text-base ${
-                        isSelected
-                          ? 'text-orange-600 dark:text-orange-500 font-bold'
-                          : 'text-gray-400 dark:text-gray-600'
-                      }`}
-                    >
-                      {day}
-                    </Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          </View>
-          <View className="h-10 items-center justify-center mt-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-            <Text className="text-base text-orange-600 dark:text-orange-500 font-bold">
-              {selectedDay}
-            </Text>
-          </View>
+type CalendarView = "days" | "months" | "years";
+
+function RangeCalendar({
+  rango,
+  onRangoChange,
+}: {
+  rango: RangoFechas;
+  onRangoChange: (r: RangoFechas) => void;
+}) {
+  const now = new Date();
+  const ref = rango.inicio || now;
+
+  const [viewYear, setViewYear] = useState(ref.getFullYear());
+  const [viewMonth, setViewMonth] = useState(ref.getMonth());
+  const [calendarView, setCalendarView] = useState<CalendarView>("days");
+  const [selectingEnd, setSelectingEnd] = useState(false);
+
+  useEffect(() => {
+    if (rango.inicio && !selectingEnd) {
+      setViewYear(rango.inicio.getFullYear());
+      setViewMonth(rango.inicio.getMonth());
+    }
+  }, [rango.inicio, selectingEnd]);
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfWeek = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+
+  const handleDayPress = (day: number) => {
+    const tapped = new Date(viewYear, viewMonth, day);
+
+    if (!rango.inicio || (rango.inicio && rango.fin)) {
+      onRangoChange({ inicio: tapped, fin: null });
+      setSelectingEnd(true);
+      return;
+    }
+
+    if (tapped < rango.inicio) {
+      onRangoChange({ inicio: tapped, fin: null });
+      setSelectingEnd(true);
+      return;
+    }
+
+    onRangoChange({ inicio: rango.inicio, fin: tapped });
+    setSelectingEnd(false);
+  };
+
+  const getDayStatus = (day: number) => {
+    const d = new Date(viewYear, viewMonth, day);
+    const dOnly = toDateOnly(d);
+    const isStart = sameDay(rango.inicio, d);
+    const isEnd = sameDay(rango.fin, d);
+    const isToday =
+      now.getFullYear() === viewYear &&
+      now.getMonth() === viewMonth &&
+      now.getDate() === day;
+
+    let inRange = false;
+    if (rango.inicio && rango.fin) {
+      const s = toDateOnly(rango.inicio);
+      const e = toDateOnly(rango.fin);
+      inRange = dOnly >= s && dOnly <= e;
+    }
+
+    return { isStart, isEnd, inRange, isToday };
+  };
+
+  const navigateMonth = (delta: number) => {
+    let m = viewMonth + delta;
+    let y = viewYear;
+    if (m < 0) { m = 11; y--; }
+    else if (m > 11) { m = 0; y++; }
+    setViewMonth(m);
+    setViewYear(y);
+  };
+
+  const yearStart = now.getFullYear() - 10;
+  const yearsList = Array.from({ length: 21 }, (_, i) => yearStart + i);
+
+  // ── Years view ──
+  if (calendarView === "years") {
+    return (
+      <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
+        <Pressable
+          onPress={() => setCalendarView("days")}
+          className="items-center mb-3"
+        >
+          <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
+            Seleccionar Año
+          </Text>
+        </Pressable>
+        <View className="flex-row flex-wrap justify-center gap-2">
+          {yearsList.map((y) => {
+            const active = y === viewYear;
+            return (
+              <Pressable
+                key={y}
+                onPress={() => { setViewYear(y); setCalendarView("months"); }}
+                className={`py-2 px-3 rounded-xl ${
+                  active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
+                }`}
+              >
+                <Text
+                  className={`text-sm font-semibold ${
+                    active ? "text-white" : "text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {y}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
+      </View>
+    );
+  }
+
+  // ── Months view ──
+  if (calendarView === "months") {
+    return (
+      <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
+        <Pressable
+          onPress={() => setCalendarView("years")}
+          className="items-center mb-3"
+        >
+          <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
+            {viewYear}
+          </Text>
+        </Pressable>
+        <View className="flex-row flex-wrap gap-2">
+          {MONTH_NAMES.map((m, idx) => {
+            const active = idx === viewMonth;
+            return (
+              <Pressable
+                key={m}
+                onPress={() => { setViewMonth(idx); setCalendarView("days"); }}
+                style={{ width: "31%" }}
+                className={`py-2.5 items-center rounded-xl ${
+                  active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
+                }`}
+              >
+                <Text
+                  className={`text-sm font-semibold ${
+                    active ? "text-white" : "text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {m}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
+
+  // ── Days view ──
+  const blanks = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+  const daysList = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  return (
+    <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
+      {/* Header */}
+      <View className="flex-row items-center justify-between mb-3">
+        <Pressable
+          onPress={() => navigateMonth(-1)}
+          className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+        >
+          <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">‹</Text>
+        </Pressable>
+        <Pressable onPress={() => setCalendarView("months")}>
+          <Text className="text-[15px] font-bold text-gray-800 dark:text-gray-100">
+            {MONTH_FULL[viewMonth]} {viewYear}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigateMonth(1)}
+          className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+        >
+          <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">›</Text>
+        </Pressable>
+      </View>
+
+      {/* Day-of-week headers */}
+      <View className="flex-row mb-1">
+        {DAY_HEADERS.map((d) => (
+          <View key={d} style={{ width: "14.28%" }} className="items-center py-1">
+            <Text className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase">
+              {d}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Day grid */}
+      <View className="flex-row flex-wrap">
+        {blanks.map((i) => (
+          <View key={`b-${i}`} style={{ width: "14.28%", height: 38 }} />
+        ))}
+        {daysList.map((day) => {
+          const { isStart, isEnd, inRange, isToday } = getDayStatus(day);
+          const isEndpoint = isStart || isEnd;
+
+          const rangeBg = inRange && !isEndpoint
+            ? "bg-orange-100 dark:bg-orange-900/25"
+            : "";
+
+          const startEdge = isStart && rango.fin ? "rounded-l-full bg-orange-100 dark:bg-orange-900/25" : "";
+          const endEdge = isEnd && rango.inicio ? "rounded-r-full bg-orange-100 dark:bg-orange-900/25" : "";
+          const edgeBg = startEdge || endEdge;
+
+          return (
+            <View
+              key={day}
+              style={{ width: "14.28%", height: 38 }}
+              className={`justify-center items-center ${rangeBg} ${edgeBg}`}
+            >
+              <Pressable
+                onPress={() => handleDayPress(day)}
+                className={`w-9 h-9 items-center justify-center rounded-full ${
+                  isEndpoint
+                    ? "bg-orange-600"
+                    : isToday
+                      ? "border border-orange-400 dark:border-orange-500"
+                      : ""
+                }`}
+              >
+                <Text
+                  className={`text-[13px] ${
+                    isEndpoint
+                      ? "text-white font-bold"
+                      : isToday
+                        ? "text-orange-600 dark:text-orange-400 font-bold"
+                        : inRange
+                          ? "text-orange-700 dark:text-orange-300 font-medium"
+                          : "text-gray-700 dark:text-gray-300 font-medium"
+                  }`}
+                >
+                  {day}
+                </Text>
+              </Pressable>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
 }
 
-/**
- * Componente reutilizable para filtrar por período de tiempo
- * 
- * @example
- * ```tsx
- * <PeriodFilter
- *   periodo={periodo}
- *   onPeriodoChange={handlePeriodoChange}
- *   rangoPersonalizado={rangoPersonalizado}
- *   onRangoPersonalizadoChange={setRangoPersonalizado}
- *   formatDate={formatDate}
- * />
- * ```
- */
+// ─── Modals ──────────────────────────────────────────────────────────
+
+function MobileModal({
+  visible,
+  onClose,
+  children,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Animated.View
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(150)}
+        className="flex-1 justify-end"
+        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
+        <Pressable className="flex-1" onPress={onClose} />
+        <Animated.View
+          entering={SlideInDown.springify().damping(20).stiffness(180)}
+          exiting={SlideOutDown.duration(200)}
+        >
+          <View className="bg-white dark:bg-neutral-800 rounded-t-3xl">
+            <View className="w-10 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full self-center mt-3 mb-1" />
+            <ScrollView
+              bounces={false}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ padding: 20, paddingTop: 12 }}
+              style={{ maxHeight: 560 }}
+            >
+              {children}
+            </ScrollView>
+          </View>
+        </Animated.View>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+function DesktopModal({
+  visible,
+  onClose,
+  children,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Animated.View
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(150)}
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      >
+        <Pressable
+          className="absolute top-0 left-0 right-0 bottom-0"
+          onPress={onClose}
+        />
+        <Animated.View
+          entering={ZoomIn.duration(250).springify().damping(18)}
+          exiting={ZoomOut.duration(150)}
+          className="w-full max-w-md"
+        >
+          <View
+            className="bg-white dark:bg-neutral-800 rounded-3xl mx-4 overflow-hidden"
+            style={
+              Platform.OS === "web"
+                ? { boxShadow: "0 24px 48px rgba(0,0,0,0.2)" }
+                : { elevation: 24 }
+            }
+          >
+            <ScrollView
+              bounces={false}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ padding: 24 }}
+              style={{ maxHeight: 560 }}
+            >
+              {children}
+            </ScrollView>
+          </View>
+        </Animated.View>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+// ─── Custom Period Content ───────────────────────────────────────────
+
+function CustomPeriodContent({
+  rangoTemporal,
+  onRangoChange,
+  onConfirm,
+  onCancel,
+  isMobile,
+}: {
+  rangoTemporal: RangoFechas;
+  onRangoChange: (rango: RangoFechas) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isMobile: boolean;
+}) {
+  const canConfirm = rangoTemporal.inicio && rangoTemporal.fin;
+
+  const selectingStep = !rangoTemporal.inicio
+    ? "inicio"
+    : !rangoTemporal.fin
+      ? "fin"
+      : "done";
+
+  return (
+    <>
+      <Text
+        className={`font-bold text-gray-800 dark:text-gray-100 text-center ${
+          isMobile ? "text-lg mb-1" : "text-xl mb-1"
+        }`}
+      >
+        Período Personalizado
+      </Text>
+
+      <Text className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+        {selectingStep === "inicio" && "Selecciona la fecha de inicio"}
+        {selectingStep === "fin" && "Ahora selecciona la fecha de fin"}
+        {selectingStep === "done" && "Toca un día para reiniciar la selección"}
+      </Text>
+
+      {/* Range summary pills */}
+      <View className="flex-row gap-2 mb-4">
+        <View
+          className={`flex-1 py-2.5 px-3 rounded-xl border ${
+            selectingStep === "inicio"
+              ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
+              : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+          }`}
+        >
+          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+            Desde
+          </Text>
+          <Text
+            className={`text-sm font-bold ${
+              rangoTemporal.inicio
+                ? "text-gray-800 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-500"
+            }`}
+          >
+            {defaultFormatDate(rangoTemporal.inicio)}
+          </Text>
+        </View>
+
+        <View className="justify-center">
+          <Text className="text-gray-400 dark:text-gray-500 font-medium">→</Text>
+        </View>
+
+        <View
+          className={`flex-1 py-2.5 px-3 rounded-xl border ${
+            selectingStep === "fin"
+              ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
+              : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+          }`}
+        >
+          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+            Hasta
+          </Text>
+          <Text
+            className={`text-sm font-bold ${
+              rangoTemporal.fin
+                ? "text-gray-800 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-500"
+            }`}
+          >
+            {defaultFormatDate(rangoTemporal.fin)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Unified calendar */}
+      <View className="mb-5">
+        <RangeCalendar rango={rangoTemporal} onRangoChange={onRangoChange} />
+      </View>
+
+      {/* Action buttons */}
+      <View className="flex-row gap-3">
+        <TouchableOpacity
+          onPress={onCancel}
+          className="flex-1 bg-gray-100 dark:bg-neutral-700 rounded-2xl py-3.5 items-center"
+          activeOpacity={0.7}
+        >
+          <Text className="text-gray-700 dark:text-gray-200 font-semibold text-[15px]">
+            Cancelar
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onConfirm}
+          className="flex-1 bg-orange-600 rounded-2xl py-3.5 items-center"
+          disabled={!canConfirm}
+          activeOpacity={0.8}
+          style={{ opacity: canConfirm ? 1 : 0.4 }}
+        >
+          <Text className="text-white font-semibold text-[15px]">
+            Confirmar
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────────────────
+
 export default function PeriodFilter({
   periodo,
   onPeriodoChange,
   rangoPersonalizado,
   onRangoPersonalizadoChange,
-  formatDate = defaultFormatDate,
-  containerClassName = '',
-  buttonClassName = '',
-  rangeTextClassName = '',
+  formatDate = shortFormatDate,
 }: PeriodFilterProps) {
-  const [showModalPersonalizado, setShowModalPersonalizado] = useState(false);
+  const isMobile = useLayoutStore((s) => s.isMobile);
+  const [showModal, setShowModal] = useState(false);
   const [rangoTemporal, setRangoTemporal] = useState<RangoFechas>({
     inicio: rangoPersonalizado?.inicio || null,
     fin: rangoPersonalizado?.fin || null,
   });
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Sincronizar rangoTemporal con rangoPersonalizado cuando cambia externamente
   useEffect(() => {
-    if (rangoPersonalizado) {
-      setRangoTemporal(rangoPersonalizado);
-    }
+    if (rangoPersonalizado) setRangoTemporal(rangoPersonalizado);
   }, [rangoPersonalizado]);
 
-  const handlePeriodoPress = (p: Periodo) => {
-    if (p === 'personalizado') {
-      setShowModalPersonalizado(true);
-      // Animar entrada
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ]).start();
-    } else {
-      onPeriodoChange(p);
-      if (onRangoPersonalizadoChange) {
-        onRangoPersonalizadoChange({ inicio: null, fin: null });
+  const handleSelect = useCallback(
+    (p: Periodo) => {
+      if (p === "personalizado") {
+        setShowModal(true);
+      } else {
+        onPeriodoChange(p);
+        onRangoPersonalizadoChange?.({ inicio: null, fin: null });
       }
-    }
-  };
+    },
+    [onPeriodoChange, onRangoPersonalizadoChange],
+  );
 
-  const handleCloseModal = () => {
-    // Animar salida
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-    ]).start(() => {
-      setShowModalPersonalizado(false);
-    });
-  };
+  const handleCloseModal = useCallback(() => setShowModal(false), []);
 
-  const handleConfirmarPersonalizado = () => {
-    if (rangoTemporal.inicio && rangoTemporal.fin) {
-      if (rangoTemporal.inicio <= rangoTemporal.fin) {
-        if (onRangoPersonalizadoChange) {
-          onRangoPersonalizadoChange(rangoTemporal);
-        }
-        onPeriodoChange('personalizado');
-        handleCloseModal();
-      }
+  const handleConfirm = useCallback(() => {
+    if (
+      rangoTemporal.inicio &&
+      rangoTemporal.fin &&
+      rangoTemporal.inicio <= rangoTemporal.fin
+    ) {
+      onRangoPersonalizadoChange?.(rangoTemporal);
+      onPeriodoChange("personalizado");
+      setShowModal(false);
     }
-  };
+  }, [rangoTemporal, onPeriodoChange, onRangoPersonalizadoChange]);
 
   const hasCustomRange =
-    periodo === 'personalizado' &&
+    periodo === "personalizado" &&
     rangoPersonalizado?.inicio &&
     rangoPersonalizado?.fin;
 
+  const ModalWrapper = isMobile ? MobileModal : DesktopModal;
+
   return (
     <>
-      <View className={`mb-6 w-full ${containerClassName}`}>
-        {/* Botones de período */}
-        <View className="flex-row flex-wrap gap-2 w-full">
-          {PERIODOS.map((p) => {
-            const isSelected = periodo === p;
-            return (
-              <TouchableOpacity
-                key={p}
-                onPress={() => handlePeriodoPress(p)}
-                className={`flex-1 min-w-[80px] px-4 py-3 rounded-lg items-center justify-center ${
-                  isSelected
-                    ? 'bg-orange-600'
-                    : 'bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700'
-                } ${buttonClassName}`}
-                accessibilityLabel={`Filtrar por ${formatPeriodoLabel(p)}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-              >
-                <Text
-                  className={`font-semibold text-sm ${
-                    isSelected
-                      ? 'text-white'
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {formatPeriodoLabel(p)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      <View
+        className={`mb-6 ${
+          isMobile ? "w-full" : "w-full max-w-md self-center"
+        }`}
+      >
+        <PeriodBadges
+          periodo={periodo}
+          onSelect={handleSelect}
+          isMobile={isMobile}
+        />
 
-        {/* Mostrar rango personalizado si está seleccionado */}
         {hasCustomRange && (
-          <Text
-            className={`text-sm text-gray-600 dark:text-gray-400 mt-2 ${rangeTextClassName}`}
-            accessibilityLabel={`Rango seleccionado: ${formatDate(rangoPersonalizado.inicio)} hasta ${formatDate(rangoPersonalizado.fin)}`}
-          >
-            {formatDate(rangoPersonalizado.inicio)} - {formatDate(rangoPersonalizado.fin)}
-          </Text>
+          <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+            <Pressable
+              onPress={() => setShowModal(true)}
+              className="mt-3 flex-row items-center justify-center gap-2 py-2 px-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40"
+            >
+              <Text className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                {formatDate(rangoPersonalizado.inicio)} — {formatDate(rangoPersonalizado.fin)}
+              </Text>
+            </Pressable>
+          </Animated.View>
         )}
       </View>
 
-      {/* Modal para Período Personalizado - Bottom Sheet con Animaciones */}
-      <Modal
-        visible={showModalPersonalizado}
-        transparent
-        animationType="none"
-        onRequestClose={handleCloseModal}
-      >
-        <Animated.View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            opacity: fadeAnim,
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={handleCloseModal}
-            className="flex-1 justify-end"
-          >
-            <Animated.View
-              style={{
-                transform: [
-                  {
-                    translateY: slideAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [600, 0],
-                    }),
-                  },
-                ],
-              }}
-            >
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-neutral-800 rounded-t-3xl p-6 max-h-[85%] w-full"
-              >
-                {/* Handle bar */}
-                <View className="w-12 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full self-center mb-6" />
-
-                <Text className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-8 text-center">
-                  Seleccionar Período Personalizado
-                </Text>
-
-                {/* Selector de Fecha Inicio */}
-                <View className="mb-6">
-                  <Text className="text-base font-bold text-gray-800 dark:text-gray-200 mb-4">
-                    Fecha Inicio
-                  </Text>
-                  <DatePicker
-                    date={rangoTemporal.inicio}
-                    onDateChange={(date) =>
-                      setRangoTemporal((prev) => ({ ...prev, inicio: date }))
-                    }
-                  />
-                </View>
-
-                {/* Selector de Fecha Fin */}
-                <View className="mb-6">
-                  <Text className="text-base font-bold text-gray-800 dark:text-gray-200 mb-4">
-                    Fecha Fin
-                  </Text>
-                  <DatePicker
-                    date={rangoTemporal.fin}
-                    onDateChange={(date) =>
-                      setRangoTemporal((prev) => ({ ...prev, fin: date }))
-                    }
-                    minDate={rangoTemporal.inicio}
-                  />
-                </View>
-
-                {/* Botones */}
-                <View className="gap-3 mt-2">
-                  <TouchableOpacity
-                    onPress={handleCloseModal}
-                    className="w-full bg-gray-100 dark:bg-neutral-700 rounded-xl py-4 items-center justify-center shadow-sm"
-                    activeOpacity={0.7}
-                  >
-                    <Text className="text-gray-800 dark:text-gray-200 font-semibold text-base">
-                      Cancelar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={handleConfirmarPersonalizado}
-                    className="w-full bg-orange-600 rounded-xl py-4 items-center justify-center shadow-lg"
-                    disabled={!rangoTemporal.inicio || !rangoTemporal.fin}
-                    activeOpacity={0.8}
-                    style={{
-                      opacity: !rangoTemporal.inicio || !rangoTemporal.fin ? 0.5 : 1,
-                    }}
-                  >
-                    <Text className="text-white font-semibold text-base">Confirmar</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          </TouchableOpacity>
-        </Animated.View>
-      </Modal>
+      <ModalWrapper visible={showModal} onClose={handleCloseModal}>
+        <CustomPeriodContent
+          rangoTemporal={rangoTemporal}
+          onRangoChange={setRangoTemporal}
+          onConfirm={handleConfirm}
+          onCancel={handleCloseModal}
+          isMobile={isMobile}
+        />
+      </ModalWrapper>
     </>
   );
 }

@@ -54,7 +54,7 @@ export function DynamicIslandTabBar({
   insets,
 }: BottomTabBarProps) {
   const { width } = useWindowDimensions();
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? "light";
   const isDark = colorScheme === "dark";
   const isWeb = Platform.OS === "web";
   const isCompact = width < 640;
@@ -66,8 +66,9 @@ export function DynamicIslandTabBar({
   }, [onHeightChange, totalHeight]);
 
   const inactiveColor = isDark ? INACTIVE_COLOR_DARK : INACTIVE_COLOR_LIGHT;
-  const bgBar = isDark ? "rgba(28,28,30,0.97)" : "rgba(255,255,255,0.97)";
+  const bgBar = isDark ? "rgba(28,28,30,0.98)" : "rgba(250,250,250,0.98)";
   const shadowColor = isDark ? "#000" : "#1c1917";
+  const borderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
 
   const tabs: TabConfig[] = useMemo(
     () =>
@@ -91,7 +92,7 @@ export function DynamicIslandTabBar({
 
   const webShadow = isDark
     ? "0 4px 32px 0 rgba(0,0,0,0.55), 0 1.5px 8px 0 rgba(0,0,0,0.35)"
-    : "0 4px 32px 0 rgba(0,0,0,0.12), 0 1.5px 8px 0 rgba(0,0,0,0.06)";
+    : "0 4px 32px 0 rgba(0,0,0,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.08)";
 
   return (
     <Animated.View
@@ -113,7 +114,7 @@ export function DynamicIslandTabBar({
           {
             backgroundColor: bgBar,
             width: islandWidth,
-            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+            borderColor,
             ...(isWeb
               ? { boxShadow: webShadow }
               : {
@@ -171,6 +172,7 @@ export function DynamicIslandTabBar({
         <PcOnlyBadge
           tab={tabs[state.index]}
           visible={tabs[state.index]?.pcOnly === true}
+          isDark={isDark}
         />
       ) : null}
     </Animated.View>
@@ -251,19 +253,19 @@ function TabItem({
       <View style={styles.iconWrapper}>
         <IconSymbol size={isCompact ? 22 : 24} name={tab.icon} color={color} />
       </View>
-      {!isCompact ? (
-        <Text
-          style={[styles.label, { color }, isFocused && styles.labelActive]}
-          numberOfLines={1}
-        >
-          {tab.label}
-        </Text>
-      ) : null}
     </Pressable>
   );
 }
 
-function PcOnlyBadge({ tab, visible }: { tab: TabConfig; visible: boolean }) {
+function PcOnlyBadge({
+  tab,
+  visible,
+  isDark,
+}: {
+  tab: TabConfig;
+  visible: boolean;
+  isDark: boolean;
+}) {
   const opacity = useSharedValue(0);
 
   useEffect(() => {
@@ -277,8 +279,23 @@ function PcOnlyBadge({ tab, visible }: { tab: TabConfig; visible: boolean }) {
   if (!tab?.pcOnly) return null;
 
   return (
-    <Animated.View style={[styles.pcBadge, animatedStyle]}>
-      <Text style={styles.pcBadgeText}>Solo en PC</Text>
+    <Animated.View
+      style={[
+        styles.pcBadge,
+        animatedStyle,
+        {
+          backgroundColor: isDark ? "rgba(234,88,12,0.25)" : "rgba(234,88,12,0.15)",
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.pcBadgeText,
+          { color: isDark ? "#f97316" : "#c2410c" },
+        ]}
+      >
+        Solo en PC
+      </Text>
     </Animated.View>
   );
 }
@@ -330,24 +347,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  label: {
-    fontSize: 11,
-    fontWeight: "500",
-    letterSpacing: 0.1,
-  },
-  labelActive: {
-    fontWeight: "700",
-  },
   pcBadge: {
     marginTop: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    backgroundColor: "rgba(234,88,12,0.2)",
     borderRadius: 8,
   },
   pcBadgeText: {
     fontSize: 11,
-    color: ACTIVE_BG,
     fontWeight: "600",
   },
 });

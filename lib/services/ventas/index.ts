@@ -4,18 +4,37 @@ import {
   addDoc,
   collection,
   doc,
+  DocumentData,
   getDoc,
   getDocs,
-  orderBy,
+  onSnapshot,
   query,
+  QueryDocumentSnapshot,
   Timestamp,
+  Unsubscribe,
   updateDoc,
   where,
 } from 'firebase/firestore';
 
-/**
- * Crear una nueva venta
- */
+function docToVenta(snap: QueryDocumentSnapshot<DocumentData>): Venta {
+  const data = snap.data();
+  return {
+    id: snap.id,
+    ...data,
+    fecha: data.fecha?.toDate(),
+    createdAt: data.createdAt?.toDate(),
+    updatedAt: data.updatedAt?.toDate(),
+  } as Venta;
+}
+
+function sortByFechaDesc(ventas: Venta[]): Venta[] {
+  return ventas.sort((a, b) => {
+    const fa = a.fecha instanceof Date ? a.fecha.getTime() : 0;
+    const fb = b.fecha instanceof Date ? b.fecha.getTime() : 0;
+    return fb - fa;
+  });
+}
+
 export const createVenta = async (ventaData: CreateVentaInput): Promise<string> => {
   try {
     const docRef = await addDoc(collection(db, 'ventas'), {
@@ -34,148 +53,86 @@ export const createVenta = async (ventaData: CreateVentaInput): Promise<string> 
   }
 };
 
-/**
- * Obtener una venta por ID
- */
 export const getVentaById = async (id: string): Promise<Venta | null> => {
   try {
     const docRef = doc(db, 'ventas', id);
     const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      return {
-        id: docSnap.id,
-        ...data,
-        fecha: data.fecha?.toDate(),
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Venta;
-    }
-    return null;
+
+    if (!docSnap.exists()) return null;
+
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      ...data,
+      fecha: data.fecha?.toDate(),
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+    } as Venta;
   } catch (error) {
     console.error('Error al obtener venta:', error);
     throw new Error('No se pudo obtener la venta');
   }
 };
 
-/**
- * Obtener todas las ventas
- */
 export const getAllVentas = async (): Promise<Venta[]> => {
   try {
-    const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        fecha: data.fecha?.toDate(),
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Venta;
-    });
+    const snapshot = await getDocs(collection(db, 'ventas'));
+    return sortByFechaDesc(snapshot.docs.map(docToVenta));
   } catch (error) {
     console.error('Error al obtener ventas:', error);
     throw new Error('No se pudieron obtener las ventas');
   }
 };
 
-/**
- * Obtener ventas por negocio_id
- */
 export const getVentasByNegocio = async (negocio_id: string): Promise<Venta[]> => {
   try {
     const q = query(
       collection(db, 'ventas'),
       where('negocio_id', '==', negocio_id),
-      orderBy('fecha', 'desc')
     );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        fecha: data.fecha?.toDate(),
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Venta;
-    });
+    const snapshot = await getDocs(q);
+    return sortByFechaDesc(snapshot.docs.map(docToVenta));
   } catch (error) {
     console.error('Error al obtener ventas por negocio:', error);
     throw new Error('No se pudieron obtener las ventas');
   }
 };
 
-/**
- * Obtener ventas por sucursal_id
- */
 export const getVentasBySucursal = async (sucursal_id: string): Promise<Venta[]> => {
   try {
     const q = query(
       collection(db, 'ventas'),
       where('sucursal_id', '==', sucursal_id),
-      orderBy('fecha', 'desc')
     );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        fecha: data.fecha?.toDate(),
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Venta;
-    });
+    const snapshot = await getDocs(q);
+    return sortByFechaDesc(snapshot.docs.map(docToVenta));
   } catch (error) {
     console.error('Error al obtener ventas por sucursal:', error);
     throw new Error('No se pudieron obtener las ventas');
   }
 };
 
-/**
- * Obtener ventas por estado
- */
 export const getVentasByEstado = async (
   negocio_id: string,
-  estado: string
+  estado: string,
 ): Promise<Venta[]> => {
   try {
     const q = query(
       collection(db, 'ventas'),
       where('negocio_id', '==', negocio_id),
       where('estado', '==', estado),
-      orderBy('fecha', 'desc')
     );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        fecha: data.fecha?.toDate(),
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Venta;
-    });
+    const snapshot = await getDocs(q);
+    return sortByFechaDesc(snapshot.docs.map(docToVenta));
   } catch (error) {
     console.error('Error al obtener ventas por estado:', error);
     throw new Error('No se pudieron obtener las ventas');
   }
 };
 
-/**
- * Actualizar una venta
- */
 export const updateVenta = async (
   id: string,
-  ventaData: UpdateVentaInput
+  ventaData: UpdateVentaInput,
 ): Promise<void> => {
   try {
     const docRef = doc(db, 'ventas', id);
@@ -188,3 +145,30 @@ export const updateVenta = async (
     throw new Error('No se pudo actualizar la venta');
   }
 };
+
+/**
+ * Listener en tiempo real para ventas de un negocio.
+ * Cada vez que se crea/modifica/elimina una venta, llama al callback con la lista actualizada.
+ */
+export function onVentasByNegocio(
+  negocio_id: string,
+  callback: (ventas: Venta[]) => void,
+  onError?: (error: Error) => void,
+): Unsubscribe {
+  const q = query(
+    collection(db, 'ventas'),
+    where('negocio_id', '==', negocio_id),
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const ventas = sortByFechaDesc(snapshot.docs.map(docToVenta));
+      callback(ventas);
+    },
+    (error) => {
+      console.error('Error en listener de ventas:', error);
+      onError?.(error);
+    },
+  );
+}

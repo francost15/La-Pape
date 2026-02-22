@@ -1,5 +1,6 @@
 import ProductListContent from "@/components/ventas/ProductListContent";
-import React from "react";
+import { notify } from "@/lib/notify";
+import React, { useCallback } from "react";
 import { View } from "react-native";
 
 /**
@@ -7,10 +8,20 @@ import { View } from "react-native";
  * con búsqueda, categorías y lista de productos.
  */
 export default function SidebarProducts() {
+  const showProductAddedToast = useCallback(
+    (productName: string) =>
+      notify.success({ title: `${productName} agregado` }),
+    [],
+  );
+
   return (
     <View className="flex-3 border-r border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50">
       <View className="flex-1 mt-3 min-h-0">
-        <ProductListContent searchContextId="ventas" listKey="desktop" />
+        <ProductListContent
+          searchContextId="ventas"
+          listKey="desktop"
+          onProductAdded={showProductAddedToast}
+        />
       </View>
     </View>
   );

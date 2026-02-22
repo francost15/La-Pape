@@ -7,7 +7,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   Timestamp,
   updateDoc,
@@ -86,11 +85,10 @@ export const getSucursalesByNegocio = async (negocio_id: string): Promise<Sucurs
       collection(db, 'sucursales'),
       where('negocio_id', '==', negocio_id),
       where('activo', '==', true),
-      orderBy('nombre', 'asc')
     );
-    
+
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => {
+    const sucursales = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -99,6 +97,8 @@ export const getSucursalesByNegocio = async (negocio_id: string): Promise<Sucurs
         updatedAt: data.updatedAt?.toDate(),
       } as Sucursal;
     });
+
+    return sucursales.sort((a, b) => a.nombre.localeCompare(b.nombre));
   } catch (error) {
     console.error('Error al obtener sucursales por negocio:', error);
     throw new Error('No se pudieron obtener las sucursales');

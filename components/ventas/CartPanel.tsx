@@ -1,67 +1,149 @@
 import { notify } from "@/lib/notify";
+import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
 import { useCheckoutStore } from "@/store/checkout-store";
+import { useProductosStore } from "@/store/productos-store";
+import { useSessionStore } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import * as Haptics from "expo-haptics";
-import React from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import ConfirmAlert from "../ui/ConfirmAlert";
 import { IconSymbol } from "../ui/icon-symbol";
-import VentaExitosaModal from "./VentaExitosaModal";
+import QuantityStepper from "./QuantityStepper";
+
+const DESKTOP_MIN_WIDTH = 768;
 
 export default function CartPanel() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= DESKTOP_MIN_WIDTH;
   const { items, removeItem, updateQuantity, getTotal, clearCart } =
     useVentasStore();
-  const {
-    confirmVisible,
-    successVenta,
-    openConfirm,
-    closeConfirm,
-    setSuccessVenta,
-    closeSuccess,
-  } = useCheckoutStore();
-  const {
-    deleteConfirmItem,
-    openDeleteConfirm,
-    closeDeleteConfirm,
-  } = useVentasUIStore();
+  const { confirmVisible, processing, openConfirm, closeConfirm, setProcessing, setSuccessVenta } =
+    useCheckoutStore();
+  const { deleteConfirmItem, openDeleteConfirm, closeDeleteConfirm } =
+    useVentasUIStore();
+  const { negocioId, sucursalId, userId } = useSessionStore();
+  const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
   const total = getTotal();
 
-  const handleMinus = (item: (typeof items)[0]) => {
-    if (item.quantity === 1) {
+  const handleClearCartPress = useCallback(() => {
+    if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      openDeleteConfirm({ productId: item.productId, nombre: item.product.nombre });
-    } else {
-      updateQuantity(item.productId, item.quantity - 1);
     }
-  };
+    setClearCartConfirmVisible(true);
+  }, []);
+
+  const handleConfirmClearCart = useCallback(() => {
+    clearCart();
+    setClearCartConfirmVisible(false);
+    notify.info({ title: "Carrito vaciado" });
+  }, [clearCart]);
+
+  const handleCancelClearCart = useCallback(() => {
+    setClearCartConfirmVisible(false);
+  }, []);
+
+  const handleMinus = useCallback(
+    (item: (typeof items)[0]) => {
+      if (item.quantity === 1) {
+        openDeleteConfirm({
+          productId: item.productId,
+          nombre: item.product.nombre,
+        });
+      } else {
+        updateQuantity(item.productId, item.quantity - 1);
+      }
+    },
+    [openDeleteConfirm, updateQuantity],
+  );
 
   const handleConfirmRemove = () => {
     if (deleteConfirmItem) {
       removeItem(deleteConfirmItem.productId);
-      notify.warning({ title: `${deleteConfirmItem.nombre} eliminado del carrito` });
+      notify.warning({
+        title: `${deleteConfirmItem.nombre} eliminado del carrito`,
+      });
       closeDeleteConfirm();
     }
   };
 
-  const handleCompleteVenta = () => {
-    const totalVenta = getTotal();
-    const now = new Date();
-    const id = now.getTime().toString();
-    const fecha = now.toLocaleString("es", {
-      day: "numeric",
-      month: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    clearCart();
-    notify.success({
-      title: "Venta completada",
-      description: `Total: $${totalVenta.toLocaleString()}`,
-    });
-    setSuccessVenta({ id, fecha, total: totalVenta });
+  const handleCompleteVenta = async () => {
+    if (useCheckoutStore.getState().processing) return;
+    setProcessing(true);
+    closeConfirm();
+
+    if (!negocioId || !userId) {
+      notify.error({ title: "No se pudo completar: sesión incompleta" });
+      setProcessing(false);
+      return;
+    }
+    try {
+      const subtotal = getTotal();
+      const result = await completeVentaFlow({
+        items,
+        negocioId,
+        sucursalId: sucursalId ?? '',
+        userId,
+        total: subtotal,
+        subtotal,
+      });
+
+      // Actualizar stock local sin refetch
+      const products = useProductosStore.getState().products;
+      const updated = products.map((p) => {
+        const cartItem = items.find((i) => i.productId === p.id);
+        return cartItem
+          ? { ...p, cantidad: p.cantidad - cartItem.quantity }
+          : p;
+      });
+      useProductosStore.getState().setProducts(updated);
+
+      clearCart();
+
+      const fechaStr = result.fecha.toLocaleString("es", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      const ventaItems = items.map((i) => ({
+        nombre: i.product.nombre,
+        cantidad: i.quantity,
+        precioUnitario: i.unitPrice,
+        totalLinea: i.unitPrice * i.quantity,
+      }));
+
+      notify.success({
+        title: "Venta completada",
+        description: `Total: $${result.total.toLocaleString()}`,
+      });
+      setSuccessVenta({
+        id: result.ventaId,
+        fecha: fechaStr,
+        total: result.total,
+        subtotal,
+        descuento: 0,
+        items: ventaItems,
+      });
+    } catch (err) {
+      console.error("Error al completar venta:", err);
+      notify.error({ title: "Error al registrar la venta" });
+      setProcessing(false);
+      closeConfirm();
+    }
   };
 
   if (items.length === 0) {
@@ -80,15 +162,6 @@ export default function CartPanel() {
             </Text>
           </View>
         </View>
-        {successVenta && (
-          <VentaExitosaModal
-            visible
-            venta={successVenta}
-            onClose={closeSuccess}
-            onDescargarRecibo={() => {}}
-            onEnviarRecibo={() => {}}
-          />
-        )}
       </>
     );
   }
@@ -132,29 +205,11 @@ export default function CartPanel() {
                 ${item.unitPrice.toLocaleString()} × {item.quantity}
               </Text>
             </View>
-            <View className="flex-row items-center shrink-0 gap-1.5">
-              <TouchableOpacity
-                onPress={() => handleMinus(item)}
-                className="w-9 h-9 rounded-full bg-gray-200 dark:bg-neutral-700 items-center justify-center"
-              >
-                <IconSymbol
-                  name="minus.circle.fill"
-                  size={20}
-                  color="#6b7280"
-                />
-              </TouchableOpacity>
-              <Text className="text-base font-semibold text-gray-900 dark:text-white w-7 text-center">
-                {item.quantity}
-              </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  updateQuantity(item.productId, item.quantity + 1)
-                }
-                className="w-9 h-9 rounded-full bg-orange-500 items-center justify-center"
-              >
-                <IconSymbol name="plus.circle.fill" size={20} color="white" />
-              </TouchableOpacity>
-            </View>
+            <QuantityStepper
+              quantity={item.quantity}
+              onMinus={() => handleMinus(item)}
+              onPlus={() => updateQuantity(item.productId, item.quantity + 1)}
+            />
           </View>
         ))}
       </ScrollView>
@@ -162,7 +217,11 @@ export default function CartPanel() {
       <ConfirmAlert
         visible={!!deleteConfirmItem}
         title="Eliminar del carrito"
-        message={deleteConfirmItem ? `¿Quitar "${deleteConfirmItem.nombre}" del carrito?` : ""}
+        message={
+          deleteConfirmItem
+            ? `¿Quitar "${deleteConfirmItem.nombre}" del carrito?`
+            : ""
+        }
         confirmText="Eliminar"
         cancelText="Cancelar"
         onConfirm={handleConfirmRemove}
@@ -181,20 +240,21 @@ export default function CartPanel() {
         danger={false}
       />
 
-      {successVenta && (
-        <VentaExitosaModal
-          visible={!!successVenta}
-          venta={successVenta}
-          onClose={closeSuccess}
-          onDescargarRecibo={() => {}}
-          onEnviarRecibo={() => {}}
-        />
-      )}
+      <ConfirmAlert
+        visible={clearCartConfirmVisible}
+        title="Vaciar carrito"
+        message="¿Estás seguro de vaciar el carrito? Se eliminarán todos los productos."
+        confirmText="Vaciar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmClearCart}
+        onCancel={handleCancelClearCart}
+        danger
+      />
 
-      <View className="px-4 py-3 gap-3 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-        <View className="flex-row justify-between items-center">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">
-            Total:
+      <View className="px-3 pt-3 pb-2 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+        <View className="flex-row justify-between items-center mb-2.5 px-1">
+          <Text className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            Total
           </Text>
           <Text className="text-xl font-bold text-orange-600">
             ${total.toLocaleString()}
@@ -202,14 +262,32 @@ export default function CartPanel() {
         </View>
 
         <TouchableOpacity
-          className="bg-orange-500 rounded-xl py-3.5 items-center justify-center active:opacity-90"
+          className="rounded-2xl py-3.5 bg-orange-500 items-center justify-center active:opacity-90"
           activeOpacity={0.9}
           onPress={openConfirm}
+          disabled={processing}
+          style={processing ? { opacity: 0.6 } : undefined}
         >
-          <Text className="text-base font-semibold text-white">
-            Completar venta
-          </Text>
+          {processing ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text className="text-base font-semibold text-white tracking-tight">
+              Completar venta
+            </Text>
+          )}
         </TouchableOpacity>
+
+        {isDesktop && (
+          <TouchableOpacity
+            className="mt-2 rounded-2xl py-3 flex-row items-center justify-center gap-1.5 border border-orange-500/40 active:opacity-90"
+            activeOpacity={0.85}
+            onPress={handleClearCartPress}
+          >
+            <Text className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+              Limpiar
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

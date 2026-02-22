@@ -1,4 +1,3 @@
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useToastStore } from '@/store/toast-store';
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
@@ -22,29 +21,35 @@ function IslandToast({
   type,
   title,
   description,
+  index,
 }: {
   id: string;
   type: keyof typeof STATUS;
   title: string;
   description?: string;
+  index: number;
 }) {
   const status = STATUS[type];
 
   return (
     <Animated.View
-      entering={FadeInDown.springify().damping(20).stiffness(350)}
+      pointerEvents="none"
+      entering={FadeInDown.springify()
+        .damping(20)
+        .stiffness(350)
+        .delay(index * 60)}
       exiting={FadeOutUp.duration(180)}
-      layout={LinearTransition.springify()}
+      layout={LinearTransition.springify().damping(18).stiffness(120)}
       style={[
         styles.island,
         isWeb
-          ? { boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)' }
+          ? { boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.35)' }
           : {
               shadowColor: '#000',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.4,
-              shadowRadius: 24,
-              elevation: 16,
+              shadowOffset: { width: 0, height: 12 },
+              shadowOpacity: 0.45,
+              shadowRadius: 28,
+              elevation: 20,
             },
       ]}
     >
@@ -52,11 +57,11 @@ function IslandToast({
         <Text style={styles.dotIcon}>{status.icon}</Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={styles.title} numberOfLines={2}>
           {title}
         </Text>
         {description ? (
-          <Text style={styles.desc} numberOfLines={1}>
+          <Text style={styles.desc} numberOfLines={2}>
             {description}
           </Text>
         ) : null}
@@ -73,63 +78,74 @@ export default function NativeToaster() {
 
   return (
     <View
-      style={[styles.container, { top: insets.top + 4 }]}
+      style={[StyleSheet.absoluteFill, styles.overlay]}
       pointerEvents="box-none"
     >
-      {toasts.map((t) => (
-        <IslandToast key={t.id} {...t} />
-      ))}
+      <View
+        style={[styles.container, { top: insets.top + 12 }]}
+        pointerEvents="none"
+      >
+        {[...toasts].reverse().map((t, index) => (
+          <IslandToast key={t.id} {...t} index={index} />
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    backgroundColor: 'transparent',
+    zIndex: 99999,
+  },
   container: {
     position: 'absolute',
     left: 0,
     right: 0,
-    zIndex: 9999,
     alignItems: 'center',
-    gap: 6,
+    gap: 10,
+    paddingHorizontal: 20,
   },
   island: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1c1c1e',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 40,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 48,
     borderCurve: 'continuous',
-    minWidth: 180,
-    maxWidth: 340,
-    gap: 10,
+    minWidth: 260,
+    maxWidth: 420,
+    gap: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   dot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dotIcon: {
     color: '#1c1c1e',
-    fontSize: 12,
+    fontSize: 18,
     fontWeight: '800',
   },
   content: {
     flex: 1,
-    gap: 1,
+    gap: 2,
+    minWidth: 0,
   },
   title: {
     color: '#f5f5f5',
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '600',
     letterSpacing: 0.1,
   },
   desc: {
     color: '#a1a1aa',
-    fontSize: 11,
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

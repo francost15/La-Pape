@@ -48,6 +48,7 @@ export default function VentaExitosaModal({
     <Modal
       visible={visible}
       transparent
+      statusBarTranslucent
       animationType="fade"
       onRequestClose={handleClose}
     >

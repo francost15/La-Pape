@@ -1,5 +1,9 @@
+import LayoutSync from "@/components/LayoutSync";
+import AddProductsSheet from "@/components/ventas/AddProductsSheet";
+import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import NativeToaster from "@/components/NativeToaster";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { initSessionListener } from "@/store/session-store";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,6 +11,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { Platform, View } from "react-native";
 import "react-native-reanimated";
 import "./global.css";
@@ -24,19 +29,27 @@ if (Platform.OS === "web" && typeof window !== "undefined") {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  useEffect(() => {
+    const unsub = initSessionListener();
+    return () => unsub();
+  }, []);
+
   if (Platform.OS === "web" && typeof document !== "undefined") {
     document.title = "La Pape - Sistema de Ventas";
   }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <View style={{ flex: 1 }}>
+      <View className="flex-1">
+        <LayoutSync />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
         </Stack>
+        <AddProductsSheet />
+        <NativeToaster />
+        <VentaExitosaOverlay />
       </View>
-      <NativeToaster />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

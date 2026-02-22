@@ -1,45 +1,77 @@
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Categoria } from "@/interface/categorias";
+import { useLayoutStore } from "@/store/layout-store";
+import * as Haptics from "expo-haptics";
 import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 interface BadgeCategoryProductsProps {
   categories: Categoria[];
-  orderBy?: 'asc' | 'desc';
+  orderBy?: "asc" | "desc";
   selectedCategoryId?: string | null;
   onCategoryPress: (categoryId: string | null) => void;
 }
 
-function BadgeItem({ 
-  category, 
-  isSelected, 
-  onPress 
-}: { 
-  category: Categoria;
+const ACTIVE_BG = "#ea580c";
+
+function BadgeItem({
+  label,
+  isSelected,
+  isDark,
+  onPress,
+}: {
+  label: string;
   isSelected: boolean;
+  isDark: boolean;
   onPress: () => void;
 }) {
+  const bgInactive = isDark ? "#2C2C2E" : "#F2F2F7";
+  const textInactive = isDark ? "#E5E5EA" : "#3A3A3C";
+
   return (
-    <TouchableOpacity 
-      className={`px-4 py-3 rounded-full ${isSelected ? 'bg-orange-600 ' : 'bg-neutral-200 dark:bg-neutral-700 '}`}
-      onPress={onPress}
+    <TouchableOpacity
+      onPress={() => {
+        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress();
+      }}
+      style={{
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 24,
+        backgroundColor: isSelected ? ACTIVE_BG : bgInactive,
+      }}
+      activeOpacity={0.8}
     >
-      <Text className={`${isSelected ? 'text-white' : 'text-black'} text-sm font-medium dark:text-white`}>{category.nombre}</Text>
+      <Text
+        style={{
+          fontSize: 15,
+          fontWeight: isSelected ? "600" : "500",
+          color: isSelected ? "#FFFFFF" : textInactive,
+          letterSpacing: -0.1,
+        }}
+      >
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
 
-export default function BadgeCategoryProducts({ 
-  categories, 
-  orderBy = 'asc',
+export default function BadgeCategoryProducts({
+  categories,
+  orderBy = "asc",
   selectedCategoryId,
-  onCategoryPress
+  onCategoryPress,
 }: BadgeCategoryProductsProps) {
-  const isWeb = Platform.OS === 'web';
-  const sortedCategories = [...categories].sort((a, b) => 
-    orderBy === 'asc' ? a.nombre.localeCompare(b.nombre) : b.nombre.localeCompare(a.nombre)
+  const isMobile = useLayoutStore((s) => s.isMobile);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const sortedCategories = [...categories].sort((a, b) =>
+    orderBy === "asc"
+      ? a.nombre.localeCompare(b.nombre)
+      : b.nombre.localeCompare(a.nombre),
   );
 
-  const handleCategoryPress = (categoryId: string) => {
-    // Si se hace clic en la categoría ya seleccionada, deseleccionarla
+  const handlePress = (categoryId: string | null) => {
     if (selectedCategoryId === categoryId) {
       onCategoryPress(null);
     } else {
@@ -47,35 +79,42 @@ export default function BadgeCategoryProducts({
     }
   };
 
-  // esto es para la vista web
-  if (isWeb) {
+  const allBadges = (
+    <>
+      <BadgeItem
+        label="Todos"
+        isSelected={selectedCategoryId === null}
+        isDark={isDark}
+        onPress={() => onCategoryPress(null)}
+      />
+      {sortedCategories.map((cat) => (
+        <BadgeItem
+          key={cat.id}
+          label={cat.nombre}
+          isSelected={selectedCategoryId === cat.id}
+          isDark={isDark}
+          onPress={() => handlePress(cat.id)}
+        />
+      ))}
+    </>
+  );
+
+  if (isMobile) {
     return (
-      <View className="flex-row flex-wrap gap-2 mb-4">
-        {sortedCategories.map((category) => (
-          <BadgeItem 
-            key={category.id} 
-            category={category}
-            isSelected={selectedCategoryId === category.id}
-            onPress={() => handleCategoryPress(category.id)}
-          />
-        ))}
-      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 10, gap: 8, paddingVertical: 4 }}
+        style={{ marginBottom: 16 }}
+      >
+        {allBadges}
+      </ScrollView>
     );
   }
 
-  // esto es para la vista mobile
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12 }}>
-      <View className="flex-row gap-4 mb-4">
-        {sortedCategories.map((category) => (
-          <BadgeItem 
-            key={category.id} 
-            category={category}
-            isSelected={selectedCategoryId === category.id}
-            onPress={() => handleCategoryPress(category.id)}
-          />
-        ))}
-      </View>
-    </ScrollView>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 8, paddingVertical: 4, marginBottom: 16 }}>
+      {allBadges}
+    </View>
   );
 }

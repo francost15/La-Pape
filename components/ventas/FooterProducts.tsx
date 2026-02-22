@@ -1,72 +1,22 @@
-import ProductListContent from "@/components/ventas/ProductListContent";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { notify } from "@/lib/notify";
-import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import * as Haptics from "expo-haptics";
-import React, { useCallback, useEffect, useRef } from "react";
-import {
-  Animated,
-  Keyboard,
-  Modal,
-  PanResponder,
-  Platform,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import React, { useCallback } from "react";
+import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const SHEET_HEIGHT_PERCENT = 0.72;
-const DISMISS_THRESHOLD = 80;
-
 /**
- * Vista de productos para móvil: FAB "Agregar productos" + sheet modal
- * con búsqueda, categorías y lista de productos.
+ * Vista de productos para móvil: FAB "Agregar productos".
+ * El sheet se renderiza en AddProductsSheet (root layout) para que
+ * las notificaciones queden encima sin bloquear interacción.
  */
 export default function FooterProducts() {
-  const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
-  const itemCount = useVentasStore((s) => s.getItemCount());
 
-  const sheetBg = colorScheme === "dark" ? "#171717" : "#f3f4f6";
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const openSheet = useVentasUIStore((s) => s.openSheet);
-  const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-  const slideAnim = useRef(new Animated.Value(height)).current;
-  const dragOffsetRef = useRef(0);
-
-  const baseSheetHeight = height * SHEET_HEIGHT_PERCENT;
-  const spaceAboveKeyboard = height - insets.top - keyboardHeight;
-  const sheetHeight =
-    keyboardHeight > 0
-      ? Math.min(baseSheetHeight, spaceAboveKeyboard - 24)
-      : baseSheetHeight;
-
-  const showProductAddedToast = useCallback(
-    (productName: string) =>
-      notify.success({ title: `${productName} agregado` }),
-    []
-  );
-
-  const closeSheet = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Animated.timing(slideAnim, {
-      toValue: height,
-      duration: 250,
-      useNativeDriver: Platform.OS !== "web",
-    }).start(() => closeSheetStore());
-  }, [height, slideAnim, closeSheetStore]);
-
-  const closeSheetRef = useRef(closeSheet);
-  closeSheetRef.current = closeSheet;
 
   const handleOpenSheet = useCallback(() => {
     if (Platform.OS !== "web") {
@@ -75,213 +25,64 @@ export default function FooterProducts() {
     openSheet();
   }, [openSheet]);
 
-  useEffect(() => {
-    if (sheetVisible) {
-      slideAnim.setValue(height);
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        tension: 65,
-        friction: 12,
-        useNativeDriver: Platform.OS !== "web",
-      }).start();
-    }
-  }, [sheetVisible, slideAnim, height]);
+  const TAB_BAR_CLEARANCE = 96 + insets.bottom;
+  const isDark = (colorScheme ?? "light") === "dark";
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => setKeyboardHeight(e.endCoordinates.height)
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardHeight(0)
-    );
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
-      onPanResponderGrant: () => {
-        slideAnim.stopAnimation((v) => {
-          dragOffsetRef.current = v;
-        });
-      },
-      onPanResponderMove: (_, gestureState) => {
-        const newY = Math.max(0, dragOffsetRef.current + gestureState.dy);
-        slideAnim.setValue(newY);
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > DISMISS_THRESHOLD || gestureState.vy > 0.5) {
-          closeSheetRef.current();
-        } else {
-          Animated.spring(slideAnim, {
-            toValue: 0,
-            tension: 65,
-            friction: 12,
-            useNativeDriver: Platform.OS !== "web",
-          }).start();
-        }
-      },
-    })
-  ).current;
-
-  const TAB_BAR_CLEARANCE = 90 + insets.bottom;
+  const fabBg = isDark ? "rgba(44,44,46,0.98)" : "rgba(255,255,255,0.98)";
+  const fabTextColor = isDark ? "#FFFFFF" : "#1D1D1F";
+  const fabBorderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const fabShadow = isDark
+    ? "0 2px 12px rgba(0,0,0,0.35)"
+    : "0 2px 12px rgba(0,0,0,0.1)";
 
   return (
     <>
       {!sheetVisible && (
         <Pressable
           onPress={handleOpenSheet}
-          style={{ bottom: TAB_BAR_CLEARANCE }}
-          className="absolute left-0 right-0 z-20 mx-4 rounded-2xl bg-orange-500 shadow-lg shadow-orange-900/30 flex-row items-center justify-between px-4 py-3"
+          style={{
+            position: "absolute",
+            bottom: TAB_BAR_CLEARANCE,
+            left: 12,
+            right: 12,
+            zIndex: 20,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: fabBg,
+            borderWidth: 1,
+            borderColor: fabBorderColor,
+            borderRadius: 14,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            ...(Platform.OS === "web"
+              ? { boxShadow: fabShadow }
+              : {
+                  shadowColor: isDark ? "#000" : "#1c1917",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: isDark ? 0.35 : 0.12,
+                  shadowRadius: 10,
+                  elevation: 8,
+                }),
+          }}
         >
-          <View className="flex-row items-center gap-2.5">
-            <View className="w-8 h-8 rounded-full bg-white/20 items-center justify-center">
-              <IconSymbol name="bag.fill" size={18} color="white" />
-            </View>
-            <Text className="text-white font-semibold text-sm">
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Text
+              style={{
+                color: fabTextColor,
+                fontSize: 15,
+                fontWeight: "600",
+                letterSpacing: 0,
+              }}
+            >
               Agregar productos
             </Text>
           </View>
-          <View className="flex-row items-center gap-2">
-            {itemCount > 0 ? (
-              <View className="bg-white rounded-full px-2.5 py-0.5">
-                <Text className="text-orange-600 font-bold text-xs">
-                  {itemCount} en carrito
-                </Text>
-              </View>
-            ) : null}
-            <View className="w-7 h-7 rounded-full bg-white/20 items-center justify-center">
-              <IconSymbol name="chevron.up" size={16} color="white" />
-            </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <IconSymbol name="chevron.up" size={18} color={fabTextColor} />
           </View>
         </Pressable>
       )}
-
-      <Modal
-        visible={sheetVisible}
-        transparent
-        animationType="none"
-        onRequestClose={closeSheet}
-      >
-        <View
-          style={{
-            flex: 1,
-            paddingTop: insets.top,
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <Pressable
-            style={{ flex: 1 }}
-            onPress={() => {
-              Keyboard.dismiss();
-              closeSheet();
-            }}
-          />
-          <Animated.View
-            {...panResponder.panHandlers}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: sheetHeight,
-              backgroundColor: sheetBg,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              overflow: "hidden",
-              transform: [{ translateY: slideAnim }],
-              ...(Platform.OS === "web"
-                ? { boxShadow: "0px -4px 12px 0px rgba(0,0,0,0.15)" }
-                : {
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: -4 },
-                    shadowOpacity: 0.15,
-                    shadowRadius: 12,
-                    elevation: 16,
-                  }),
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <View
-                style={{
-                  paddingTop: 12,
-                  paddingBottom: 12,
-                  paddingHorizontal: 16,
-                }}
-              >
-                <View
-                  style={{
-                    width: 48,
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor:
-                      colorScheme === "dark" ? "#525252" : "#d1d5db",
-                    alignSelf: "center",
-                    marginBottom: 12,
-                  }}
-                />
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: colorScheme === "dark" ? "#fafafa" : "#111827",
-                    }}
-                  >
-                    Agregar productos
-                  </Text>
-                  <TouchableOpacity
-                    onPress={closeSheet}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      backgroundColor:
-                        colorScheme === "dark" ? "#404040" : "#e5e7eb",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <IconSymbol
-                      name="xmark"
-                      size={18}
-                      color={colorScheme === "dark" ? "#a3a3a3" : "#525252"}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={{ flex: 1, minHeight: 0, paddingHorizontal: 12 }}>
-                <ProductListContent
-                  searchContextId="ventas"
-                  onProductAdded={showProductAddedToast}
-                  searchSize="large"
-                  listKey="mobile"
-                  contentContainerStyle={{
-                    paddingBottom: 100 + insets.bottom,
-                  }}
-                  keyboardDismissMode="on-drag"
-                  keyboardShouldPersistTaps="handled"
-                />
-              </View>
-            </View>
-
-          </Animated.View>
-        </View>
-      </Modal>
     </>
   );
 }
