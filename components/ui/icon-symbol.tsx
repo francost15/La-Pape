@@ -16,6 +16,7 @@ const MAPPING = {
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
+  'chevron.left': 'chevron-left',
   'chevron.right': 'chevron-right',
   'cart.fill': 'shopping-cart',
   'bag.fill': 'shopping-bag',
@@ -41,8 +42,21 @@ const MAPPING = {
   'checkmark.circle.fill': 'check-circle',
   'square.and.arrow.down': 'file-download',
   'eye.fill': 'visibility',
+  'eye.slash.fill': 'visibility-off',
+  'person.fill': 'person',
+  'envelope.fill': 'email',
+  'building.2.fill': 'business',
   'arrow.uturn.backward': 'replay',
   'dollarsign.circle.fill': 'attach-money',
+  'gearshape.fill': 'settings',
+  'person.badge.plus': 'person-add',
+  'person.2.fill': 'group',
+  'checkmark.seal.fill': 'verified',
+  'xmark.circle.fill': 'cancel',
+  // Resumen / charts
+  'chart.line.uptrend.xyaxis': 'trending-up',
+  'chart.pie.fill': 'pie-chart',
+  'chart.bar.fill': 'bar-chart',
 } as const satisfies IconMapping;
 
 /**

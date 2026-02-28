@@ -40,6 +40,7 @@ const ICON_MAP: Record<string, IconSymbolName> = {
 
 interface TabConfig {
   routeName: string;
+  routeKey: string;
   label: string;
   icon: IconSymbolName;
   pcOnly?: boolean;
@@ -80,6 +81,7 @@ export function DynamicIslandTabBar({
         );
         return {
           routeName: route.name,
+          routeKey: route.key,
           label: typeof title === "string" ? title : route.name,
           icon: ICON_MAP[route.name] ?? "doc.text",
           pcOnly,
@@ -87,6 +89,8 @@ export function DynamicIslandTabBar({
       }),
     [state.routes, descriptors],
   );
+
+  const activeIndex = state.index;
 
   const islandWidth = Math.min(width - 32, isWeb ? 520 : 400);
 
@@ -129,16 +133,16 @@ export function DynamicIslandTabBar({
       >
         <View style={styles.tabsRowWrapper}>
           <SlidingIndicator
-            activeIndex={state.index}
+            activeIndex={activeIndex}
             tabCount={tabs.length}
             islandWidth={islandWidth}
           />
           <View style={styles.tabsRow}>
             {tabs.map((tab, index) => (
               <TabItem
-                key={tab.routeName}
+                key={tab.routeKey}
                 tab={tab}
-                isFocused={state.index === index}
+                isFocused={activeIndex === index}
                 isCompact={isCompact}
                 inactiveColor={inactiveColor}
                 onPress={() => {
@@ -147,20 +151,17 @@ export function DynamicIslandTabBar({
                   }
                   const event = navigation.emit({
                     type: "tabPress",
-                    target: state.routes[index].key,
+                    target: tab.routeKey,
                     canPreventDefault: true,
                   });
                   if (!event.defaultPrevented) {
-                    navigation.navigate(
-                      state.routes[index].name,
-                      state.routes[index].params,
-                    );
+                    navigation.navigate(tab.routeName);
                   }
                 }}
                 onLongPress={() => {
                   navigation.emit({
                     type: "tabLongPress",
-                    target: state.routes[index].key,
+                    target: tab.routeKey,
                   });
                 }}
               />
@@ -168,10 +169,10 @@ export function DynamicIslandTabBar({
           </View>
         </View>
       </View>
-      {!isWeb && state.routes[state.index] ? (
+      {!isWeb && tabs[activeIndex] ? (
         <PcOnlyBadge
-          tab={tabs[state.index]}
-          visible={tabs[state.index]?.pcOnly === true}
+          tab={tabs[activeIndex]}
+          visible={tabs[activeIndex]?.pcOnly === true}
           isDark={isDark}
         />
       ) : null}

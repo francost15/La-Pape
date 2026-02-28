@@ -26,6 +26,14 @@ export interface CategoriaVenta {
   total: number;
 }
 
+export interface VentasPorUsuario {
+  usuario_id: string;
+  nombre: string;
+  total: number;
+  transacciones: number;
+  foto?: string;
+}
+
 interface ResumenState {
   ventas: Venta[];
   detallesMap: Record<string, VentaDetalle[]>;
@@ -238,5 +246,45 @@ export function selectCategorias(
 
   return Array.from(catMap.entries())
     .map(([nombre, total]) => ({ nombre, total }))
+    .sort((a, b) => b.total - a.total);
+}
+
+export function selectProductosBajoStock(products: Product[]): Product[] {
+  return products
+    .filter((p) => p.cantidad <= (p.stock_minimo ?? 0))
+    .sort((a, b) => a.cantidad - b.cantidad)
+    .slice(0, 8);
+}
+
+export function selectVentasPorUsuario(
+  ventasFiltradas: Venta[],
+  usuariosMap: Record<string, { nombre: string; foto?: string }>,
+): VentasPorUsuario[] {
+  const pagadas = ventasFiltradas.filter((v) => v.estado === "PAGADA");
+  const map = new Map<
+    string,
+    { total: number; transacciones: number }
+  >();
+
+  for (const v of pagadas) {
+    const uid = v.usuario_id;
+    const existing = map.get(uid);
+    const nombre = usuariosMap[uid]?.nombre ?? "Vendedor";
+    if (existing) {
+      existing.total += v.total;
+      existing.transacciones += 1;
+    } else {
+      map.set(uid, { total: v.total, transacciones: 1 });
+    }
+  }
+
+  return Array.from(map.entries())
+    .map(([usuario_id, data]) => ({
+      usuario_id,
+      nombre: usuariosMap[usuario_id]?.nombre ?? "Vendedor",
+      total: data.total,
+      transacciones: data.transacciones,
+      foto: usuariosMap[usuario_id]?.foto,
+    }))
     .sort((a, b) => b.total - a.total);
 }

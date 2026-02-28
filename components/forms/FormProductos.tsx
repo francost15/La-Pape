@@ -15,6 +15,8 @@ interface FormProductosProps {
   errors: FieldErrors<CreateProductFormData>;
   categories: Categoria[];
   isWeb?: boolean;
+  /** Cuando true, no se renderiza el campo imagen (para layouts que lo ubican aparte) */
+  hideImage?: boolean;
 }
 
 export default function FormProductos({
@@ -22,16 +24,17 @@ export default function FormProductos({
   errors,
   categories,
   isWeb = false,
+  hideImage = false,
 }: FormProductosProps) {
   return (
-    <View className="space-y-4">
+    <View className="gap-4">
       <CampoNombre control={control} errors={errors} />
       <CampoCategoria control={control} errors={errors} categories={categories} isWeb={isWeb} />
       <CampoPrecios control={control} errors={errors} />
       <CampoCostos control={control} errors={errors} />
       <CampoMarca control={control} errors={errors} />
       <CampoDescripcion control={control} errors={errors} />
-      <CampoImagen control={control} errors={errors} isWeb={isWeb} />
+      {hideImage ? null : <CampoImagen control={control} errors={errors} isWeb={isWeb} />}
     </View>
   );
 }

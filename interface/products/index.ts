@@ -50,6 +50,13 @@ export interface CardProductsProps {
   product: Product;
   onPress?: () => void;
   className?: string;
+  /** Variante "ranking": muestra cantidad vendida y total en vez de stock/precio. */
+  variant?: "default" | "ranking" | "stock";
+  rankingData?: { cantidad: number; total: number };
+  /** Índice en el ranking (1-based), se muestra como badge cuando variant=ranking */
+  rank?: number;
+  /** Datos para variante stock: cantidad actual y stock mínimo (se usa product si no se pasa) */
+  stockData?: { cantidad: number; stockMinimo: number };
 }
 
 // Mantener compatibilidad temporal

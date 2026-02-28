@@ -3,15 +3,18 @@ import { CreateProductFormData } from '@/lib';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { Alert, Image, Modal, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Alert, Modal, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface CampoImagenProps {
   control: Control<CreateProductFormData>;
   errors: FieldErrors<CreateProductFormData>;
   isWeb?: boolean;
+  /** Tamaño fijo del preview en layout tipo detalle (ej. 420x420 desktop) */
+  previewSize?: { width: number; height: number };
 }
 
-export default function CampoImagen({ control, errors, isWeb = false }: CampoImagenProps) {
+export default function CampoImagen({ control, errors, isWeb = false, previewSize }: CampoImagenProps) {
   const [showImageModal, setShowImageModal] = useState(false);
 
   const requestCameraPermission = async () => {
@@ -102,23 +105,25 @@ export default function CampoImagen({ control, errors, isWeb = false }: CampoIma
               </TouchableOpacity>
             )}
 
-            {value && (
+            {value ? (
               <View className="mb-3">
                 <Image
                   source={{ uri: value }}
-                  className="w-full h-48 rounded-lg"
-                  resizeMode="cover"
+                  contentFit="contain"
+                  style={
+                    previewSize
+                      ? { width: previewSize.width, height: previewSize.height, borderRadius: 8 }
+                      : { width: '100%', height: 192, borderRadius: 8 }
+                  }
                 />
                 <TouchableOpacity
-                  className="mt-2 bg-red-500 px-4 py-2 rounded-lg"
-                  onPress={() => {
-                    onChange('');
-                  }}
+                  className="mt-2 py-2"
+                  onPress={() => onChange('')}
                 >
-                  <Text className="text-white text-center font-semibold">Eliminar Imagen</Text>
+                  <Text className="text-red-600 dark:text-red-400 text-sm font-medium">Quitar imagen</Text>
                 </TouchableOpacity>
               </View>
-            )}
+            ) : null}
 
             <TextInput
               className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 rounded-lg px-4 py-3 text-black dark:text-white"

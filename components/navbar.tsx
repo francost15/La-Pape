@@ -1,3 +1,4 @@
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Usuario } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { getUsuarioById } from "@/lib/services/usuarios";
@@ -76,6 +77,7 @@ export default function Navbar() {
 
       {user && (
         <>
+          {/* Avatar (abre mini menú de usuario) */}
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
             activeOpacity={0.8}
@@ -95,7 +97,7 @@ export default function Navbar() {
                 style={{ width: 60, height: 60 }}
               >
                 <Text
-                  className="text-lg font-bold text-gray-700 dark:text-gray-200"
+                  className="font-bold text-gray-700 dark:text-gray-200"
                   style={{ fontSize: 18 }}
                 >
                   {inicial}
@@ -104,6 +106,7 @@ export default function Navbar() {
             )}
           </TouchableOpacity>
 
+          {/* Mini menú de usuario */}
           <Modal
             visible={menuVisible}
             transparent
@@ -111,7 +114,6 @@ export default function Navbar() {
             onRequestClose={() => setMenuVisible(false)}
           >
             <Pressable
-              className="flex-1 justify-end"
               style={{
                 flex: 1,
                 backgroundColor: "rgba(0,0,0,0.5)",
@@ -159,6 +161,23 @@ export default function Navbar() {
                     </Text>
                   ) : null}
                 </View>
+
+                {/* Ir a Configuración */}
+                <TouchableOpacity
+                  onPress={() => {
+                    setMenuVisible(false);
+                    router.push("/configuracion");
+                  }}
+                  className="flex-row items-center gap-3 py-3 px-4 rounded-xl bg-gray-200 dark:bg-neutral-700 mb-3 active:opacity-80"
+                >
+                  <IconSymbol name="gearshape.fill" size={18} color="#6b7280" />
+                  <Text className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Configuración
+                  </Text>
+                  <View className="flex-1" />
+                  <IconSymbol name="chevron.right" size={14} color="#9ca3af" />
+                </TouchableOpacity>
+
                 <TouchableOpacity
                   onPress={handleSignOut}
                   className="rounded-xl bg-red-100 py-3 dark:bg-red-900/30"

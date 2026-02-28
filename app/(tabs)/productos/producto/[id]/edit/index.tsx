@@ -1,14 +1,18 @@
+import CampoImagen from '@/components/forms/products/CampoImagen';
 import FormProductos from '@/components/forms/FormProductos';
 import { auth, CreateProductFormData, createProductSchema, getProductosScreenData } from '@/lib';
 import { getCategoriasByNegocio } from '@/lib/services/categorias';
 import { notify } from '@/lib/notify';
+import type { UpdateProductInput } from '@/interface';
 import { getProductById, updateProduct } from '@/lib/services/productos';
 import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
 import { useProductosStore } from '@/store/productos-store';
+import { useSessionStore } from '@/store/session-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import {
   ActivityIndicator,
   Alert,
@@ -17,17 +21,35 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  useWindowDimensions,
+  View,
 } from 'react-native';
 
 export default function EditProduct() {
   const isWeb = Platform.OS === 'web';
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
+  const tabBarHeight = useBottomTabBarHeight();
+
   const { id, product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
   const router = useRouter();
-  const { negocioId, categories, setNegocioId, setCategories, setProducts, currentProduct, setCurrentProduct } = useProductosStore();
+  // negocioId viene del sessionStore (ya hidratado en login).
+  // Solo se hace fallback a Firestore si por alguna razón no está disponible aún.
+  const sessionNegocioId = useSessionStore((s) => s.negocioId);
+
+  const {
+    negocioId: storeNegocioId,
+    categories,
+    setNegocioId,
+    setCategories,
+    setProducts,
+    currentProduct,
+    setCurrentProduct,
+  } = useProductosStore();
+
+  const negocioId = sessionNegocioId ?? storeNegocioId;
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
-
 
   const {
     control,
@@ -55,78 +77,58 @@ export default function EditProduct() {
       try {
         const user = auth.currentUser;
         if (!user) {
-          // Usar setTimeout para asegurar que el router esté montado
-          setTimeout(() => {
-            router.replace('/');
-          }, 100);
+          setTimeout(() => router.replace('/'), 100);
           return;
         }
 
-        // Cargar producto desde parámetros, store o Firestore
         let product = null;
-        
-        // Primero intentar desde parámetros
+
         if (productParam) {
           try {
-            // Intentar decodificar primero (para URLs codificadas)
             product = JSON.parse(decodeURIComponent(productParam));
           } catch {
-            // Si falla, intentar sin decode
             try {
               product = JSON.parse(productParam);
             } catch {
-              // Continuar con otros métodos
+              /* continuar */
             }
           }
         }
-        
-        // Si no está en parámetros, intentar desde el store
+
         if (!product && currentProduct && currentProduct.id === id) {
           product = currentProduct;
         }
-        
-        // Si aún no está, cargar desde Firestore
+
         if (!product && id) {
           product = await getProductById(id);
         }
 
         if (!product) {
           Alert.alert('Error', 'Producto no encontrado', [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Usar setTimeout para asegurar que el router esté montado
-                setTimeout(() => {
-                  router.back();
-                }, 100);
-              },
-            },
+            { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
           ]);
           return;
         }
 
-        // Cargar negocio y categorías
-        const currentNegocioId = await getNegocioIdByUsuario(user.uid, user.email || '');
+        // Usar negocioId del sessionStore si está disponible — evita un round-trip a Firestore
+        const currentNegocioId =
+          negocioId ?? (await getNegocioIdByUsuario(user.uid, user.email || ''));
+
         if (!currentNegocioId) {
           Alert.alert('Error', 'No tienes un negocio asignado', [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Usar setTimeout para asegurar que el router esté montado
-                setTimeout(() => {
-                  router.back();
-                }, 100);
-              },
-            },
+            { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
           ]);
           return;
         }
 
-        setNegocioId(currentNegocioId);
-        const categoriasData = await getCategoriasByNegocio(currentNegocioId);
-        setCategories(categoriasData);
+        if (!negocioId) setNegocioId(currentNegocioId);
 
-        // Resetear el formulario con los datos del producto
+        // Cargar categorías solo si el store no las tiene (ya cargadas desde la lista de productos)
+        if (categories.length === 0) {
+          const categoriasData = await getCategoriasByNegocio(currentNegocioId);
+          setCategories(categoriasData);
+        }
+
         reset({
           nombre: product.nombre || '',
           categoria_id: product.categoria_id || '',
@@ -137,19 +139,12 @@ export default function EditProduct() {
           imagen: product.imagen || '',
           descripcion: product.descripcion || '',
           marca: product.marca || '',
-          stock_minimo: product.stock_minimo || 0,
+          stock_minimo: product.stock_minimo ?? 0,
         });
-      } catch (error: any) {
-        Alert.alert('Error', error?.message || 'Error al cargar los datos', [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Usar setTimeout para asegurar que el router esté montado
-              setTimeout(() => {
-                router.back();
-              }, 100);
-            },
-          },
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Error al cargar los datos';
+        Alert.alert('Error', msg, [
+          { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
         ]);
       } finally {
         setLoadingData(false);
@@ -157,15 +152,15 @@ export default function EditProduct() {
     };
 
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  // negocioId y categories se leen del store pero no son deps de init (no deben retriggerar)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, productParam, reset, router]);
 
   const onSubmit = async (data: CreateProductFormData) => {
     if (!id) {
       Alert.alert('Error', 'Id del producto no encontrado');
       return;
     }
-
     if (!negocioId) {
       Alert.alert('Error', 'No tienes un negocio asignado');
       return;
@@ -173,41 +168,35 @@ export default function EditProduct() {
 
     try {
       setLoading(true);
-      // Preparar los datos para actualizar, convirtiendo cadenas vacías a null
-      const updateData: any = {
+      const updateData = {
         nombre: data.nombre,
         categoria_id: data.categoria_id,
         precio_venta: data.precio_venta,
         precio_mayoreo: data.precio_mayoreo,
         costo_promedio: data.costo_promedio,
         cantidad: data.cantidad,
-      };
-
-      // Campos opcionales: si están vacíos, enviar null para eliminarlos
-      updateData.imagen = data.imagen && data.imagen.trim() !== '' ? data.imagen : null;
-      updateData.descripcion = data.descripcion && data.descripcion.trim() !== '' ? data.descripcion : null;
-      updateData.marca = data.marca && data.marca.trim() !== '' ? data.marca : null;
-      updateData.stock_minimo = data.stock_minimo !== undefined && data.stock_minimo !== null ? data.stock_minimo : null;
+        imagen: data.imagen?.trim() ? data.imagen : null,
+        descripcion: data.descripcion?.trim() ? data.descripcion : null,
+        marca: data.marca?.trim() ? data.marca : null,
+        stock_minimo: data.stock_minimo != null ? data.stock_minimo : null,
+      } as UpdateProductInput;
 
       await updateProduct(id, updateData);
 
-      // Refrescar los productos en el store
       const user = auth.currentUser;
       if (user) {
         const storeData = await getProductosScreenData(user.uid, user.email || '');
         setProducts(storeData.products);
       }
 
-      // Actualizar el producto en el store (siempre actualizar, no solo si ya existe)
       const updatedProduct = await getProductById(id);
-      if (updatedProduct) {
-        setCurrentProduct(updatedProduct);
-      }
+      if (updatedProduct) setCurrentProduct(updatedProduct);
 
       notify.success({ title: 'Producto actualizado' });
       router.back();
-    } catch (error: any) {
-      notify.error({ title: 'Error', description: error?.message || 'No se pudo actualizar el producto' });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'No se pudo actualizar el producto';
+      notify.error({ title: 'Error', description: msg });
     } finally {
       setLoading(false);
     }
@@ -215,58 +204,104 @@ export default function EditProduct() {
 
   if (loadingData) {
     return (
-      <View className="flex-1 bg-gray-100 dark:bg-neutral-900 justify-center items-center">
+      <View className="flex-1 bg-gray-50 dark:bg-neutral-900 justify-center items-center">
         <ActivityIndicator size="large" color="#ea580c" />
         <Text className="text-gray-500 dark:text-gray-400 mt-4">Cargando...</Text>
       </View>
     );
   }
 
+  const actionButtons = (
+    <View className="flex-row gap-2">
+      <TouchableOpacity
+        className="h-11 px-4 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 flex-row items-center justify-center active:opacity-80"
+        onPress={() => router.back()}
+        disabled={loading}
+      >
+        <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium">Cancelar</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        className="flex-1 h-11 bg-orange-600 rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
+        onPress={handleSubmit(onSubmit)}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="white" size="small" />
+        ) : (
+          <Text className="text-white font-semibold text-[15px]">Guardar Cambios</Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (isDesktop) {
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1 bg-gray-50 dark:bg-neutral-900"
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ alignItems: 'center', padding: 40 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={{ width: '100%', maxWidth: 1100 }} className="flex-row gap-10 items-start">
+            {/* Columna izquierda: imagen — mismo estilo que vista detalle */}
+            <View
+              className="rounded-3xl overflow-hidden bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shrink-0"
+              style={{ width: 420 }}
+            >
+              <CampoImagen
+                control={control}
+                errors={errors}
+                isWeb={isWeb}
+                previewSize={{ width: 420, height: 420 }}
+              />
+            </View>
+
+            {/* Columna derecha: formulario */}
+            <View className="flex-1 gap-4">
+              <FormProductos
+                control={control}
+                errors={errors}
+                categories={categories}
+                isWeb={isWeb}
+                hideImage
+              />
+              {actionButtons}
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-gray-100 dark:bg-neutral-900"
+      className="flex-1 bg-gray-50 dark:bg-neutral-900"
     >
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: isWeb ? 24 : 16 }}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-2xl font-bold text-black dark:text-white mb-2">
-          Editar Producto
-        </Text>
-
         <FormProductos
           control={control}
           errors={errors}
           categories={categories}
           isWeb={isWeb}
         />
-
-        {/* Botones */}
-        <View className={`flex-row gap-3 mt-6 ${isWeb ? 'justify-end' : ''}`}>
-          <TouchableOpacity
-            className="flex-1 bg-gray-300 dark:bg-neutral-700 px-6 py-3 rounded-lg"
-            onPress={() => router.back()}
-            disabled={loading}
-          >
-            <Text className="text-center text-gray-700 dark:text-gray-300 font-semibold">
-              Cancelar
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 bg-orange-600 px-6 py-3 rounded-lg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-center text-white font-semibold">Guardar Cambios</Text>
-            )}
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      <View
+        className="px-4 py-3 bg-gray-50 dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-800"
+        style={{ paddingBottom: 12 + tabBarHeight }}
+      >
+        {actionButtons}
+      </View>
     </KeyboardAvoidingView>
   );
 }

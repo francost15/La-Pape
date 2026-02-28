@@ -8,7 +8,10 @@ import { onVentasByNegocio } from "@/lib/services/ventas";
 import { refundVentaFlow } from "@/lib/services/ventas/refund-venta";
 import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
 import { notify } from "@/lib/notify";
-import { useFiltrosStore } from "@/store/filtros-store";
+import {
+  filterVentasByPeriodo,
+  useFiltrosStore,
+} from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import * as Haptics from "expo-haptics";
@@ -358,45 +361,11 @@ export default function HistoryScreen() {
     };
   }, [sessionReady, negocioId]);
 
-  const ventasFiltradas = useMemo(() => {
-    const ahora = new Date();
-    ahora.setHours(23, 59, 59, 999);
-    let inicio: Date;
-    let fin: Date = ahora;
-
-    switch (periodo) {
-      case "semana":
-        inicio = new Date(ahora);
-        inicio.setDate(inicio.getDate() - 6);
-        inicio.setHours(0, 0, 0, 0);
-        break;
-      case "mes":
-        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-        inicio.setHours(0, 0, 0, 0);
-        break;
-      case "año":
-        inicio = new Date(ahora.getFullYear(), 0, 1);
-        inicio.setHours(0, 0, 0, 0);
-        break;
-      case "personalizado":
-        if (rangoPersonalizado.inicio && rangoPersonalizado.fin) {
-          inicio = new Date(rangoPersonalizado.inicio);
-          inicio.setHours(0, 0, 0, 0);
-          fin = new Date(rangoPersonalizado.fin);
-          fin.setHours(23, 59, 59, 999);
-        } else {
-          return [];
-        }
-        break;
-      default:
-        inicio = new Date(0);
-    }
-
-    return ventas.filter((v) => {
-      const f = v.fecha instanceof Date ? v.fecha : new Date(v.fecha);
-      return f >= inicio && f <= fin;
-    });
-  }, [ventas, periodo, rangoPersonalizado]);
+  const ventasFiltradas = useMemo(
+    () =>
+      filterVentasByPeriodo(ventas, periodo, rangoPersonalizado),
+    [ventas, periodo, rangoPersonalizado],
+  );
 
   const ventasAgrupadas = useMemo(
     () => groupVentasByDate(ventasFiltradas, detallesMap),

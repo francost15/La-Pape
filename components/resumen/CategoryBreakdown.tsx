@@ -1,20 +1,23 @@
+import EmptyState from "@/components/resumen/shared/EmptyState";
+import SectionCard from "@/components/resumen/shared/SectionCard";
+import { formatCurrency } from "@/lib/utils/format";
 import type { CategoriaVenta } from "@/store/resumen-store";
 import React from "react";
-import { Platform, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
+// Paleta de colores consistente con el diseño del resto de la app
 const COLORS = [
   "#3b82f6", "#ea580c", "#10b981", "#8b5cf6",
   "#f59e0b", "#ef4444", "#ec4899", "#14b8a6",
 ];
 
-function formatCurrency(value: number): string {
-  return `$${value.toLocaleString("es-CL", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+// ─── Donut Chart ──────────────────────────────────────────────────────────────
 
+/**
+ * Renderiza un donut chart SVG construyendo los paths manualmente.
+ * Se usa SVG nativo para compatibilidad con Expo (web + nativo).
+ */
 function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   const total = data.reduce((s, d) => s + d.total, 0);
   if (total === 0) return null;
@@ -27,8 +30,7 @@ function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   let currentAngle = -90;
 
   const slices = data.map((d, i) => {
-    const pct = d.total / total;
-    const angle = pct * 360;
+    const angle = (d.total / total) * 360;
     const start = currentAngle;
     const end = currentAngle + angle;
     currentAngle += angle;
@@ -67,35 +69,48 @@ function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   );
 }
 
-function LegendItem({
-  color,
-  label,
-  value,
-  percentage,
-}: {
+// ─── Legend Item ──────────────────────────────────────────────────────────────
+
+interface LegendItemProps {
   color: string;
   label: string;
   value: number;
   percentage: number;
-}) {
+}
+
+/**
+ * Fila de leyenda con barra de progreso horizontal.
+ * La barra da un escaneo visual rápido de la distribución sin leer los números.
+ */
+function LegendItem({ color, label, value, percentage }: LegendItemProps) {
   return (
-    <View className="flex-row items-center gap-2.5 py-1.5">
-      <View className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-      <Text
-        className="text-sm text-gray-700 dark:text-gray-300 flex-1"
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-      <Text className="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
-        {percentage.toFixed(0)}%
-      </Text>
-      <Text className="text-sm font-semibold text-gray-800 dark:text-gray-200 tabular-nums min-w-[70px] text-right">
-        {formatCurrency(value)}
-      </Text>
+    <View className="py-1.5 gap-1">
+      {/* Fila superior: punto de color + nombre + % + monto */}
+      <View className="flex-row items-center gap-2">
+        <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+        <Text className="text-[13px] text-gray-700 dark:text-gray-300 flex-1" numberOfLines={1}>
+          {label}
+        </Text>
+        <Text className="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+          {percentage.toFixed(0)}%
+        </Text>
+        <Text className="text-[13px] font-semibold text-gray-800 dark:text-gray-200 tabular-nums min-w-[64px] text-right">
+          {formatCurrency(value)}
+        </Text>
+      </View>
+
+      {/* Barra de progreso: visualización rápida de la proporción */}
+      <View className="h-1 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden ml-4">
+        <View
+          className="h-full rounded-full"
+          style={{ backgroundColor: color, width: `${percentage}%` }}
+        />
+      </View>
     </View>
   );
 }
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 interface CategoryBreakdownProps {
   data: CategoriaVenta[];
@@ -104,30 +119,19 @@ interface CategoryBreakdownProps {
 
 export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownProps) {
   const total = data.reduce((s, d) => s + d.total, 0);
-  const chartSize = isMobile ? 160 : 180;
+  const chartSize = isMobile ? 140 : 160;
+  const isEmpty = data.length === 0 || total === 0;
 
   return (
-    <View
-      className="bg-white dark:bg-neutral-800 rounded-2xl p-5 border border-gray-100 dark:border-neutral-700"
-      style={
-        Platform.OS === "web"
-          ? { boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }
-          : { elevation: 1 }
-      }
-    >
-      <Text className="text-base font-bold text-gray-800 dark:text-gray-100 mb-4">
-        Ventas por Categoría
-      </Text>
-
-      {data.length === 0 || total === 0 ? (
-        <View className="py-10 items-center">
-          <Text className="text-sm text-gray-400 dark:text-gray-500">
-            Sin datos en este período
-          </Text>
-        </View>
+    <SectionCard title="Ventas por Categoría">
+      {isEmpty ? (
+        <EmptyState
+          message="Sin datos en este período"
+          iconName="chart.pie.fill"
+        />
       ) : (
-        <View className={isMobile ? "" : "flex-row gap-6 items-start"}>
-          <View className={`items-center ${isMobile ? "mb-4" : ""}`}>
+        <View className={isMobile ? "gap-1" : "flex-row gap-4 items-start"}>
+          <View className={`items-center ${isMobile ? "mb-2" : ""}`}>
             <DonutChart data={data} size={chartSize} />
           </View>
           <View className="flex-1">
@@ -137,12 +141,12 @@ export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownP
                 color={COLORS[i % COLORS.length]}
                 label={d.nombre}
                 value={d.total}
-                percentage={total > 0 ? (d.total / total) * 100 : 0}
+                percentage={(d.total / total) * 100}
               />
             ))}
           </View>
         </View>
       )}
-    </View>
+    </SectionCard>
   );
 }
