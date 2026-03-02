@@ -1,7 +1,7 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,13 +17,12 @@ export default function FooterProducts() {
 
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const openSheet = useVentasUIStore((s) => s.openSheet);
+  const haptic = useHaptic();
 
   const handleOpenSheet = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     openSheet();
-  }, [openSheet]);
+  }, [haptic, openSheet]);
 
   const TAB_BAR_CLEARANCE = 96 + insets.bottom;
   const isDark = (colorScheme ?? "light") === "dark";

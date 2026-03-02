@@ -1,8 +1,8 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Categoria } from "@/interface/categorias";
 import { useLayoutStore } from "@/store/layout-store";
-import * as Haptics from "expo-haptics";
-import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useHaptic } from "@/hooks/use-haptic";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 interface BadgeCategoryProductsProps {
   categories: Categoria[];
@@ -24,13 +24,14 @@ function BadgeItem({
   isDark: boolean;
   onPress: () => void;
 }) {
+  const haptic = useHaptic();
   const bgInactive = isDark ? "#2C2C2E" : "#F2F2F7";
   const textInactive = isDark ? "#E5E5EA" : "#3A3A3C";
 
   return (
     <TouchableOpacity
       onPress={() => {
-        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        haptic();
         onPress();
       }}
       style={{

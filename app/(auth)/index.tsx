@@ -1,4 +1,5 @@
 import AuthForm from "@/components/auth/AuthForm";
+import { AppFonts } from "@/constants/typography";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { signIn, signUp } from "@/lib/auth";
 import {
@@ -13,7 +14,7 @@ import { router } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Platform, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {
@@ -119,13 +120,36 @@ export default function AuthScreen() {
         }`}
       >
         <Image
-          source={require("@/assets/images/pape.png")}
+          source={require("@/assets/images/pape.webp")}
           style={{
             width: 250,
             height: 150,
             alignSelf: "center",
           }}
         />
+        <Text
+          style={{
+            fontFamily: AppFonts.display,
+            fontSize: 34,
+            letterSpacing: 1.1,
+            textAlign: "center",
+            color: isDark ? "#f5f5f5" : "#1f2937",
+            marginTop: 4,
+          }}
+        >
+          La Pape POS
+        </Text>
+        <Text
+          style={{
+            fontFamily: AppFonts.body,
+            fontSize: 14,
+            textAlign: "center",
+            color: isDark ? "#a3a3a3" : "#6b7280",
+            marginTop: -2,
+          }}
+        >
+          Punto de venta ágil para caja, inventario y reportes
+        </Text>
         <AuthForm
           control={control}
           errors={errors}

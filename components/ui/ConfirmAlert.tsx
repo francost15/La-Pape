@@ -96,6 +96,8 @@ export default function ConfirmAlert({
                   borderRightWidth: 1,
                   borderRightColor: borderColor,
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={cancelText}
               >
                 <Text
                   style={{
@@ -110,6 +112,8 @@ export default function ConfirmAlert({
               <TouchableOpacity
                 onPress={onConfirm}
                 style={{ flex: 1, paddingVertical: 16, alignItems: "center" }}
+                accessibilityRole="button"
+                accessibilityLabel={confirmText}
               >
                 <Text
                   style={{

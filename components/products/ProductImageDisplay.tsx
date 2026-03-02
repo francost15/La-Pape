@@ -6,6 +6,7 @@ interface ProductImageDisplayProps {
   uri: string | undefined;
   hasImg: boolean;
   onError: () => void;
+  accessibilityLabel?: string;
 }
 
 /**
@@ -13,7 +14,7 @@ interface ProductImageDisplayProps {
  * Si no hay imagen o falla la carga, muestra un placeholder con ícono.
  * Reutilizado en detalle y (si se necesita) en otros contextos de solo lectura.
  */
-export default function ProductImageDisplay({ uri, hasImg, onError }: ProductImageDisplayProps) {
+export default function ProductImageDisplay({ uri, hasImg, onError, accessibilityLabel }: ProductImageDisplayProps) {
   if (hasImg) {
     return (
       <Image
@@ -21,6 +22,8 @@ export default function ProductImageDisplay({ uri, hasImg, onError }: ProductIma
         contentFit="contain"
         style={{ width: '100%', height: '100%' }}
         onError={onError}
+        accessibilityLabel={accessibilityLabel ?? "Imagen del producto"}
+        accessibilityRole="image"
       />
     );
   }

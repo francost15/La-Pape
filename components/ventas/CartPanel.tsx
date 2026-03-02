@@ -1,22 +1,22 @@
 import { notify } from "@/lib/notify";
+import { AppFonts } from "@/constants/typography";
 import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  Platform,
-  ScrollView,
+  FlatList,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import ConfirmAlert from "../ui/ConfirmAlert";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
@@ -26,22 +26,31 @@ const DESKTOP_MIN_WIDTH = 768;
 export default function CartPanel() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
-  const { items, removeItem, updateQuantity, getTotal, clearCart } =
-    useVentasStore();
-  const { confirmVisible, processing, openConfirm, closeConfirm, setProcessing, setSuccessVenta } =
-    useCheckoutStore();
-  const { deleteConfirmItem, openDeleteConfirm, closeDeleteConfirm } =
-    useVentasUIStore();
-  const { negocioId, sucursalId, userId } = useSessionStore();
+  const items = useVentasStore((s) => s.items);
+  const removeItem = useVentasStore((s) => s.removeItem);
+  const updateQuantity = useVentasStore((s) => s.updateQuantity);
+  const getTotal = useVentasStore((s) => s.getTotal);
+  const clearCart = useVentasStore((s) => s.clearCart);
+  const confirmVisible = useCheckoutStore((s) => s.confirmVisible);
+  const processing = useCheckoutStore((s) => s.processing);
+  const openConfirm = useCheckoutStore((s) => s.openConfirm);
+  const closeConfirm = useCheckoutStore((s) => s.closeConfirm);
+  const setProcessing = useCheckoutStore((s) => s.setProcessing);
+  const setSuccessVenta = useCheckoutStore((s) => s.setSuccessVenta);
+  const deleteConfirmItem = useVentasUIStore((s) => s.deleteConfirmItem);
+  const openDeleteConfirm = useVentasUIStore((s) => s.openDeleteConfirm);
+  const closeDeleteConfirm = useVentasUIStore((s) => s.closeDeleteConfirm);
+  const negocioId = useSessionStore((s) => s.negocioId);
+  const sucursalId = useSessionStore((s) => s.sucursalId);
+  const userId = useSessionStore((s) => s.userId);
   const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
+  const haptic = useHaptic();
   const total = getTotal();
 
   const handleClearCartPress = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     setClearCartConfirmVisible(true);
-  }, []);
+  }, [haptic]);
 
   const handleConfirmClearCart = useCallback(() => {
     clearCart();
@@ -154,10 +163,16 @@ export default function CartPanel() {
             <View className="w-20 h-20 rounded-full bg-gray-100 dark:bg-neutral-800 items-center justify-center">
               <IconSymbol size={40} name="cart.fill" color="#9ca3af" />
             </View>
-            <Text className="text-center text-gray-500 dark:text-gray-400 text-base font-medium">
+            <Text
+              className="text-center text-gray-500 dark:text-gray-400 text-base font-medium"
+              style={{ fontFamily: AppFonts.heading }}
+            >
               Carrito vacío
             </Text>
-            <Text className="text-center text-gray-400 dark:text-gray-500 text-sm">
+            <Text
+              className="text-center text-gray-400 dark:text-gray-500 text-sm"
+              style={{ fontFamily: AppFonts.body }}
+            >
               Agrega productos desde el panel lateral
             </Text>
           </View>
@@ -168,22 +183,20 @@ export default function CartPanel() {
 
   return (
     <View className="flex-1 flex-col">
-      <ScrollView
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.productId}
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-      >
-        {items.map((item) => (
-          <View
-            key={item.productId}
-            className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-neutral-800 gap-3"
-          >
+        renderItem={({ item }) => (
+          <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-neutral-800 gap-3">
             <View className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-neutral-700 overflow-hidden shrink-0">
               {item.product.imagen?.trim() ? (
                 <Image
                   source={{ uri: item.product.imagen }}
                   className="w-full h-full"
-                  resizeMode="cover"
+                  contentFit="cover"
                 />
               ) : (
                 <View className="w-full h-full items-center justify-center">
@@ -194,12 +207,14 @@ export default function CartPanel() {
             <View className="flex-1 min-w-0 shrink justify-center gap-0.5 pr-2">
               <Text
                 className="text-sm font-medium text-gray-900 dark:text-white"
+                style={{ fontFamily: AppFonts.bodyStrong }}
                 numberOfLines={2}
               >
                 {item.product.nombre}
               </Text>
               <Text
                 className="text-sm font-semibold text-orange-600"
+                style={{ fontFamily: AppFonts.heading }}
                 numberOfLines={1}
               >
                 ${item.unitPrice.toLocaleString()} × {item.quantity}
@@ -211,8 +226,8 @@ export default function CartPanel() {
               onPlus={() => updateQuantity(item.productId, item.quantity + 1)}
             />
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
 
       <ConfirmAlert
         visible={!!deleteConfirmItem}
@@ -253,10 +268,16 @@ export default function CartPanel() {
 
       <View className="px-3 pt-3 pb-2 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
         <View className="flex-row justify-between items-center mb-2.5 px-1">
-          <Text className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <Text
+            className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
             Total
           </Text>
-          <Text className="text-xl font-bold text-orange-600">
+          <Text
+            className="text-xl font-bold text-orange-600"
+            style={{ fontFamily: AppFonts.display, letterSpacing: 0.4 }}
+          >
             ${total.toLocaleString()}
           </Text>
         </View>
@@ -267,11 +288,17 @@ export default function CartPanel() {
           onPress={openConfirm}
           disabled={processing}
           style={processing ? { opacity: 0.6 } : undefined}
+          accessibilityRole="button"
+          accessibilityLabel="Completar venta"
+          accessibilityHint="Confirma y registra la venta actual"
         >
           {processing ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-base font-semibold text-white tracking-tight">
+            <Text
+              className="text-base font-semibold text-white tracking-tight"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
               Completar venta
             </Text>
           )}
@@ -282,8 +309,14 @@ export default function CartPanel() {
             className="mt-2 rounded-2xl py-3 flex-row items-center justify-center gap-1.5 border border-orange-500/40 active:opacity-90"
             activeOpacity={0.85}
             onPress={handleClearCartPress}
+            accessibilityRole="button"
+            accessibilityLabel="Limpiar carrito"
+            accessibilityHint="Vacía todos los productos del carrito"
           >
-            <Text className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+            <Text
+              className="text-sm font-semibold text-orange-600 dark:text-orange-400"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
               Limpiar
             </Text>
           </TouchableOpacity>

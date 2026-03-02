@@ -4,7 +4,7 @@ import QrScannerSheet from "@/components/ventas/QrScannerSheet";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { notify } from "@/lib/notify";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
@@ -34,6 +34,7 @@ export default function AddProductsSheet() {
   const colorScheme = useColorScheme() ?? "light";
   const isDark = colorScheme === "dark";
 
+  const haptic = useHaptic();
   const sheetBg = isDark ? "#1C1C1E" : "#F2F2F7";
   const backdropBg = isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)";
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
@@ -57,15 +58,13 @@ export default function AddProductsSheet() {
   );
 
   const closeSheet = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     Animated.timing(slideAnim, {
       toValue: height,
       duration: 250,
       useNativeDriver: Platform.OS !== "web",
     }).start(() => closeSheetStore());
-  }, [height, slideAnim, closeSheetStore]);
+  }, [haptic, height, slideAnim, closeSheetStore]);
 
   const closeSheetRef = useRef(closeSheet);
   closeSheetRef.current = closeSheet;

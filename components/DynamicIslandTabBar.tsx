@@ -1,11 +1,11 @@
 import type { IconSymbolName } from "@/components/ui/icon-symbol";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useHaptic } from "@/hooks/use-haptic";
 import {
   BottomTabBarHeightCallbackContext,
   type BottomTabBarProps,
 } from "@react-navigation/bottom-tabs";
-import * as Haptics from "expo-haptics";
 import React, { useEffect, useMemo } from "react";
 import {
   Platform,
@@ -20,6 +20,7 @@ import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
@@ -27,8 +28,32 @@ const PC_ONLY_ROUTES = ["resumen"] as const;
 
 const ACTIVE_BG = "#ea580c";
 const ACTIVE_ICON_COLOR = "#ffffff";
-const INACTIVE_COLOR_LIGHT = "#78716c";
-const INACTIVE_COLOR_DARK = "#a8a29e";
+
+const THEME = {
+  light: {
+    barBg: "rgba(255,255,255,0.82)",
+    border: "rgba(0,0,0,0.08)",
+    shadow: "#78716c",
+    shadowOpacity: 0.14,
+    webShadow: "0 4px 24px 0 rgba(0,0,0,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.06)",
+    inactiveIcon: "#78716c",
+    inactiveLabel: "#78716c",
+    pcBadgeBg: "rgba(234,88,12,0.12)",
+    pcBadgeText: "#c2410c",
+  },
+  dark: {
+    barBg: "rgba(38,38,38,0.82)",
+    border: "rgba(255,255,255,0.10)",
+    shadow: "#000000",
+    shadowOpacity: 0.45,
+    webShadow: "0 4px 24px 0 rgba(0,0,0,0.45), 0 1.5px 6px 0 rgba(0,0,0,0.30)",
+    inactiveIcon: "#a8a29e",
+    inactiveLabel: "#a8a29e",
+    pcBadgeBg: "rgba(234,88,12,0.22)",
+    pcBadgeText: "#f97316",
+  },
+} as const;
+
 const COLOR_EASING = Easing.bezier(0.25, 0.1, 0.25, 1);
 
 const ICON_MAP: Record<string, IconSymbolName> = {
@@ -47,6 +72,9 @@ interface TabConfig {
 }
 
 const ESTIMATED_ISLAND_HEIGHT = 80;
+const PILL_H = 40;
+const PILL_BORDER_RADIUS = 20;
+const isWeb = Platform.OS === "web";
 
 export function DynamicIslandTabBar({
   state,
@@ -55,9 +83,10 @@ export function DynamicIslandTabBar({
   insets,
 }: BottomTabBarProps) {
   const { width } = useWindowDimensions();
+  const haptic = useHaptic();
   const colorScheme = useColorScheme() ?? "light";
   const isDark = colorScheme === "dark";
-  const isWeb = Platform.OS === "web";
+  const theme = isDark ? THEME.dark : THEME.light;
   const isCompact = width < 640;
   const onHeightChange = React.useContext(BottomTabBarHeightCallbackContext);
 
@@ -65,11 +94,6 @@ export function DynamicIslandTabBar({
   useEffect(() => {
     onHeightChange?.(totalHeight);
   }, [onHeightChange, totalHeight]);
-
-  const inactiveColor = isDark ? INACTIVE_COLOR_DARK : INACTIVE_COLOR_LIGHT;
-  const bgBar = isDark ? "rgba(28,28,30,0.98)" : "rgba(250,250,250,0.98)";
-  const shadowColor = isDark ? "#000" : "#1c1917";
-  const borderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
 
   const tabs: TabConfig[] = useMemo(
     () =>
@@ -91,12 +115,7 @@ export function DynamicIslandTabBar({
   );
 
   const activeIndex = state.index;
-
   const islandWidth = Math.min(width - 32, isWeb ? 520 : 400);
-
-  const webShadow = isDark
-    ? "0 4px 32px 0 rgba(0,0,0,0.55), 0 1.5px 8px 0 rgba(0,0,0,0.35)"
-    : "0 4px 32px 0 rgba(0,0,0,0.15), 0 1.5px 8px 0 rgba(0,0,0,0.08)";
 
   return (
     <Animated.View
@@ -104,10 +123,7 @@ export function DynamicIslandTabBar({
       style={[
         styles.wrapper,
         {
-          paddingBottom:
-            Platform.OS === "web"
-              ? insets.bottom + 28
-              : insets.bottom,
+          paddingBottom: isWeb ? insets.bottom + 28 : insets.bottom,
         },
       ]}
       pointerEvents="box-none"
@@ -116,16 +132,20 @@ export function DynamicIslandTabBar({
         style={[
           styles.island,
           {
-            backgroundColor: bgBar,
+            backgroundColor: theme.barBg,
             width: islandWidth,
-            borderColor,
+            borderColor: theme.border,
             ...(isWeb
-              ? { boxShadow: webShadow }
+              ? {
+                  boxShadow: theme.webShadow,
+                  backdropFilter: "blur(20px) saturate(180%)",
+                  WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                }
               : {
-                  shadowColor,
-                  shadowOffset: { width: 0, height: 10 },
-                  shadowOpacity: isDark ? 0.5 : 0.18,
-                  shadowRadius: 32,
+                  shadowColor: theme.shadow,
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: theme.shadowOpacity,
+                  shadowRadius: 24,
                   elevation: 20,
                 }),
           },
@@ -144,11 +164,9 @@ export function DynamicIslandTabBar({
                 tab={tab}
                 isFocused={activeIndex === index}
                 isCompact={isCompact}
-                inactiveColor={inactiveColor}
+                theme={theme}
                 onPress={() => {
-                  if (Platform.OS !== "web") {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
+                  haptic();
                   const event = navigation.emit({
                     type: "tabPress",
                     target: tab.routeKey,
@@ -173,7 +191,7 @@ export function DynamicIslandTabBar({
         <PcOnlyBadge
           tab={tabs[activeIndex]}
           visible={tabs[activeIndex]?.pcOnly === true}
-          isDark={isDark}
+          theme={theme}
         />
       ) : null}
     </Animated.View>
@@ -193,19 +211,18 @@ function SlidingIndicator({
 
   useEffect(() => {
     progress.value = withTiming(activeIndex, {
-      duration: 280,
+      duration: 300,
       easing: COLOR_EASING,
     });
   }, [activeIndex, progress]);
 
-  const pillSize = 38;
   const contentWidth = islandWidth - 20;
   const tabWidth = contentWidth / tabCount;
 
   const animatedStyle = useAnimatedStyle(() => {
     "worklet";
     const centerX = (progress.value + 0.5) * tabWidth;
-    const x = centerX - pillSize / 2 - 2;
+    const x = centerX - PILL_H / 2 - 2;
     return {
       transform: [{ translateX: x }],
     };
@@ -215,7 +232,20 @@ function SlidingIndicator({
     <Animated.View
       style={[
         styles.slidingPill,
-        { backgroundColor: ACTIVE_BG },
+        {
+          backgroundColor: ACTIVE_BG,
+          ...(isWeb
+            ? {
+                boxShadow: "0 2px 12px 0 rgba(234,88,12,0.35)",
+              }
+            : {
+                shadowColor: ACTIVE_BG,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
+                elevation: 6,
+              }),
+        },
         animatedStyle,
       ]}
       pointerEvents="none"
@@ -223,49 +253,67 @@ function SlidingIndicator({
   );
 }
 
+type ThemeColors = (typeof THEME)["light"] | (typeof THEME)["dark"];
+
 interface TabItemProps {
   tab: TabConfig;
   isFocused: boolean;
   isCompact: boolean;
-  inactiveColor: string;
+  theme: ThemeColors;
   onPress: () => void;
   onLongPress: () => void;
 }
 
-function TabItem({
+const TabItem = React.memo(function TabItem({
   tab,
   isFocused,
   isCompact,
-  inactiveColor,
+  theme,
   onPress,
   onLongPress,
 }: TabItemProps) {
-  const color = isFocused ? ACTIVE_ICON_COLOR : inactiveColor;
+  const scale = useSharedValue(1);
+
+  const iconColor = isFocused ? ACTIVE_ICON_COLOR : theme.inactiveIcon;
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
+      onPressIn={() => {
+        scale.value = withSpring(0.88, { damping: 15, stiffness: 400 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+      }}
       style={styles.tabItem}
       accessibilityRole="tab"
       accessibilityState={{ selected: isFocused }}
       accessibilityLabel={tab.label}
     >
-      <View style={styles.iconWrapper}>
-        <IconSymbol size={isCompact ? 22 : 24} name={tab.icon} color={color} />
-      </View>
+      <Animated.View style={[styles.tabItemInner, animatedStyle]}>
+        <IconSymbol
+          size={isCompact ? 21 : 23}
+          name={tab.icon}
+          color={iconColor}
+        />
+      </Animated.View>
     </Pressable>
   );
-}
+});
 
-function PcOnlyBadge({
+const PcOnlyBadge = React.memo(function PcOnlyBadge({
   tab,
   visible,
-  isDark,
+  theme,
 }: {
   tab: TabConfig;
   visible: boolean;
-  isDark: boolean;
+  theme: ThemeColors;
 }) {
   const opacity = useSharedValue(0);
 
@@ -284,22 +332,15 @@ function PcOnlyBadge({
       style={[
         styles.pcBadge,
         animatedStyle,
-        {
-          backgroundColor: isDark ? "rgba(234,88,12,0.25)" : "rgba(234,88,12,0.15)",
-        },
+        { backgroundColor: theme.pcBadgeBg },
       ]}
     >
-      <Text
-        style={[
-          styles.pcBadgeText,
-          { color: isDark ? "#f97316" : "#c2410c" },
-        ]}
-      >
+      <Text style={[styles.pcBadgeText, { color: theme.pcBadgeText }]}>
         Solo en PC
       </Text>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -312,10 +353,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   island: {
-    borderRadius: 30,
+    borderRadius: 28,
     borderCurve: "continuous",
     borderWidth: 1,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 10,
   },
   tabsRowWrapper: {
@@ -327,9 +368,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     top: 0,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: PILL_H,
+    height: PILL_H,
+    borderRadius: PILL_BORDER_RADIUS,
   },
   tabsRow: {
     flex: 1,
@@ -341,10 +382,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 4,
-    gap: 3,
+    paddingVertical: 2,
   },
-  iconWrapper: {
+  tabItemInner: {
     alignItems: "center",
     justifyContent: "center",
   },

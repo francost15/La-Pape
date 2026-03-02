@@ -13,7 +13,6 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import {
   ActivityIndicator,
   Alert,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -21,7 +20,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { useHaptic } from "@/hooks/use-haptic";
 
 export default function ProductoById() {
   const { id, product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
@@ -31,6 +30,7 @@ export default function ProductoById() {
   const isDesktop = width >= 768;
   const tabBarHeight = useBottomTabBarHeight();
 
+  const haptic = useHaptic();
   const {
     currentProduct: product,
     productLoading: loading,
@@ -134,8 +134,9 @@ export default function ProductoById() {
               setCurrentProduct(null);
               notify.success({ title: `${product.nombre} eliminado` });
               router.replace('/productos' as any);
-            } catch (error: any) {
-              notify.error({ title: 'Error', description: error?.message || 'No se pudo eliminar' });
+            } catch (error: unknown) {
+              const message = error instanceof Error ? error.message : 'No se pudo eliminar';
+              notify.error({ title: 'Error', description: message });
             } finally {
               setDeleting(false);
             }
@@ -186,6 +187,8 @@ export default function ProductoById() {
         onPress={handleDelete}
         disabled={deleting}
         className="h-11 px-4 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-900/20 flex-row items-center justify-center gap-1.5 active:opacity-80"
+        accessibilityRole="button"
+        accessibilityLabel="Eliminar producto"
       >
         {deleting ? (
           <ActivityIndicator color="#dc2626" size="small" />
@@ -199,6 +202,8 @@ export default function ProductoById() {
         onPress={handleEdit}
         disabled={deleting}
         className="flex-1 h-11 bg-orange-600 rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
+        accessibilityRole="button"
+        accessibilityLabel="Editar producto"
       >
         <IconSymbol name="pencil" size={15} color="white" />
         <Text className="text-white font-semibold text-[15px]">Editar Producto</Text>
@@ -209,10 +214,12 @@ export default function ProductoById() {
   const BackButton = () => (
     <Pressable
       onPress={() => {
-        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        haptic();
         router.back();
       }}
       className="flex-row items-center gap-2 mb-4 active:opacity-70"
+      accessibilityRole="button"
+      accessibilityLabel="Volver"
     >
       <IconSymbol name="chevron.left" size={20} color="#6b7280" />
       <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">Volver</Text>
@@ -239,6 +246,7 @@ export default function ProductoById() {
               uri={product.imagen}
               hasImg={hasImg}
               onError={() => setProductImageError(true)}
+              accessibilityLabel={`Imagen de ${product.nombre}`}
             />
           </View>
 
@@ -285,6 +293,7 @@ export default function ProductoById() {
             uri={product.imagen}
             hasImg={hasImg}
             onError={() => setProductImageError(true)}
+            accessibilityLabel={`Imagen de ${product.nombre}`}
           />
         </View>
 

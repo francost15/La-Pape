@@ -22,7 +22,7 @@ interface RankingRowProps {
  * Diseño tipo "tabla": sin card por fila, separador sutil entre items.
  * NO usar CardProducts aquí — esa card genérica queda fuera de lugar en el resumen.
  */
-function RankingRow({ item, rank, showDivider }: RankingRowProps) {
+const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: RankingRowProps) {
   const [imgError, setImgError] = useState(false);
   const hasImg = Boolean(item.producto.imagen?.trim()) && !imgError;
 
@@ -90,7 +90,7 @@ function RankingRow({ item, rank, showDivider }: RankingRowProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 

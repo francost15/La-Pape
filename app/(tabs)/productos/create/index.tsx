@@ -22,7 +22,11 @@ import {
 
 export default function CreateProduct() {
   const isWeb = Platform.OS === 'web';
-  const { negocioId, categories, setNegocioId, setCategories, setProducts } = useProductosStore();
+  const negocioId = useProductosStore((s) => s.negocioId);
+  const categories = useProductosStore((s) => s.categories);
+  const setNegocioId = useProductosStore((s) => s.setNegocioId);
+  const setCategories = useProductosStore((s) => s.setCategories);
+  const setProducts = useProductosStore((s) => s.setProducts);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -67,8 +71,9 @@ export default function CreateProduct() {
         setNegocioId(currentNegocioId);
         const categoriasData = await getCategoriasByNegocio(currentNegocioId);
         setCategories(categoriasData);
-      } catch (error: any) {
-        Alert.alert('Error', error?.message || 'Error al cargar los datos');
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error al cargar los datos';
+        Alert.alert('Error', message);
         router.back();
       } finally {
         setLoadingData(false);
@@ -112,8 +117,9 @@ export default function CreateProduct() {
       
       notify.success({ title: 'Producto creado' });
       router.replace(`/productos/producto/${productId}`);
-    } catch (error: any) {
-      notify.error({ title: 'Error', description: error?.message || 'No se pudo crear el producto' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'No se pudo crear el producto';
+      notify.error({ title: 'Error', description: message });
     } finally {
       setLoading(false);
     }

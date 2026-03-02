@@ -38,7 +38,6 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
  * NO contiene lógica de UI de los sub-componentes ni formateo ad-hoc.
  */
 export default function ResumenScreen() {
-  // ── Sesión ─────────────────────────────────────────────────────────────────
   const negocioId = useSessionStore((s) => s.negocioId);
   const sessionReady = useSessionStore((s) => s.ready);
   const sessionError = useSessionStore((s) => s.error);
@@ -46,18 +45,18 @@ export default function ResumenScreen() {
   const userEmail = useSessionStore((s) => s.userEmail);
 
   // ── Filtros y layout ───────────────────────────────────────────────────────
-  const { periodo, rangoPersonalizado, setPeriodo, setRangoPersonalizado } =
-    useFiltrosStore();
+  const periodo = useFiltrosStore((s) => s.periodo);
+  const rangoPersonalizado = useFiltrosStore((s) => s.rangoPersonalizado);
+  const setPeriodo = useFiltrosStore((s) => s.setPeriodo);
+  const setRangoPersonalizado = useFiltrosStore((s) => s.setRangoPersonalizado);
   const isMobile = useLayoutStore((s) => s.isMobile);
 
   // ── Productos ──────────────────────────────────────────────────────────────
-  const {
-    products,
-    categories,
-    setProducts,
-    setCategories,
-    reset: resetProductos,
-  } = useProductosStore();
+  const products = useProductosStore((s) => s.products);
+  const categories = useProductosStore((s) => s.categories);
+  const setProducts = useProductosStore((s) => s.setProducts);
+  const setCategories = useProductosStore((s) => s.setCategories);
+  const resetProductos = useProductosStore((s) => s.reset);
 
   // ── Ventas en tiempo real ──────────────────────────────────────────────────
   const ventas = useResumenStore((s) => s.ventas);

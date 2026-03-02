@@ -25,10 +25,11 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { useHaptic } from "@/hooks/use-haptic";
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function EditProduct() {
+  const haptic = useHaptic();
   const isWeb = Platform.OS === 'web';
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
@@ -240,7 +241,7 @@ export default function EditProduct() {
   const BackButton = () => (
     <Pressable
       onPress={() => {
-        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        haptic();
         router.back();
       }}
       className="flex-row items-center gap-2 mb-4 active:opacity-70"

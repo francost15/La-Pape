@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppFonts } from "@/constants/typography";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { Metricas } from "@/store/resumen-store";
 import React, { memo, useEffect } from "react";
@@ -72,7 +73,11 @@ const KpiCard = memo(function KpiCard({
       >
         {/* Fila superior: etiqueta a la izquierda, ícono a la derecha */}
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex-1 mr-2" numberOfLines={1}>
+          <Text
+            className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex-1 mr-2"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+            numberOfLines={1}
+          >
             {label}
           </Text>
           <View
@@ -86,7 +91,7 @@ const KpiCard = memo(function KpiCard({
         {/* Valor principal — el dato más importante, tamaño dominante */}
         <Text
           className="font-bold text-gray-900 dark:text-white tracking-tight leading-tight"
-          style={{ fontSize: 20 }}
+          style={{ fontSize: 20, fontFamily: AppFonts.display }}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.7}
@@ -95,7 +100,10 @@ const KpiCard = memo(function KpiCard({
         </Text>
 
         {/* Subtítulo aclaratorio */}
-        <Text className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5">
+        <Text
+          className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5"
+          style={{ fontFamily: AppFonts.body }}
+        >
           {subtitle}
         </Text>
       </View>

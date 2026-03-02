@@ -1,6 +1,6 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { VentaCompletada } from "@/store/checkout-store";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React from "react";
 import {
   Modal,
@@ -35,10 +35,10 @@ export default function VentaExitosaModal({
 }: VentaExitosaModalProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const haptic = useHaptic();
 
   const handleClose = () => {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic();
     onClose();
   };
 
@@ -102,8 +102,7 @@ export default function VentaExitosaModal({
           <View style={styles.actions}>
             <TouchableOpacity
               onPress={() => {
-                if (Platform.OS !== "web")
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                haptic();
                 onDescargarRecibo?.();
               }}
               style={[styles.button, styles.buttonPrimary]}
@@ -115,8 +114,7 @@ export default function VentaExitosaModal({
 
             <TouchableOpacity
               onPress={() => {
-                if (Platform.OS !== "web")
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                haptic();
                 onEnviarRecibo?.();
               }}
               style={[styles.button, styles.buttonSecondary]}

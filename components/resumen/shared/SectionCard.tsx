@@ -1,4 +1,5 @@
 import React from "react";
+import { AppFonts } from "@/constants/typography";
 import { Platform, Text, View, type ViewProps } from "react-native";
 
 interface SectionCardProps extends ViewProps {
@@ -39,7 +40,10 @@ export default function SectionCard({
       ]}
     >
       {title ? (
-        <Text className="text-[15px] font-bold text-gray-800 dark:text-gray-100 mb-3">
+        <Text
+          className="text-[15px] font-bold text-gray-800 dark:text-gray-100 mb-3"
+          style={{ fontFamily: AppFonts.heading }}
+        >
           {title}
         </Text>
       ) : null}

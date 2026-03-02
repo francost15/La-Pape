@@ -7,9 +7,7 @@ import { db } from '@/lib/firebase';
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   Timestamp,
@@ -17,9 +15,6 @@ import {
   where,
 } from 'firebase/firestore';
 
-/**
- * Crear una nueva relación usuario-negocio
- */
 export const createUsuarioNegocio = async (
   usuarioNegocioData: CreateUsuarioNegocioInput
 ): Promise<string> => {
@@ -36,34 +31,6 @@ export const createUsuarioNegocio = async (
   }
 };
 
-/**
- * Obtener una relación por ID
- */
-export const getUsuarioNegocioById = async (
-  id: string
-): Promise<UsuarioNegocio | null> => {
-  try {
-    const docRef = doc(db, 'usuarios_negocios', id);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      return {
-        id: docSnap.id,
-        ...data,
-        createdAt: data.createdAt?.toDate(),
-      } as UsuarioNegocio;
-    }
-    return null;
-  } catch (error) {
-    console.error('Error al obtener relación usuario-negocio:', error);
-    throw new Error('No se pudo obtener la relación usuario-negocio');
-  }
-};
-
-/**
- * Obtener todos los negocios de un usuario
- */
 export const getNegociosByUsuario = async (
   usuario_id: string
 ): Promise<UsuarioNegocio[]> => {
@@ -89,9 +56,6 @@ export const getNegociosByUsuario = async (
   }
 };
 
-/**
- * Obtener todos los usuarios de un negocio
- */
 export const getUsuariosByNegocio = async (
   negocio_id: string
 ): Promise<UsuarioNegocio[]> => {
@@ -117,9 +81,6 @@ export const getUsuariosByNegocio = async (
   }
 };
 
-/**
- * Actualizar una relación usuario-negocio
- */
 export const updateUsuarioNegocio = async (
   id: string,
   usuarioNegocioData: UpdateUsuarioNegocioInput
@@ -128,7 +89,7 @@ export const updateUsuarioNegocio = async (
     const docRef = doc(db, 'usuarios_negocios', id);
     await updateDoc(docRef, {
       ...usuarioNegocioData,
-    } as any);
+    } as Record<string, unknown>);
   } catch (error) {
     console.error('Error al actualizar relación usuario-negocio:', error);
     throw new Error('No se pudo actualizar la relación usuario-negocio');
@@ -136,31 +97,16 @@ export const updateUsuarioNegocio = async (
 };
 
 /**
- * Eliminar una relación usuario-negocio
- */
-export const deleteUsuarioNegocio = async (id: string): Promise<void> => {
-  try {
-    const docRef = doc(db, 'usuarios_negocios', id);
-    await deleteDoc(docRef);
-  } catch (error) {
-    console.error('Error al eliminar relación usuario-negocio:', error);
-    throw new Error('No se pudo eliminar la relación usuario-negocio');
-  }
-};
-
-/**
- * Obtener el negocio del usuario por UID de Auth o email
- * Intenta primero con el UID de Auth, si no encuentra, busca por email en Firestore
+ * Obtener el negocio del usuario por UID de Auth o email.
+ * Intenta primero con el UID de Auth, si no encuentra, busca por email en Firestore.
  */
 export const getNegocioIdByUsuario = async (
   userId: string,
   userEmail: string
 ): Promise<string | null> => {
   try {
-    // Intentar primero con UID de Auth
     let negociosUsuario = await getNegociosByUsuario(userId);
     
-    // Si no encuentra, buscar el usuario en Firestore por email
     if (!negociosUsuario.length) {
       const usuariosSnapshot = await getDocs(
         query(collection(db, 'usuarios'), where('email', '==', userEmail))

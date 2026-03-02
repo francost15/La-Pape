@@ -1,5 +1,5 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import { Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui/icon-symbol";
 
@@ -20,6 +20,7 @@ export default function SearchProducts({
 }: SearchProductsProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const haptic = useHaptic();
 
   const bg = isDark ? "#2C2C2E" : "#F2F2F7";
   const textColor = isDark ? "#F5F5F7" : "#1D1D1F";
@@ -52,7 +53,8 @@ export default function SearchProducts({
               paddingVertical: 0,
               letterSpacing: -0.2,
             },
-            Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : undefined,
+            // @ts-expect-error outlineStyle is web-only; RN types don't include it
+            Platform.OS === "web" ? { outlineStyle: "none" as const } : undefined,
           ]}
           placeholder="Buscar producto..."
           placeholderTextColor={placeholderColor}
@@ -81,7 +83,7 @@ export default function SearchProducts({
       {showQrButton && (
         <TouchableOpacity
           onPress={() => {
-            if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            haptic();
             onQrPress?.();
           }}
           style={{

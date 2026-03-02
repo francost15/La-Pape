@@ -1,4 +1,5 @@
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
+import { AppFonts } from "@/constants/typography";
 import CartPanel from "@/components/ventas/CartPanel";
 import FooterProducts from "@/components/ventas/FooterProducts";
 import SidebarProducts from "@/components/ventas/SidebarProducts";
@@ -20,7 +21,10 @@ export default function VentasScreen() {
         className={`flex-1 ${isDesktop ? "border-l border-gray-200 dark:border-neutral-800" : "pb-36"}`}
       >
         <View className="px-4 py-4 border-b border-gray-200 dark:border-neutral-800">
-          <Text className="text-xl font-bold text-gray-900 dark:text-white">
+          <Text
+            className="text-xl font-bold text-gray-900 dark:text-white"
+            style={{ fontFamily: AppFonts.heading }}
+          >
             Carrito ({itemCount})
           </Text>
         </View>

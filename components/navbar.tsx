@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppFonts } from "@/constants/typography";
 import { Usuario } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { getUsuarioById } from "@/lib/services/usuarios";
@@ -70,8 +71,10 @@ export default function Navbar() {
         className={`${isWeb ? "px-2 py-2 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-lg transition-colors" : ""}`}
       >
         <Image
-          source={require("@/assets/images/pape.png")}
+          source={require("@/assets/images/pape.webp")}
           style={{ width: 110, height: 30 }}
+          accessibilityLabel="Logo La Pape"
+          accessibilityRole="image"
         />
       </Link>
 
@@ -83,6 +86,9 @@ export default function Navbar() {
             activeOpacity={0.8}
             className="rounded-full overflow-hidden bg-gray-200 dark:bg-neutral-600"
             style={{ width: 60, height: 60 }}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir menú de usuario"
+            accessibilityHint="Muestra opciones de perfil y cierre de sesión"
           >
             {user.photoURL && !photoLoadFailed ? (
               <Image
@@ -98,7 +104,7 @@ export default function Navbar() {
               >
                 <Text
                   className="font-bold text-gray-700 dark:text-gray-200"
-                  style={{ fontSize: 18 }}
+                  style={{ fontSize: 18, fontFamily: AppFonts.heading }}
                 >
                   {inicial}
                 </Text>
@@ -138,25 +144,37 @@ export default function Navbar() {
                       className="items-center justify-center rounded-full bg-gray-300 dark:bg-neutral-600"
                       style={{ width: 56, height: 56 }}
                     >
-                      <Text className="text-2xl font-bold text-gray-700 dark:text-gray-200">
+                      <Text
+                        className="text-2xl font-bold text-gray-700 dark:text-gray-200"
+                        style={{ fontFamily: AppFonts.heading }}
+                      >
                         {inicial}
                       </Text>
                     </View>
                   )}
                   <View className="flex-1">
-                    <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <Text
+                      className="text-lg font-semibold text-gray-900 dark:text-white"
+                      style={{ fontFamily: AppFonts.heading }}
+                    >
                       {nombre ?? "Usuario"}
                     </Text>
                   </View>
                 </View>
                 <View className="mb-4 gap-1">
                   {email ? (
-                    <Text className="text-sm text-gray-500 dark:text-gray-500">
+                    <Text
+                      className="text-sm text-gray-500 dark:text-gray-500"
+                      style={{ fontFamily: AppFonts.body }}
+                    >
                       {email}
                     </Text>
                   ) : null}
                   {usuarioData?.telefono ? (
-                    <Text className="text-sm text-gray-500 dark:text-gray-500">
+                    <Text
+                      className="text-sm text-gray-500 dark:text-gray-500"
+                      style={{ fontFamily: AppFonts.body }}
+                    >
                       {usuarioData.telefono}
                     </Text>
                   ) : null}
@@ -169,9 +187,14 @@ export default function Navbar() {
                     router.push("/configuracion");
                   }}
                   className="flex-row items-center gap-3 py-3 px-4 rounded-xl bg-gray-200 dark:bg-neutral-700 mb-3 active:opacity-80"
+                  accessibilityRole="button"
+                  accessibilityLabel="Configuración"
                 >
                   <IconSymbol name="gearshape.fill" size={18} color="#6b7280" />
-                  <Text className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  <Text
+                    className="text-sm font-semibold text-gray-700 dark:text-gray-200"
+                    style={{ fontFamily: AppFonts.bodyStrong }}
+                  >
                     Configuración
                   </Text>
                   <View className="flex-1" />
@@ -181,8 +204,13 @@ export default function Navbar() {
                 <TouchableOpacity
                   onPress={handleSignOut}
                   className="rounded-xl bg-red-100 py-3 dark:bg-red-900/30"
+                  accessibilityRole="button"
+                  accessibilityLabel="Cerrar sesión"
                 >
-                  <Text className="text-center font-semibold text-red-600 dark:text-red-400">
+                  <Text
+                    className="text-center font-semibold text-red-600 dark:text-red-400"
+                    style={{ fontFamily: AppFonts.bodyStrong }}
+                  >
                     Cerrar sesión
                   </Text>
                 </TouchableOpacity>

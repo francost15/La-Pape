@@ -21,7 +21,7 @@ interface StockRowProps {
  * - Naranja: stock bajo pero existente
  * NO usar CardProducts — esa card genérica no encaja en el contexto del resumen.
  */
-function StockRow({ product, showDivider }: StockRowProps) {
+const StockRow = React.memo(function StockRow({ product, showDivider }: StockRowProps) {
   const [imgError, setImgError] = useState(false);
   const hasImg = Boolean(product.imagen?.trim()) && !imgError;
   const stockMinimo = product.stock_minimo ?? 0;
@@ -91,7 +91,7 @@ function StockRow({ product, showDivider }: StockRowProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 

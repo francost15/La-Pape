@@ -16,14 +16,9 @@ import {
 import { getCategoriasByNegocio } from '../categorias';
 import { getNegocioIdByUsuario } from '../usuarios-negocios';
 
-/**
- * Crear un nuevo producto
- * La colección "productos" se crea automáticamente si no existe
- */
 export const createProduct = async (productData: CreateProductInput): Promise<string> => {
   try {
-    // Filtrar campos undefined para evitar errores en Firestore
-    const cleanData: any = {
+    const cleanData: Record<string, unknown> = {
       negocio_id: productData.negocio_id,
       nombre: productData.nombre,
       categoria_id: productData.categoria_id,
@@ -36,7 +31,6 @@ export const createProduct = async (productData: CreateProductInput): Promise<st
       updatedAt: Timestamp.now(),
     };
 
-    // Agregar campos opcionales solo si tienen valor
     if (productData.imagen) cleanData.imagen = productData.imagen;
     if (productData.descripcion) cleanData.descripcion = productData.descripcion;
     if (productData.marca) cleanData.marca = productData.marca;
@@ -45,7 +39,6 @@ export const createProduct = async (productData: CreateProductInput): Promise<st
     }
 
     const docRef = await addDoc(collection(db, 'productos'), cleanData);
-    // El ID del documento es el UUID que se usa como código de barras
     return docRef.id;
   } catch (error) {
     console.error('Error al crear producto:', error);
@@ -53,9 +46,6 @@ export const createProduct = async (productData: CreateProductInput): Promise<st
   }
 };
 
-/**
- * Obtener un producto por ID
- */
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
     const docRef = doc(db, 'productos', id);
@@ -77,30 +67,6 @@ export const getProductById = async (id: string): Promise<Product | null> => {
   }
 };
 
-/**
- * Obtener todos los productos
- */
-export const getAllProducts = async (): Promise<Product[]> => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'productos'));
-    return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Product;
-    });
-  } catch (error) {
-    console.error('Error al obtener productos:', error);
-    throw new Error('No se pudieron obtener los productos');
-  }
-};
-
-/**
- * Obtener productos por negocio_id
- */
 export const getProductsByNegocio = async (negocio_id: string): Promise<Product[]> => {
   try {
     const q = query(
@@ -120,7 +86,6 @@ export const getProductsByNegocio = async (negocio_id: string): Promise<Product[
       } as Product;
     });
     
-    // Ordenar en memoria para evitar necesidad de índice compuesto
     return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
   } catch (error) {
     console.error('Error al obtener productos por negocio:', error);
@@ -128,40 +93,6 @@ export const getProductsByNegocio = async (negocio_id: string): Promise<Product[
   }
 };
 
-/**
- * Obtener productos por categoria_id
- */
-export const getProductsByCategoria = async (negocio_id: string, categoria_id: string): Promise<Product[]> => {
-  try {
-    const q = query(
-      collection(db, 'productos'),
-      where('negocio_id', '==', negocio_id),
-      where('categoria_id', '==', categoria_id),
-      where('activo', '==', true)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const productos = querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate(),
-        updatedAt: data.updatedAt?.toDate(),
-      } as Product;
-    });
-    
-    // Ordenar en memoria para evitar necesidad de índice compuesto
-    return productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-  } catch (error) {
-    console.error('Error al obtener productos por categoría:', error);
-    throw new Error('No se pudieron obtener los productos');
-  }
-};
-
-/**
- * Actualizar un producto
- */
 export const updateProduct = async (
   id: string,
   productData: UpdateProductInput
@@ -169,34 +100,20 @@ export const updateProduct = async (
   try {
     const docRef = doc(db, 'productos', id);
     
-    // Construir el objeto de actualización
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updatedAt: Timestamp.now(),
     };
 
-    // Procesar cada campo del producto
     Object.keys(productData).forEach((key) => {
-      const value = (productData as any)[key];
+      const value = (productData as Record<string, unknown>)[key];
       
-      // Si el valor es undefined, omitirlo completamente
-      if (value === undefined) {
-        return;
-      }
+      if (value === undefined) return;
       
-      // Si el valor es null, usar deleteField para eliminar el campo del documento
       if (value === null) {
         updateData[key] = deleteField();
-      } 
-      // Si es cadena vacía, también eliminar el campo (solo para campos opcionales como imagen, descripcion, marca)
-      else if (value === '' && (key === 'imagen' || key === 'descripcion' || key === 'marca')) {
+      } else if (value === '' && (key === 'imagen' || key === 'descripcion' || key === 'marca')) {
         updateData[key] = deleteField();
-      }
-      // Para valores numéricos 0, mantenerlos (no eliminar)
-      else if (typeof value === 'number' && value === 0) {
-        updateData[key] = value;
-      }
-      // Para otros valores válidos, agregarlos
-      else {
+      } else {
         updateData[key] = value;
       }
     });
@@ -208,9 +125,6 @@ export const updateProduct = async (
   }
 };
 
-/**
- * Eliminar un producto
- */
 export const deleteProduct = async (id: string): Promise<void> => {
   try {
     const docRef = doc(db, 'productos', id);
@@ -221,11 +135,6 @@ export const deleteProduct = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * Obtener datos completos para la pantalla de productos
- * Incluye productos y categorías del negocio del usuario
- * Es un disparador de varios servicios para obtener los datos completos para la pantalla de productos
- */
 export const getProductosScreenData = async (
   userId: string,
   email?: string

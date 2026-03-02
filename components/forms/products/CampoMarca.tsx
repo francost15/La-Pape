@@ -1,6 +1,6 @@
 import { CreateProductFormData } from '@/lib';
 import { useProductosStore } from '@/store/productos-store';
-import { createElement, useMemo, useState } from 'react';
+import { type ChangeEvent, createElement, useMemo, useState } from 'react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { Modal, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -39,7 +39,7 @@ export default function CampoMarca({ control, errors }: CampoMarcaProps) {
                 'select',
                 {
                   value: value || '',
-                  onChange: (e: any) => onChange(e.target.value),
+                  onChange: (e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value),
                   className: 'w-full px-4 py-3 bg-transparent text-black dark:text-white border-none outline-none',
                   style: {
                     width: '100%',

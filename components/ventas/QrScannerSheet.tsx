@@ -8,11 +8,11 @@ import {
   useCameraPermissions,
 } from "expo-camera";
 import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Modal,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -38,6 +38,8 @@ export default function QrScannerSheet({
   const [permission, requestPermission] = useCameraPermissions();
   const addItem = useVentasStore((s) => s.addItem);
   const negocioId = useSessionStore((s) => s.negocioId);
+  const haptic = useHaptic();
+  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
   const scannedRef = useRef(false);
 
   useEffect(() => {
@@ -51,9 +53,7 @@ export default function QrScannerSheet({
       if (!productId) return;
 
       scannedRef.current = true;
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+      hapticMedium();
 
       try {
         const product = await getProductById(productId);
@@ -97,15 +97,13 @@ export default function QrScannerSheet({
         scannedRef.current = false;
       }
     },
-    [addItem, negocioId, onClose, onProductAdded],
+    [addItem, hapticMedium, negocioId, onClose, onProductAdded],
   );
 
   const handleClose = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     onClose();
-  }, [onClose]);
+  }, [haptic, onClose]);
 
   if (!visible) return null;
 

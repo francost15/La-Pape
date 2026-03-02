@@ -4,11 +4,7 @@ import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import NativeToaster from "@/components/NativeToaster";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { initSessionListener } from "@/store/session-store";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -20,8 +16,7 @@ import "./global.css";
 if (Platform.OS === "web" && typeof window !== "undefined") {
   const warn = console.warn;
   console.warn = (...args: unknown[]) => {
-    if (args[0] === "props.pointerEvents is deprecated. Use style.pointerEvents")
-      return;
+    if (args[0] === "props.pointerEvents is deprecated. Use style.pointerEvents") return;
     warn(...args);
   };
 }
@@ -34,9 +29,17 @@ export default function RootLayout() {
     return () => unsub();
   }, []);
 
-  if (Platform.OS === "web" && typeof document !== "undefined") {
-    document.title = "La Pape - Sistema de Ventas";
-  }
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined") return;
+    document.title = "Punto de Venta La Pape";
+    if (!document.querySelector('meta[name="description"]')) {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content =
+        "Sistema punto de venta multi-sucursal para negocios en Chile. Gestión de productos, ventas, inventario y reportes en tiempo real.";
+      document.head.appendChild(meta);
+    }
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

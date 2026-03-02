@@ -3,10 +3,10 @@ import SectionCard from "@/components/resumen/shared/SectionCard";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { VentasPorUsuario as VentasPorUsuarioType } from "@/store/resumen-store";
-import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import { Image } from "expo-image";
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -127,6 +127,7 @@ interface VentasPorUsuarioProps {
 
 export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   const [expanded, setExpanded] = useState(false);
+  const haptic = useHaptic();
   const hasMore = data.length > MAX_VISIBLE;
   const visibleData = expanded || !hasMore ? data : data.slice(0, MAX_VISIBLE);
   const remainingCount = data.length - MAX_VISIBLE;
@@ -135,11 +136,9 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   const totalGeneral = data.reduce((sum, u) => sum + u.total, 0);
 
   const handleVerMas = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     setExpanded(true);
-  }, []);
+  }, [haptic]);
 
   return (
     <SectionCard title="Ventas por Usuario">

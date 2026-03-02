@@ -1,15 +1,16 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
 import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  Platform,
   Pressable,
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
@@ -25,12 +26,14 @@ interface ProductCardMobileProps {
  * Item de lista optimizado para móvil (diseño compacto "List Item").
  * Usa ventas-store (addItem, items, updateQuantity).
  */
-export default function ProductCardMobile({
+export default React.memo(function ProductCardMobile({
   product,
   onProductAdded,
 }: ProductCardMobileProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const haptic = useHaptic();
+  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
   const [imageError, setImageError] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
@@ -51,22 +54,19 @@ export default function ProductCardMobile({
   }, [justAdded]);
 
   const handleAdd = () => {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    hapticMedium();
     addItem(product, 1);
     setJustAdded(true);
     onProductAdded?.();
   };
 
   const handlePlus = () => {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic();
     updateQuantity(product.id, quantity + 1);
   };
 
   const handleMinus = () => {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic();
     updateQuantity(product.id, quantity - 1);
   };
 
@@ -88,6 +88,9 @@ export default function ProductCardMobile({
         borderBottomColor: borderColor,
         gap: 14,
       })}
+      accessibilityRole={inCart ? undefined : "button"}
+      accessibilityLabel={product.nombre}
+      accessibilityHint={inCart ? "Producto en el carrito" : "Agregar al carrito"}
     >
       <View
         style={{
@@ -105,7 +108,7 @@ export default function ProductCardMobile({
           <Image
             source={{ uri: product.imagen }}
             style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
+            contentFit="cover"
             onError={() => setImageError(true)}
           />
         ) : (
@@ -131,6 +134,7 @@ export default function ProductCardMobile({
               letterSpacing: -0.2,
               flex: 1,
               marginRight: 8,
+              fontFamily: AppFonts.bodyStrong,
             }}
             numberOfLines={2}
           >
@@ -145,6 +149,7 @@ export default function ProductCardMobile({
                 fontSize: 13,
                 color: isDark ? "#9CA3AF" : "#6B7280",
                 fontWeight: "500",
+                fontFamily: AppFonts.body,
               }}
               numberOfLines={1}
             >
@@ -161,6 +166,7 @@ export default function ProductCardMobile({
               fontWeight: "700",
               color: "#ea580c",
               letterSpacing: -0.3,
+              fontFamily: AppFonts.display,
             }}
           >
             ${product.precio_venta.toLocaleString()}
@@ -188,4 +194,4 @@ export default function ProductCardMobile({
       </View>
     </Pressable>
   );
-}
+});

@@ -1,26 +1,20 @@
 import { CardProductsProps } from "@/interface/products";
+import { formatCurrency } from "@/lib/utils/format";
 import { useLayoutStore } from "@/store/layout-store";
 import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
-  Platform,
   Pressable,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { IconSymbol } from "../ui/icon-symbol";
 
-function formatCurrency(value: number): string {
-  return `$${value.toLocaleString("es-CL", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
-export default function CardProducts({
+export default React.memo(function CardProducts({
   product,
   className = "",
   variant = "default",
@@ -30,6 +24,8 @@ export default function CardProducts({
 }: CardProductsProps) {
   const isMobile = useLayoutStore((s) => s.isMobile);
   const [imageError, setImageError] = useState(false);
+  const haptic = useHaptic();
+  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
 
   const handlePress = () => {
     router.push({
@@ -44,9 +40,7 @@ export default function CardProducts({
   const hasImage = Boolean(product.imagen?.trim());
 
   const handleCardPress = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    haptic();
     handlePress();
   };
 
@@ -64,7 +58,7 @@ export default function CardProducts({
       {hasImage && !imageError ? (
         <Image
           source={{ uri: product.imagen }}
-          resizeMode="cover"
+          contentFit="cover"
           className="h-full w-full"
           onError={() => setImageError(true)}
         />
@@ -220,7 +214,7 @@ export default function CardProducts({
           {hasImage && !imageError ? (
             <Image
               source={{ uri: product.imagen }}
-              resizeMode="cover"
+              contentFit="cover"
               className="h-full w-full"
               onError={() => setImageError(true)}
             />
@@ -273,11 +267,7 @@ export default function CardProducts({
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      onPressIn={() => {
-        if (Platform.OS !== "web") {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        }
-      }}
+      onPressIn={hapticMedium}
       onPress={handlePress}
       className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-800"
     >
@@ -285,7 +275,7 @@ export default function CardProducts({
         {hasImage && !imageError ? (
           <Image
             source={{ uri: product.imagen }}
-            resizeMode="cover"
+            contentFit="cover"
             className="h-full w-full"
             onError={() => setImageError(true)}
           />
@@ -342,4 +332,4 @@ export default function CardProducts({
       </View>
     </TouchableOpacity>
   );
-}
+});

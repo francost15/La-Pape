@@ -1,9 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Merriweather:wght@400;700&family=Nunito+Sans:wght@400;600;700;800&display=swap");
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
 
+:root {
+  --font-display: "Bebas Neue", "Oswald", "Arial Narrow", sans-serif;
+  --font-heading: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "Nunito Sans", "Segoe UI", sans-serif;
+}
 
 /* Quitar outline de inputs en web */
 input:focus,

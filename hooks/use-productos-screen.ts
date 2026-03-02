@@ -29,8 +29,9 @@ export function useProductosScreen() {
 
       const negocioId = await getNegocioIdByUsuario(userId, email);
       if (negocioId) setNegocioId(negocioId);
-    } catch (e: any) {
-      setError(e?.message || 'Error al cargar los productos');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Error al cargar los productos';
+      setError(message);
     } finally {
       setLoading(false);
     }

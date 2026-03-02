@@ -1,4 +1,5 @@
 import type { LoginFormData } from "@/lib/validations/auth-schema";
+import { AppFonts } from "@/constants/typography";
 import { Image } from "expo-image";
 import * as React from "react";
 import {
@@ -75,6 +76,7 @@ export default function AuthForm({
                 borderColor: errors.email ? "#ef4444" : "transparent",
                 color: textColor,
                 fontSize: 16,
+                fontFamily: AppFonts.body,
               }}
               placeholderTextColor={placeholderColor}
               keyboardType="email-address"
@@ -84,7 +86,15 @@ export default function AuthForm({
           )}
         />
         {errors.email && (
-          <Text style={{ color: "#ef4444", fontSize: 14, marginTop: 4, paddingHorizontal: 4 }}>
+          <Text
+            style={{
+              color: "#ef4444",
+              fontSize: 14,
+              marginTop: 4,
+              paddingHorizontal: 4,
+              fontFamily: AppFonts.body,
+            }}
+          >
             {errors.email.message}
           </Text>
         )}
@@ -110,13 +120,22 @@ export default function AuthForm({
                 borderColor: errors.password ? "#ef4444" : "transparent",
                 color: textColor,
                 fontSize: 16,
+                fontFamily: AppFonts.body,
               }}
               placeholderTextColor={placeholderColor}
             />
           )}
         />
         {errors.password && (
-          <Text style={{ color: "#ef4444", fontSize: 14, marginTop: 4, paddingHorizontal: 4 }}>
+          <Text
+            style={{
+              color: "#ef4444",
+              fontSize: 14,
+              marginTop: 4,
+              paddingHorizontal: 4,
+              fontFamily: AppFonts.body,
+            }}
+          >
             {errors.password.message}
           </Text>
         )}
@@ -134,11 +153,20 @@ export default function AuthForm({
           alignItems: "center",
           justifyContent: "center",
         }}
+        accessibilityRole="button"
+        accessibilityLabel={isSignUp ? "Registrarse" : "Iniciar sesión"}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={{ color: "#fff", fontWeight: "500", fontSize: 16 }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "600",
+              fontSize: 16,
+              fontFamily: AppFonts.bodyStrong,
+            }}
+          >
             {isSignUp ? "Registrarse" : "Iniciar sesión"}
           </Text>
         )}
@@ -160,33 +188,44 @@ export default function AuthForm({
           borderWidth: 1,
           borderColor: isDark ? "#404040" : "#e5e7eb",
         }}
+        accessibilityRole="button"
+        accessibilityLabel={isSignUp ? "Registrarse con Google" : "Iniciar sesión con Google"}
       >
         {googleLoading ? (
           <ActivityIndicator size="small" color={isDark ? "#a3a3a3" : "#4b5563"} />
         ) : (
           <Image
-            source={require("@/assets/images/google.png")}
+            source={require("@/assets/images/google.webp")}
             style={{ width: 20, height: 20 }}
             contentFit="contain"
+            accessibilityLabel="Logo de Google"
+            accessibilityRole="image"
           />
         )}
         <Text
           style={{
             color: isDark ? "#d4d4d4" : "#374151",
-            fontWeight: "500",
+            fontWeight: "600",
             fontSize: 16,
+            fontFamily: AppFonts.bodyStrong,
           }}
         >
           {isSignUp ? "Registrarme con Google" : "Iniciar sesión con Google"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={onToggleSignUp} style={{ marginTop: 8 }}>
+      <TouchableOpacity
+        onPress={onToggleSignUp}
+        style={{ marginTop: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel={isSignUp ? "Cambiar a iniciar sesión" : "Cambiar a registro"}
+      >
         <Text
           style={{
             color: "#ea580c",
             fontSize: 14,
             textAlign: "center",
+            fontFamily: AppFonts.body,
           }}
         >
           {isSignUp

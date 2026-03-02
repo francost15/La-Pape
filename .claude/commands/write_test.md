@@ -1,0 +1,16 @@
+Write compregensive test for: $ARGUMENTS
+
+Testing conventions:
+
+- Use Vitests with React Testing Library
+- Place test files in a **tests** directory in the same folder as the source file
+- Name test files as [filename].test.ts(x)
+
+- use @/prefix for imports
+
+Coverage:
+
+-Test happy paths
+
+- Test edge cases
+- Test error states

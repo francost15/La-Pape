@@ -2,15 +2,16 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
+import { useHaptic } from "@/hooks/use-haptic";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   Platform,
   Pressable,
   Text,
   useWindowDimensions,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
 
@@ -22,7 +23,7 @@ interface ProductItemVentaProps {
   onProductAdded?: () => void;
 }
 
-export default function ProductItemVenta({
+export default React.memo(function ProductItemVenta({
   product,
   compact = false,
   onProductAdded,
@@ -30,6 +31,7 @@ export default function ProductItemVenta({
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
   const addItem = useVentasStore((s) => s.addItem);
+  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const [imageError, setImageError] = useState(false);
@@ -43,7 +45,7 @@ export default function ProductItemVenta({
   }, [justAdded]);
 
   const handleAdd = () => {
-    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    hapticMedium();
     addItem(product, 1);
     setJustAdded(true);
     onProductAdded?.();
@@ -69,6 +71,9 @@ export default function ProductItemVenta({
           padding: isDesktop ? 14 : 10,
           ...(Platform.OS !== "web" ? { elevation: 1 } : {}),
         }}
+        accessibilityRole="button"
+        accessibilityLabel={product.nombre}
+        accessibilityHint="Agregar al carrito"
       >
         <View
           style={{
@@ -83,7 +88,7 @@ export default function ProductItemVenta({
             <Image
               source={{ uri: product.imagen }}
               style={{ width: "100%", height: "100%" }}
-              resizeMode="cover"
+              contentFit="cover"
               onError={() => setImageError(true)}
             />
           ) : (
@@ -137,6 +142,9 @@ export default function ProductItemVenta({
           ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }
           : { elevation: 2 }),
       }}
+      accessibilityRole="button"
+      accessibilityLabel={product.nombre}
+      accessibilityHint="Agregar al carrito"
     >
       <View
         style={{
@@ -150,7 +158,7 @@ export default function ProductItemVenta({
           <Image
             source={{ uri: product.imagen }}
             style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
+            contentFit="cover"
             onError={() => setImageError(true)}
           />
         ) : (
@@ -199,4 +207,4 @@ export default function ProductItemVenta({
       </View>
     </Pressable>
   );
-}
+});
