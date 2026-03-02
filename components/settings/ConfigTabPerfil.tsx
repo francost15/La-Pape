@@ -5,8 +5,7 @@ import { notify } from "@/lib/notify";
 import { useSessionStore } from "@/store/session-store";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { updateProfile } from "firebase/auth";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { updateProfile , onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,

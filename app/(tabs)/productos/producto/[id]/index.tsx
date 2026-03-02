@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import ProductImageDisplay from '@/components/products/ProductImageDisplay';
+import QRCode from 'react-native-qrcode-svg';
 import ProductPriceCard from '@/components/products/ProductPriceCard';
 import ProductStockCard from '@/components/products/ProductStockCard';
 import { auth, getProductosScreenData } from '@/lib';
@@ -12,12 +13,15 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 export default function ProductoById() {
   const { id, product: productParam } = useLocalSearchParams<{ id: string; product?: string }>();
@@ -202,6 +206,19 @@ export default function ProductoById() {
     </View>
   );
 
+  const BackButton = () => (
+    <Pressable
+      onPress={() => {
+        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        router.back();
+      }}
+      className="flex-row items-center gap-2 mb-4 active:opacity-70"
+    >
+      <IconSymbol name="chevron.left" size={20} color="#6b7280" />
+      <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">Volver</Text>
+    </Pressable>
+  );
+
   // ─── Layout DESKTOP (≥ 768px) ───────────────────────────────────────────────
   // Imagen grande izquierda, info + botones derecha. Sin barra inferior fija.
   if (isDesktop) {
@@ -211,7 +228,9 @@ export default function ProductoById() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ alignItems: 'center', padding: 40 }}
       >
-        <View style={{ width: '100%', maxWidth: 1100 }} className="flex-row gap-10 items-start">
+        <View style={{ width: '100%', maxWidth: 1100 }}>
+          <BackButton />
+          <View className="flex-row gap-10 items-start mt-0">
           <View
             className="rounded-3xl overflow-hidden bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shrink-0"
             style={{ width: 420, height: 420 }}
@@ -224,7 +243,12 @@ export default function ProductoById() {
           </View>
 
           <View className="flex-1 gap-4">
-            <View className="gap-1">{infoSection}</View>
+            <View className="flex-row items-start gap-3">
+              <QRCode value={product.id} size={72} />
+              <View className="flex-1 min-w-0">
+                <View className="gap-1">{infoSection}</View>
+              </View>
+            </View>
             <ProductPriceCard
               precioVenta={product.precio_venta}
               precioMayoreo={product.precio_mayoreo}
@@ -236,6 +260,7 @@ export default function ProductoById() {
               isCritical={isCritical}
             />
             {actionButtons}
+          </View>
           </View>
         </View>
       </ScrollView>
@@ -251,6 +276,7 @@ export default function ProductoById() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
+        <BackButton />
         <View
           className="w-full rounded-2xl overflow-hidden bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700"
           style={{ aspectRatio: 4 / 3 }}
@@ -275,6 +301,18 @@ export default function ProductoById() {
           stockMinimo={product.stock_minimo}
           isCritical={isCritical}
         />
+
+        <View className="bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700 p-4">
+          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+            Código QR
+          </Text>
+          <View className="items-center">
+            <QRCode value={product.id} size={140} />
+          </View>
+          <Text className="text-[11px] text-gray-500 dark:text-gray-400 text-center mt-2">
+            Escanea para agregar al carrito
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Barra fija — paddingBottom evita solapamiento con el tab bar */}

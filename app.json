@@ -44,6 +44,13 @@
           }
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "La Pape necesita la cámara para escanear códigos QR de productos",
+          "barcodeScannerEnabled": true
+        }
+      ],
       "@react-native-google-signin/google-signin"
     ],
     "experiments": {

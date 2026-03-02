@@ -1,5 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import ProductListContent from "@/components/ventas/ProductListContent";
+import QrScannerSheet from "@/components/ventas/QrScannerSheet";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { notify } from "@/lib/notify";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
@@ -38,6 +39,7 @@ export default function AddProductsSheet() {
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  const [qrScannerVisible, setQrScannerVisible] = React.useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const dragOffsetRef = useRef(0);
 
@@ -233,6 +235,11 @@ export default function AddProductsSheet() {
                 onProductAdded={showProductAddedToast}
                 searchSize="large"
                 showQrButton
+                onQrPress={
+                  Platform.OS !== "web"
+                    ? () => setQrScannerVisible(true)
+                    : undefined
+                }
                 listKey="mobile"
                 contentContainerStyle={{
                   paddingBottom: 100 + insets.bottom,
@@ -244,6 +251,11 @@ export default function AddProductsSheet() {
           </View>
         </Animated.View>
       </View>
+      <QrScannerSheet
+        visible={qrScannerVisible}
+        onClose={() => setQrScannerVisible(false)}
+        onProductAdded={showProductAddedToast}
+      />
     </View>
   );
 }

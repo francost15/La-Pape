@@ -18,12 +18,15 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function EditProduct() {
   const isWeb = Platform.OS === 'web';
@@ -234,6 +237,19 @@ export default function EditProduct() {
     </View>
   );
 
+  const BackButton = () => (
+    <Pressable
+      onPress={() => {
+        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        router.back();
+      }}
+      className="flex-row items-center gap-2 mb-4 active:opacity-70"
+    >
+      <IconSymbol name="chevron.left" size={20} color="#6b7280" />
+      <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">Volver</Text>
+    </Pressable>
+  );
+
   if (isDesktop) {
     return (
       <KeyboardAvoidingView
@@ -246,7 +262,9 @@ export default function EditProduct() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ width: '100%', maxWidth: 1100 }} className="flex-row gap-10 items-start">
+          <View style={{ width: '100%', maxWidth: 1100 }}>
+            <BackButton />
+            <View className="flex-row gap-10 items-start">
             {/* Columna izquierda: imagen — mismo estilo que vista detalle */}
             <View
               className="rounded-3xl overflow-hidden bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shrink-0"
@@ -271,6 +289,7 @@ export default function EditProduct() {
               />
               {actionButtons}
             </View>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -288,6 +307,7 @@ export default function EditProduct() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        <BackButton />
         <FormProductos
           control={control}
           errors={errors}

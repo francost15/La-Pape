@@ -54,7 +54,6 @@ export default function ProductItemVenta({
 
   const imgSize = isDesktop ? 72 : 52;
   const cardGap = isDesktop ? 16 : 12;
-  const cardRadius = isDesktop ? 16 : 14;
   const imgRadius = isDesktop ? 14 : 12;
   const btnSize = isDesktop ? 48 : 36;
 
