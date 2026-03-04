@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/images/pape.webp" alt="La Pape Logo" width="180" />
+  <img src="./assets/images/favicon.png" alt="La Pape Logo" width="180" />
 
   <h1>La Pape — Sistema de Ventas</h1>
   <p>Punto de venta multi-tenant para negocios</p>
