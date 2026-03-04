@@ -2,7 +2,7 @@
   <img src="./assets/images/pape.webp" alt="La Pape Logo" width="180" />
 
   <h1>La Pape — Sistema de Ventas</h1>
-  <p>Punto de venta multi-tenant para negocios chilenos</p>
+  <p>Punto de venta multi-tenant para negocios</p>
 
   <p>
     <img src="https://img.shields.io/badge/Expo-SDK%2053-000020?logo=expo&logoColor=white" />
@@ -16,7 +16,7 @@
 
 ## ¿Qué es La Pape?
 
-**La Pape** es una aplicación móvil/web de punto de venta (POS) diseñada para pequeños y medianos negocios chilenos. Soporta múltiples usuarios, sucursales y entidades de negocio (negocios) desde una sola plataforma. Funciona en **Android**, **iOS** y **Web**.
+**La Pape** es una aplicación móvil/web de punto de venta (POS) diseñada para una papeleria. Soporta múltiples usuarios, sucursales y entidades de negocio (negocios) desde una sola plataforma. Funciona en **Android**, **iOS** y **Web**.
 
 ---
 
@@ -164,5 +164,5 @@ ios/          → proyecto nativo iOS
 ---
 
 <div align="center">
-  <sub>Construido con ❤️ en Chile · <strong>La Pape v1.0.0</strong></sub>
+  <sub>Construido con ❤️ en Mexico· <strong>La Pape v1.0.0</strong></sub>
 </div>
