@@ -1,13 +1,6 @@
 import { useLayoutStore } from "@/store/layout-store";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -61,6 +54,7 @@ function MobileModal({
       animationType="none"
       onRequestClose={onClose}
       statusBarTranslucent
+      accessibilityViewIsModal
     >
       <Animated.View
         entering={FadeIn.duration(200)}
@@ -68,13 +62,19 @@ function MobileModal({
         className="flex-1 justify-end"
         style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       >
-        <Pressable className="flex-1" onPress={onClose} />
+        <Pressable
+          className="flex-1"
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Cerrar selector de período"
+          accessibilityHint="Cierra el modal de selección de rango"
+        />
         <Animated.View
           entering={SlideInDown.springify().damping(20).stiffness(180)}
           exiting={SlideOutDown.duration(200)}
         >
-          <View className="bg-white dark:bg-neutral-800 rounded-t-3xl">
-            <View className="w-10 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full self-center mt-3 mb-1" />
+          <View className="rounded-t-3xl bg-white dark:bg-neutral-800">
+            <View className="mt-3 mb-1 h-1 w-10 self-center rounded-full bg-gray-300 dark:bg-neutral-600" />
             <ScrollView
               bounces={false}
               showsVerticalScrollIndicator={false}
@@ -106,6 +106,7 @@ function DesktopModal({
       animationType="none"
       onRequestClose={onClose}
       statusBarTranslucent
+      accessibilityViewIsModal
     >
       <Animated.View
         entering={FadeIn.duration(200)}
@@ -114,8 +115,11 @@ function DesktopModal({
         style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
       >
         <Pressable
-          className="absolute top-0 left-0 right-0 bottom-0"
+          className="absolute top-0 right-0 bottom-0 left-0"
           onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Cerrar selector de período"
+          accessibilityHint="Cierra el modal de selección de rango"
         />
         <Animated.View
           entering={ZoomIn.duration(250).springify().damping(18)}
@@ -123,7 +127,7 @@ function DesktopModal({
           className="w-full max-w-md"
         >
           <View
-            className="bg-white dark:bg-neutral-800 rounded-3xl mx-4 overflow-hidden"
+            className="mx-4 overflow-hidden rounded-3xl bg-white dark:bg-neutral-800"
             style={
               Platform.OS === "web"
                 ? { boxShadow: "0 24px 48px rgba(0,0,0,0.2)" }
@@ -174,17 +178,13 @@ export default function PeriodFilter({
         onRangoPersonalizadoChange?.({ inicio: null, fin: null });
       }
     },
-    [onPeriodoChange, onRangoPersonalizadoChange],
+    [onPeriodoChange, onRangoPersonalizadoChange]
   );
 
   const handleCloseModal = useCallback(() => setShowModal(false), []);
 
   const handleConfirm = useCallback(() => {
-    if (
-      rangoTemporal.inicio &&
-      rangoTemporal.fin &&
-      rangoTemporal.inicio <= rangoTemporal.fin
-    ) {
+    if (rangoTemporal.inicio && rangoTemporal.fin && rangoTemporal.inicio <= rangoTemporal.fin) {
       onRangoPersonalizadoChange?.(rangoTemporal);
       onPeriodoChange("personalizado");
       setShowModal(false);
@@ -192,32 +192,25 @@ export default function PeriodFilter({
   }, [rangoTemporal, onPeriodoChange, onRangoPersonalizadoChange]);
 
   const hasCustomRange =
-    periodo === "personalizado" &&
-    rangoPersonalizado?.inicio &&
-    rangoPersonalizado?.fin;
+    periodo === "personalizado" && rangoPersonalizado?.inicio && rangoPersonalizado?.fin;
 
   const ModalWrapper = isMobile ? MobileModal : DesktopModal;
 
   return (
     <>
-      <View
-        className={`mb-6 ${
-          isMobile ? "w-full" : "w-full max-w-md self-center"
-        }`}
-      >
-        <PeriodBadges
-          periodo={periodo}
-          onSelect={handleSelect}
-          isMobile={isMobile}
-        />
+      <View className="mb-4" style={!isMobile ? { alignSelf: "flex-start" } : undefined}>
+        <PeriodBadges periodo={periodo} onSelect={handleSelect} isMobile={isMobile} />
 
         {hasCustomRange && (
           <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
             <Pressable
               onPress={() => setShowModal(true)}
-              className="mt-3 flex-row items-center justify-center gap-2 py-2 px-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/40"
+              className="mt-2 flex-row items-center gap-1.5 rounded-lg border border-orange-200/60 bg-orange-50 px-3 py-1.5 dark:border-orange-800/30 dark:bg-orange-900/20"
+              accessibilityRole="button"
+              accessibilityLabel="Editar período personalizado"
+              accessibilityHint="Abre el modal para cambiar fecha de inicio y fin"
             >
-              <Text className="text-sm font-medium text-orange-700 dark:text-orange-400">
+              <Text className="text-[12px] font-medium text-orange-600 dark:text-orange-400">
                 {formatDate(rangoPersonalizado.inicio)} — {formatDate(rangoPersonalizado.fin)}
               </Text>
             </Pressable>

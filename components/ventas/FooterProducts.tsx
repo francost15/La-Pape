@@ -39,7 +39,7 @@ export default function FooterProducts() {
       {!sheetVisible && (
         <Pressable
           onPress={handleOpenSheet}
-          style={{
+          style={({ pressed }) => ({
             position: "absolute",
             bottom: TAB_BAR_CLEARANCE,
             left: 12,
@@ -54,6 +54,7 @@ export default function FooterProducts() {
             borderRadius: 14,
             paddingHorizontal: 16,
             paddingVertical: 14,
+            opacity: pressed ? 0.92 : 1,
             ...(Platform.OS === "web"
               ? { boxShadow: fabShadow }
               : {
@@ -63,7 +64,10 @@ export default function FooterProducts() {
                   shadowRadius: 10,
                   elevation: 8,
                 }),
-          }}
+          })}
+          accessibilityRole="button"
+          accessibilityLabel="Agregar productos"
+          accessibilityHint="Abre el panel para buscar y añadir productos al carrito"
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Text

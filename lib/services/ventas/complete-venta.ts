@@ -1,5 +1,6 @@
 import { CartItem } from '@/store/ventas-store';
 import { db } from '@/lib/firebase';
+import { InsufficientStockError, InvalidQuantityError, ProductNotFoundError, VentaError } from '@/lib/errors';
 import {
   collection,
   doc,
@@ -23,19 +24,35 @@ export interface CompleteVentaResult {
 }
 
 /**
- * Orquesta el flujo completo de una venta:
- * 1. Crea el documento de venta
- * 2. Crea los detalles (una línea por producto)
- * 3. Registra el pago en efectivo
- * 4. Descuenta el stock de cada producto
- * 5. Registra movimientos de inventario tipo SALIDA
+ * Orchestrates the full transactional flow of a sale.
+ * 
+ * Uses a Firestore atomic transaction to guarantee that either all steps succeed 
+ * together or none do, preventing data inconsistencies (e.g. charging without 
+ * reducing stock, or reducing stock for a failed payment).
+ * 
+ * Flow:
+ * 1. Validates quantities and aggregates identical items
+ * 2. Locks and reads current stock for all involved products
+ * 3. Verifies stock availability (throws if insufficient)
+ * 4. Creates the main Venta document
+ * 5. Creates individual VentaDetalle lines for each product
+ * 6. Records the payment in VentaPagos
+ * 7. Updates the stock count in the Productos collection
+ * 8. Logs the inventory movement in InventarioMovimientos
+ * 
+ * @param params - The necessary data including the cart items, user, and totals
+ * @returns An object containing the generated ventaId, the timestamp, and the confirmed total
+ * @throws VentaError if the cart is empty
+ * @throws InvalidQuantityError if any item has zero or negative quantity
+ * @throws ProductNotFoundError if a product no longer exists in DB
+ * @throws InsufficientStockError if there isn't enough stock to fulfill the order
  */
 export async function completeVentaFlow(
   params: CompleteVentaParams,
 ): Promise<CompleteVentaResult> {
   const { items, negocioId, sucursalId, userId, total, subtotal } = params;
   if (!items.length) {
-    throw new Error('No hay productos en el carrito');
+    throw new VentaError('No hay productos en el carrito');
   }
 
   const fecha = new Date();
@@ -44,7 +61,7 @@ export async function completeVentaFlow(
   const qtyByProduct = new Map<string, number>();
   for (const item of items) {
     if (item.quantity <= 0) {
-      throw new Error(`Cantidad inválida para ${item.product.nombre}`);
+      throw new InvalidQuantityError(item.product.nombre);
     }
     qtyByProduct.set(
       item.productId,
@@ -53,25 +70,24 @@ export async function completeVentaFlow(
   }
 
   const ventaId = await runTransaction(db, async (transaction) => {
-    // Transacción atómica para evitar ventas parciales (detalle/pago/stock desincronizados).
+    // Phase 1: Read all necessary data first (Firestore transaction rule)
     const stockByProduct = new Map<string, number>();
     for (const [productId, requestedQty] of qtyByProduct.entries()) {
       const productRef = doc(db, 'productos', productId);
       const productSnap = await transaction.get(productRef);
       if (!productSnap.exists()) {
-        throw new Error(`Producto no encontrado: ${productId}`);
+        throw new ProductNotFoundError(productId);
       }
 
       const currentStock = Number(productSnap.data().cantidad ?? 0);
       if (currentStock < requestedQty) {
-        throw new Error(
-          `Stock insuficiente para "${itemName(items, productId)}" (${currentStock} disponible)`,
-        );
+        throw new InsufficientStockError(itemName(items, productId), currentStock);
       }
 
       stockByProduct.set(productId, currentStock);
     }
 
+    // Phase 2: Perform all write operations
     const ventaRef = doc(collection(db, 'ventas'));
     transaction.set(ventaRef, {
       negocio_id: negocioId,
@@ -136,6 +152,10 @@ export async function completeVentaFlow(
   return { ventaId, fecha, total };
 }
 
+/**
+ * Utility to extract the name of a product from the cart items array 
+ * given its ID, primarily used for building readable error messages.
+ */
 function itemName(items: CartItem[], productId: string): string {
   return items.find((item) => item.productId === productId)?.product.nombre ?? 'Producto';
 }

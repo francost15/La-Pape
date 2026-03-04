@@ -1,6 +1,6 @@
 import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect } from "react";
-import { StyleProp, ViewStyle } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Platform, StyleProp, ViewStyle } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -27,15 +27,30 @@ export default function AnimatedScreen({
   const isFocused = useIsFocused();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(6);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (isFocused) {
-      opacity.value = 0;
-      translateY.value = 6;
-      opacity.value = withTiming(1, TIMING_CONFIG);
-      translateY.value = withTiming(0, TIMING_CONFIG);
+      if (reduceMotion) {
+        opacity.value = 1;
+        translateY.value = 0;
+      } else {
+        opacity.value = 0;
+        translateY.value = 6;
+        opacity.value = withTiming(1, TIMING_CONFIG);
+        translateY.value = withTiming(0, TIMING_CONFIG);
+      }
     }
-  }, [isFocused, opacity, translateY]);
+  }, [isFocused, opacity, reduceMotion, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

@@ -1,18 +1,8 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
-import {
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { LayoutChangeEvent, Platform, Pressable, Text, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import type { Periodo } from "./PeriodFilter";
 
 const PERIODOS: Periodo[] = ["semana", "mes", "año", "personalizado"];
@@ -32,11 +22,7 @@ export interface PeriodBadgesProps {
   isMobile: boolean;
 }
 
-export default function PeriodBadges({
-  periodo,
-  onSelect,
-  isMobile,
-}: PeriodBadgesProps) {
+function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   const colorScheme = useColorScheme();
   const isDark = (colorScheme ?? "light") === "dark";
 
@@ -59,7 +45,7 @@ export default function PeriodBadges({
         indicatorW.value = layout.width;
       }
     },
-    [indicatorX, indicatorW],
+    [indicatorX, indicatorW]
   );
 
   const handleLayout = useCallback(
@@ -74,7 +60,7 @@ export default function PeriodBadges({
         }
       }
     },
-    [periodo, syncIndicator],
+    [periodo, syncIndicator]
   );
 
   useEffect(() => {
@@ -87,7 +73,7 @@ export default function PeriodBadges({
     width: indicatorW.value,
     top: 0,
     bottom: 0,
-    borderRadius: isMobile ? 10 : 12,
+    borderRadius: 8,
   }));
 
   const handlePress = useCallback(
@@ -95,30 +81,24 @@ export default function PeriodBadges({
       haptic();
       onSelect(p);
     },
-    [haptic, onSelect],
+    [haptic, onSelect]
   );
 
   return (
-    <View
-      className={`flex-row relative ${
-        isMobile
-          ? "rounded-xl p-1 bg-gray-100 dark:bg-neutral-800"
-          : "rounded-2xl p-1.5 bg-gray-100 dark:bg-neutral-800/80"
-      }`}
-    >
+    <View className="relative flex-row rounded-xl bg-gray-100 p-1 dark:bg-neutral-800">
       <Animated.View
         style={[
           indicatorStyle,
           {
             backgroundColor: "#ea580c",
             ...(Platform.OS === "web"
-              ? { boxShadow: "0 2px 8px rgba(234,88,12,0.35)" }
+              ? { boxShadow: "0 1px 6px rgba(234,88,12,0.3)" }
               : {
                   shadowColor: "#ea580c",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: isDark ? 0.5 : 0.35,
-                  shadowRadius: 6,
-                  elevation: 4,
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: isDark ? 0.45 : 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }),
           },
         ]}
@@ -130,19 +110,18 @@ export default function PeriodBadges({
             key={p}
             onLayout={handleLayout(p)}
             onPress={() => handlePress(p)}
-            style={{ flex: 1, zIndex: 1 }}
-            className={`items-center justify-center ${
-              isMobile ? "py-2.5" : "py-3 px-5"
-            }`}
-            accessibilityLabel={`Filtrar por ${LABELS[p]}`}
-            accessibilityRole="button"
+            // Mobile: flex-1 para ocupar todo el ancho
+            // Desktop: ancho natural según el texto + padding
+            style={{ zIndex: 1, ...(isMobile ? { flex: 1 } : {}) }}
+            className={`items-center justify-center ${isMobile ? "py-2.5" : "px-4 py-2"}`}
+            accessibilityLabel={`Período ${LABELS[p]}`}
+            accessibilityRole="tab"
+            accessibilityHint="Aplica este período al resumen"
             accessibilityState={{ selected: isSelected }}
           >
             <Text
-              className={`font-semibold ${isMobile ? "text-[13px]" : "text-sm"} ${
-                isSelected
-                  ? "text-white"
-                  : "text-gray-500 dark:text-gray-400"
+              className={`text-[13px] font-semibold ${
+                isSelected ? "text-white" : "text-gray-500 dark:text-gray-400"
               }`}
             >
               {LABELS[p]}
@@ -153,3 +132,5 @@ export default function PeriodBadges({
     </View>
   );
 }
+
+export default React.memo(PeriodBadges);

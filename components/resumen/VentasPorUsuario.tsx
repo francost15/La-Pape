@@ -1,6 +1,5 @@
 import EmptyState from "@/components/resumen/shared/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { VentasPorUsuario as VentasPorUsuarioType } from "@/store/resumen-store";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -16,7 +15,6 @@ import Animated, {
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
-/** Retorna las iniciales de un nombre para el avatar fallback. */
 function getInitials(nombre: string): string {
   const parts = nombre.trim().split(/\s+/);
   if (parts.length >= 2) {
@@ -29,22 +27,25 @@ function getInitials(nombre: string): string {
 
 interface VentasPorUsuarioRowProps {
   item: VentasPorUsuarioType;
-  /** Porcentaje del total de ventas que representa este usuario (0-100) */
   porcentajeDelTotal: number;
   index: number;
+  showDivider: boolean;
 }
 
 /**
- * Fila de vendedor con avatar, stats y barra de proporción.
- * Diseñada para ocupar siempre el ancho completo de la sección (no se wrappea).
- * La barra de progreso permite comparar el peso de cada vendedor de un vistazo.
+ * Fila de vendedor sin fondo de row — separada por divisor sutil.
+ * La barra de progreso usa 2px para no dominar visualmente.
  */
-function VentasPorUsuarioRow({ item, porcentajeDelTotal, index }: VentasPorUsuarioRowProps) {
+function VentasPorUsuarioRow({
+  item,
+  porcentajeDelTotal,
+  index,
+  showDivider,
+}: VentasPorUsuarioRowProps) {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(6);
   const [photoError, setPhotoError] = useState(false);
 
-  // Animación de entrada escalonada por índice
   useEffect(() => {
     const delay = index * 50;
     opacity.value = withDelay(delay, withTiming(1, { duration: 240 }));
@@ -61,54 +62,56 @@ function VentasPorUsuarioRow({ item, porcentajeDelTotal, index }: VentasPorUsuar
   return (
     <Animated.View
       style={animatedStyle}
-      // Siempre ocupa el ancho completo del contenedor — no usar flex-1 aquí
-      className="py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-neutral-700/50 gap-2"
+      className={`gap-1.5 py-2.5 ${showDivider ? "border-b border-gray-100 dark:border-neutral-700/60" : ""}`}
     >
       {/* Avatar + nombre + ventas + monto */}
       <View className="flex-row items-center gap-3">
         {/* Avatar circular */}
-        <View className="w-9 h-9 rounded-full overflow-hidden bg-orange-100 dark:bg-orange-900/30 shrink-0">
+        <View className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-orange-50 dark:bg-orange-900/20">
           {showPhoto ? (
             <Image
               source={{ uri: item.foto }}
-              style={{ width: 36, height: 36 }}
+              style={{ width: 32, height: 32 }}
               contentFit="cover"
               onError={() => setPhotoError(true)}
             />
           ) : (
-            <View className="w-full h-full items-center justify-center">
-              <Text className="text-orange-600 dark:text-orange-400 font-bold text-xs">
+            <View className="h-full w-full items-center justify-center">
+              <Text className="text-[11px] font-bold text-orange-500 dark:text-orange-400">
                 {getInitials(item.nombre)}
               </Text>
             </View>
           )}
         </View>
 
-        {/* Nombre y subtítulo de ventas */}
-        <View className="flex-1 min-w-0">
-          <Text className="text-[13px] font-semibold text-gray-800 dark:text-gray-200" numberOfLines={1}>
+        {/* Nombre y subtítulo */}
+        <View className="min-w-0 flex-1">
+          <Text
+            className="text-[13px] font-semibold text-gray-800 dark:text-gray-200"
+            numberOfLines={1}
+          >
             {item.nombre}
           </Text>
-          <Text className="text-[11px] text-gray-500 dark:text-gray-400">
+          <Text className="text-[10px] text-gray-400 dark:text-gray-500">
             {item.transacciones} {pluralize(item.transacciones, "venta", "ventas")}
           </Text>
         </View>
 
         {/* Monto + porcentaje */}
-        <View className="items-end shrink-0">
-          <Text className="text-[13px] font-bold text-orange-600 dark:text-orange-400 tabular-nums">
+        <View className="shrink-0 items-end">
+          <Text className="text-[13px] font-bold text-gray-900 tabular-nums dark:text-white">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-gray-400 dark:text-gray-500 tabular-nums">
-            {porcentajeDelTotal.toFixed(0)}% del total
+          <Text className="text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
+            {porcentajeDelTotal.toFixed(0)}%
           </Text>
         </View>
       </View>
 
-      {/* Barra de participación en ventas totales */}
-      <View className="h-1.5 bg-gray-200 dark:bg-neutral-600 rounded-full overflow-hidden">
+      {/* Barra de participación: 2px, discreta */}
+      <View className="ml-11 h-0.5 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-700/80">
         <View
-          className="h-full bg-orange-500 rounded-full"
+          className="h-full rounded-full bg-orange-400 dark:bg-orange-500"
           style={{ width: `${porcentajeDelTotal}%` }}
         />
       </View>
@@ -118,7 +121,6 @@ function VentasPorUsuarioRow({ item, porcentajeDelTotal, index }: VentasPorUsuar
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
-/** Cuántos usuarios mostrar antes del botón "Ver más" */
 const MAX_VISIBLE = 5;
 
 interface VentasPorUsuarioProps {
@@ -131,8 +133,6 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   const hasMore = data.length > MAX_VISIBLE;
   const visibleData = expanded || !hasMore ? data : data.slice(0, MAX_VISIBLE);
   const remainingCount = data.length - MAX_VISIBLE;
-
-  // Total general para calcular el % de cada vendedor
   const totalGeneral = data.reduce((sum, u) => sum + u.total, 0);
 
   const handleVerMas = useCallback(() => {
@@ -143,35 +143,29 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   return (
     <SectionCard title="Ventas por Usuario">
       {data.length === 0 ? (
-        <EmptyState
-          message="Sin datos en este período"
-          iconName="person.2.fill"
-        />
+        <EmptyState message="Sin datos en este período" iconName="person.2.fill" />
       ) : (
         <>
-          {/* Siempre en columna — el layout 2-col está en el padre (index.tsx) */}
-          <View className="gap-2">
+          <View>
             {visibleData.map((item, index) => (
               <VentasPorUsuarioRow
                 key={item.usuario_id}
                 item={item}
                 index={index}
-                porcentajeDelTotal={
-                  totalGeneral > 0 ? (item.total / totalGeneral) * 100 : 0
-                }
+                porcentajeDelTotal={totalGeneral > 0 ? (item.total / totalGeneral) * 100 : 0}
+                showDivider={index < visibleData.length - 1}
               />
             ))}
           </View>
 
           {hasMore && !expanded ? (
-            <Pressable
-              onPress={handleVerMas}
-              className="mt-3 flex-row items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 active:opacity-90"
-            >
-              <Text className="text-sm font-semibold text-orange-600 dark:text-orange-400">
-                Ver más ({remainingCount} más)
+            <Pressable onPress={handleVerMas} className="mt-3 items-center py-2 active:opacity-70">
+              <Text
+                className="text-[12px] font-semibold text-orange-500 uppercase dark:text-orange-400"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Ver {remainingCount} más
               </Text>
-              <IconSymbol name="chevron.down" size={14} color="#ea580c" />
             </Pressable>
           ) : null}
         </>

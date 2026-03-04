@@ -1,30 +1,27 @@
 import { CreateVentaInput, UpdateVentaInput, Venta } from '@/interface';
 import { db } from '@/lib/firebase';
+import { createConverter } from '@/lib/utils/firestore-converter';
 import {
   addDoc,
   collection,
   doc,
-  DocumentData,
   onSnapshot,
   query,
-  QueryDocumentSnapshot,
   Timestamp,
   Unsubscribe,
   updateDoc,
   where,
 } from 'firebase/firestore';
 
-function docToVenta(snap: QueryDocumentSnapshot<DocumentData>): Venta {
-  const data = snap.data();
-  return {
-    id: snap.id,
-    ...data,
-    fecha: data.fecha?.toDate(),
-    createdAt: data.createdAt?.toDate(),
-    updatedAt: data.updatedAt?.toDate(),
-  } as Venta;
-}
+const ventaConverter = createConverter<Venta>();
 
+/**
+ * Sorts an array of Venta objects by their creation date in descending order.
+ * Ensures the most recent sales appear first in lists and reports.
+ * 
+ * @param ventas - Array of sales to sort
+ * @returns Sorted array of sales (newest first)
+ */
 function sortByFechaDesc(ventas: Venta[]): Venta[] {
   return ventas.sort((a, b) => {
     const fa = a.fecha instanceof Date ? a.fecha.getTime() : 0;
@@ -33,9 +30,17 @@ function sortByFechaDesc(ventas: Venta[]): Venta[] {
   });
 }
 
+/**
+ * Creates a new base sale document in Firestore.
+ * This is typically the first step before adding sale details (items) and payments.
+ * 
+ * @param ventaData - The required data to initialize a sale
+ * @returns The ID of the newly created sale document
+ * @throws Error if the insertion into Firestore fails
+ */
 export const createVenta = async (ventaData: CreateVentaInput): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, 'ventas'), {
+    const cleanData = {
       ...ventaData,
       fecha: ventaData.fecha ? Timestamp.fromDate(ventaData.fecha) : Timestamp.now(),
       estado: ventaData.estado ?? 'PENDIENTE',
@@ -43,7 +48,10 @@ export const createVenta = async (ventaData: CreateVentaInput): Promise<string> 
       descuento: ventaData.descuento ?? 0,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
+    };
+    
+    // Casting to 'any' is required to bypass the ID requirement on creation while using converters
+    const docRef = await addDoc(collection(db, 'ventas').withConverter(ventaConverter), cleanData as any);
     return docRef.id;
   } catch (error) {
     console.error('Error al crear venta:', error);
@@ -51,12 +59,20 @@ export const createVenta = async (ventaData: CreateVentaInput): Promise<string> 
   }
 };
 
+/**
+ * Updates an existing sale document.
+ * Often used to change the sale status (e.g., from PENDIENTE to PAGADA or CANCELADA).
+ * 
+ * @param id - The Firestore document ID of the sale
+ * @param ventaData - Partial data to update
+ * @throws Error if the update operation fails
+ */
 export const updateVenta = async (
   id: string,
   ventaData: UpdateVentaInput,
 ): Promise<void> => {
   try {
-    const docRef = doc(db, 'ventas', id);
+    const docRef = doc(db, 'ventas', id).withConverter(ventaConverter);
     await updateDoc(docRef, {
       ...ventaData,
       updatedAt: Timestamp.now(),
@@ -68,7 +84,13 @@ export const updateVenta = async (
 };
 
 /**
- * Listener en tiempo real para ventas de un negocio.
+ * Sets up a real-time listener for all sales belonging to a specific business.
+ * Used to populate UI dashboards that need to reflect new sales instantly.
+ * 
+ * @param negocio_id - The ID of the business to monitor
+ * @param callback - Function executed every time the data changes
+ * @param onError - Optional callback for handling listener errors
+ * @returns An Unsubscribe function to detach the listener and prevent memory leaks
  */
 export function onVentasByNegocio(
   negocio_id: string,
@@ -76,14 +98,14 @@ export function onVentasByNegocio(
   onError?: (error: Error) => void,
 ): Unsubscribe {
   const q = query(
-    collection(db, 'ventas'),
+    collection(db, 'ventas').withConverter(ventaConverter),
     where('negocio_id', '==', negocio_id),
   );
 
   return onSnapshot(
     q,
     (snapshot) => {
-      const ventas = sortByFechaDesc(snapshot.docs.map(docToVenta));
+      const ventas = sortByFechaDesc(snapshot.docs.map((doc) => doc.data()));
       callback(ventas);
     },
     (error) => {

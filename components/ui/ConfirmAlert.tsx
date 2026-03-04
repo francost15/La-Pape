@@ -43,6 +43,7 @@ export default function ConfirmAlert({
       transparent
       animationType="fade"
       onRequestClose={onCancel}
+      accessibilityViewIsModal
     >
       <View style={styles.container}>
         <View style={[StyleSheet.absoluteFillObject, styles.overlay]} />
@@ -68,6 +69,7 @@ export default function ConfirmAlert({
                   color: titleColor,
                   marginBottom: 4,
                 }}
+                accessibilityRole="header"
               >
                 {title}
               </Text>
@@ -98,6 +100,7 @@ export default function ConfirmAlert({
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={cancelText}
+                accessibilityHint="Cierra este diálogo sin aplicar cambios"
               >
                 <Text
                   style={{
@@ -114,6 +117,7 @@ export default function ConfirmAlert({
                 style={{ flex: 1, paddingVertical: 16, alignItems: "center" }}
                 accessibilityRole="button"
                 accessibilityLabel={confirmText}
+                accessibilityHint="Confirma la acción y continúa"
               >
                 <Text
                   style={{
@@ -151,4 +155,3 @@ const styles = StyleSheet.create({
     maxWidth: 360,
   },
 });
-

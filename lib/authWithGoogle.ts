@@ -1,9 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import {
-  getRedirectResult,
   GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
   UserCredential,
 } from "firebase/auth";
 import { Platform } from "react-native";
@@ -29,6 +26,17 @@ const getGoogleAuthErrorMessage = (error: unknown): string => {
   }
 };
 
+type WebAuthFnName = "signInWithPopup" | "signInWithRedirect" | "getRedirectResult";
+
+async function getWebAuthFn<T>(name: WebAuthFnName): Promise<T> {
+  const mod = await import("firebase/auth");
+  const fn = (mod as Record<string, unknown>)[name];
+  if (typeof fn !== "function") {
+    throw new Error("Este método de autenticación no está disponible en esta plataforma.");
+  }
+  return fn as T;
+}
+
 /**
  * Inicia sesión con Google (solo web).
  * Usa popup; si el navegador lo bloquea, usa redirect.
@@ -41,6 +49,12 @@ export async function signInWithGoogle(): Promise<UserCredential | null> {
     );
   }
   const provider = new GoogleAuthProvider();
+  const signInWithPopup = await getWebAuthFn<
+    (authInstance: typeof auth, providerInstance: GoogleAuthProvider) => Promise<UserCredential>
+  >("signInWithPopup");
+  const signInWithRedirect = await getWebAuthFn<
+    (authInstance: typeof auth, providerInstance: GoogleAuthProvider) => Promise<void>
+  >("signInWithRedirect");
   try {
     return await signInWithPopup(auth, provider);
   } catch (error) {
@@ -62,6 +76,9 @@ export async function signInWithGoogle(): Promise<UserCredential | null> {
 export async function getGoogleRedirectResult(): Promise<UserCredential | null> {
   if (Platform.OS !== "web") return null;
   try {
+    const getRedirectResult = await getWebAuthFn<
+      (authInstance: typeof auth) => Promise<UserCredential | null>
+    >("getRedirectResult");
     const result = await getRedirectResult(auth);
     return result;
   } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import type { RangoFechas } from "./PeriodFilter";
 
@@ -19,6 +19,15 @@ function formatDateShort(date: Date | null): string {
   return date.toLocaleDateString("es-ES", {
     day: "numeric",
     month: "short",
+  });
+}
+
+function formatDateA11y(date: Date): string {
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
@@ -112,8 +121,19 @@ function RangeCalendar({
     setViewYear(y);
   };
 
-  const yearStart = now.getFullYear() - 10;
-  const yearsList = Array.from({ length: 21 }, (_, i) => yearStart + i);
+  const currentYear = now.getFullYear();
+  const yearsList = useMemo(() => {
+    const yearStart = currentYear - 10;
+    return Array.from({ length: 21 }, (_, i) => yearStart + i);
+  }, [currentYear]);
+  const blanks = useMemo(
+    () => Array.from({ length: firstDayOfWeek }, (_, i) => i),
+    [firstDayOfWeek],
+  );
+  const daysList = useMemo(
+    () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
+    [daysInMonth],
+  );
 
   if (calendarView === "years") {
     return (
@@ -121,6 +141,8 @@ function RangeCalendar({
         <Pressable
           onPress={() => setCalendarView("days")}
           className="items-center mb-3"
+          accessibilityRole="button"
+          accessibilityLabel="Volver al calendario de días"
         >
           <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
             Seleccionar Año
@@ -136,6 +158,9 @@ function RangeCalendar({
                 className={`py-2 px-3 rounded-xl ${
                   active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
                 }`}
+                accessibilityRole="button"
+                accessibilityLabel={`Año ${y}`}
+                accessibilityState={{ selected: active }}
               >
                 <Text
                   className={`text-sm font-semibold ${
@@ -158,6 +183,8 @@ function RangeCalendar({
         <Pressable
           onPress={() => setCalendarView("years")}
           className="items-center mb-3"
+          accessibilityRole="button"
+          accessibilityLabel="Seleccionar año"
         >
           <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
             {viewYear}
@@ -174,6 +201,9 @@ function RangeCalendar({
                 className={`py-2.5 items-center rounded-xl ${
                   active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
                 }`}
+                accessibilityRole="button"
+                accessibilityLabel={`Mes ${MONTH_FULL[idx]} de ${viewYear}`}
+                accessibilityState={{ selected: active }}
               >
                 <Text
                   className={`text-sm font-semibold ${
@@ -190,19 +220,23 @@ function RangeCalendar({
     );
   }
 
-  const blanks = Array.from({ length: firstDayOfWeek }, (_, i) => i);
-  const daysList = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
   return (
     <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
       <View className="flex-row items-center justify-between mb-3">
         <Pressable
           onPress={() => navigateMonth(-1)}
           className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          accessibilityRole="button"
+          accessibilityLabel="Mes anterior"
         >
           <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">‹</Text>
         </Pressable>
-        <Pressable onPress={() => setCalendarView("months")}>
+        <Pressable
+          onPress={() => setCalendarView("months")}
+          accessibilityRole="button"
+          accessibilityLabel="Cambiar mes"
+          accessibilityHint="Abre la selección de mes"
+        >
           <Text className="text-[15px] font-bold text-gray-800 dark:text-gray-100">
             {MONTH_FULL[viewMonth]} {viewYear}
           </Text>
@@ -210,6 +244,8 @@ function RangeCalendar({
         <Pressable
           onPress={() => navigateMonth(1)}
           className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          accessibilityRole="button"
+          accessibilityLabel="Mes siguiente"
         >
           <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">›</Text>
         </Pressable>
@@ -256,6 +292,10 @@ function RangeCalendar({
                       ? "border border-orange-400 dark:border-orange-500"
                       : ""
                 }`}
+                accessibilityRole="button"
+                accessibilityLabel={formatDateA11y(new Date(viewYear, viewMonth, day))}
+                accessibilityHint="Selecciona esta fecha para el rango personalizado"
+                accessibilityState={{ selected: isEndpoint }}
               >
                 <Text
                   className={`text-[13px] ${
@@ -296,7 +336,7 @@ export default function CustomRangeContent({
   onCancel,
   isMobile,
 }: CustomRangeContentProps) {
-  const canConfirm = rangoTemporal.inicio && rangoTemporal.fin;
+  const canConfirm = Boolean(rangoTemporal.inicio && rangoTemporal.fin);
 
   const selectingStep = !rangoTemporal.inicio
     ? "inicio"
@@ -310,6 +350,7 @@ export default function CustomRangeContent({
         className={`font-bold text-gray-800 dark:text-gray-100 text-center ${
           isMobile ? "text-lg mb-1" : "text-xl mb-1"
         }`}
+        accessibilityRole="header"
       >
         Período Personalizado
       </Text>
@@ -377,6 +418,8 @@ export default function CustomRangeContent({
           onPress={onCancel}
           className="flex-1 bg-gray-100 dark:bg-neutral-700 rounded-2xl py-3.5 items-center"
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Cancelar selección de período"
         >
           <Text className="text-gray-700 dark:text-gray-200 font-semibold text-[15px]">
             Cancelar
@@ -388,6 +431,9 @@ export default function CustomRangeContent({
           disabled={!canConfirm}
           activeOpacity={0.8}
           style={{ opacity: canConfirm ? 1 : 0.4 }}
+          accessibilityRole="button"
+          accessibilityLabel="Confirmar período personalizado"
+          accessibilityHint="Aplica el rango de fechas seleccionado"
         >
           <Text className="text-white font-semibold text-[15px]">
             Confirmar

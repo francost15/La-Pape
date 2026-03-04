@@ -3,11 +3,10 @@ import { db } from '@/lib/firebase';
 import {
   collection,
   doc,
-  query,
   runTransaction,
   Timestamp,
-  where,
 } from 'firebase/firestore';
+import { getDetallesByVenta } from '../ventas-detalle';
 
 export interface RefundVentaParams {
   ventaId: string;
@@ -32,8 +31,12 @@ export async function refundVentaFlow(
 ): Promise<RefundVentaResult> {
   const { ventaId, sucursalId, userId } = params;
   const now = Timestamp.now();
+  const detalles = await getDetallesByVenta(ventaId);
+  if (!detalles.length) {
+    throw new Error('La venta no tiene detalles para reembolso');
+  }
 
-  const detalles = await runTransaction(db, async (transaction) => {
+  await runTransaction(db, async (transaction) => {
     const ventaRef = doc(db, 'ventas', ventaId);
     const ventaSnap = await transaction.get(ventaRef);
     if (!ventaSnap.exists()) {
@@ -45,26 +48,8 @@ export async function refundVentaFlow(
       throw new Error('La venta ya fue reembolsada');
     }
 
-    const detallesQuery = query(
-      collection(db, 'ventas_detalle'),
-      where('venta_id', '==', ventaId),
-    );
-    const detallesSnapshot = await transaction.get(detallesQuery);
-    if (detallesSnapshot.empty) {
-      throw new Error('La venta no tiene detalles para reembolso');
-    }
-
-    const detallesVenta = detallesSnapshot.docs.map((detalleSnap) => {
-      const data = detalleSnap.data();
-      return {
-        id: detalleSnap.id,
-        ...data,
-        createdAt: data.createdAt?.toDate(),
-      } as VentaDetalle;
-    });
-
     // Validamos y aplicamos devolución de stock dentro de la misma transacción.
-    for (const detalle of detallesVenta) {
+    for (const detalle of detalles) {
       const productRef = doc(db, 'productos', detalle.producto_id);
       const productSnap = await transaction.get(productRef);
       if (!productSnap.exists()) {
@@ -79,7 +64,7 @@ export async function refundVentaFlow(
 
     transaction.update(ventaRef, { estado: 'REEMBOLSO', updatedAt: now });
 
-    for (const detalle of detallesVenta) {
+    for (const detalle of detalles) {
       const movimientoRef = doc(collection(db, 'inventario_movimientos'));
       transaction.set(movimientoRef, {
         producto_id: detalle.producto_id,
@@ -92,8 +77,6 @@ export async function refundVentaFlow(
         createdAt: now,
       });
     }
-
-    return detallesVenta;
   });
 
   return { ventaId, detalles };

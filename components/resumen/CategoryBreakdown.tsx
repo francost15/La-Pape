@@ -6,24 +6,25 @@ import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
-// Paleta de colores consistente con el diseño del resto de la app
 const COLORS = [
-  "#3b82f6", "#ea580c", "#10b981", "#8b5cf6",
-  "#f59e0b", "#ef4444", "#ec4899", "#14b8a6",
+  "#3b82f6",
+  "#ea580c",
+  "#10b981",
+  "#8b5cf6",
+  "#f59e0b",
+  "#ef4444",
+  "#ec4899",
+  "#14b8a6",
 ];
 
 // ─── Donut Chart ──────────────────────────────────────────────────────────────
 
-/**
- * Renderiza un donut chart SVG construyendo los paths manualmente.
- * Se usa SVG nativo para compatibilidad con Expo (web + nativo).
- */
 function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   const total = data.reduce((s, d) => s + d.total, 0);
   if (total === 0) return null;
 
   const outerR = size / 2 - 8;
-  const innerR = outerR * 0.55;
+  const innerR = outerR * 0.58;
   const cx = size / 2;
   const cy = size / 2;
 
@@ -79,28 +80,27 @@ interface LegendItemProps {
 }
 
 /**
- * Fila de leyenda con barra de progreso horizontal.
- * La barra da un escaneo visual rápido de la distribución sin leer los números.
+ * Fila de leyenda con barra de progreso de 1px — muy delgada para no
+ * competir visualmente con los datos. El color del punto es el identificador.
  */
 function LegendItem({ color, label, value, percentage }: LegendItemProps) {
   return (
-    <View className="py-1.5 gap-1">
-      {/* Fila superior: punto de color + nombre + % + monto */}
+    <View className="gap-1 py-1.5">
       <View className="flex-row items-center gap-2">
-        <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-        <Text className="text-[13px] text-gray-700 dark:text-gray-300 flex-1" numberOfLines={1}>
+        <View className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+        <Text className="flex-1 text-[12px] text-gray-700 dark:text-gray-300" numberOfLines={1}>
           {label}
         </Text>
-        <Text className="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+        <Text className="mr-1.5 text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
           {percentage.toFixed(0)}%
         </Text>
-        <Text className="text-[13px] font-semibold text-gray-800 dark:text-gray-200 tabular-nums min-w-[64px] text-right">
+        <Text className="min-w-[58px] text-right text-[12px] font-semibold text-gray-800 tabular-nums dark:text-gray-200">
           {formatCurrency(value)}
         </Text>
       </View>
 
-      {/* Barra de progreso: visualización rápida de la proporción */}
-      <View className="h-1 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden ml-4">
+      {/* Barra de 1px: presencia mínima, máxima legibilidad */}
+      <View className="ml-4 h-px overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-700">
         <View
           className="h-full rounded-full"
           style={{ backgroundColor: color, width: `${percentage}%` }}
@@ -119,18 +119,15 @@ interface CategoryBreakdownProps {
 
 export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownProps) {
   const total = data.reduce((s, d) => s + d.total, 0);
-  const chartSize = isMobile ? 140 : 160;
+  const chartSize = isMobile ? 130 : 150;
   const isEmpty = data.length === 0 || total === 0;
 
   return (
     <SectionCard title="Ventas por Categoría">
       {isEmpty ? (
-        <EmptyState
-          message="Sin datos en este período"
-          iconName="chart.pie.fill"
-        />
+        <EmptyState message="Sin datos en este período" iconName="chart.pie.fill" />
       ) : (
-        <View className={isMobile ? "gap-1" : "flex-row gap-4 items-start"}>
+        <View className={isMobile ? "gap-1" : "flex-row items-start gap-4"}>
           <View className={`items-center ${isMobile ? "mb-2" : ""}`}>
             <DonutChart data={data} size={chartSize} />
           </View>

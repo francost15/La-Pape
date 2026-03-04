@@ -1,6 +1,5 @@
 import EmptyState from "@/components/resumen/shared/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { ProductoRanking } from "@/store/resumen-store";
 import { Image } from "expo-image";
@@ -13,14 +12,12 @@ import { Pressable, Text, View } from "react-native";
 interface RankingRowProps {
   item: ProductoRanking;
   rank: number;
-  /** true si NO es el último ítem — muestra separador inferior */
   showDivider: boolean;
 }
 
 /**
- * Fila de lista plana para el ranking de productos.
- * Diseño tipo "tabla": sin card por fila, separador sutil entre items.
- * NO usar CardProducts aquí — esa card genérica queda fuera de lugar en el resumen.
+ * Fila de ranking: número de posición como indicador tipográfico limpio,
+ * sin fondo ni decoración. El número se alinea en monospace para escaneado vertical.
  */
 const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: RankingRowProps) {
   const [imgError, setImgError] = useState(false);
@@ -33,57 +30,57 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
     });
 
   return (
-    <Pressable
-      onPress={handlePress}
-      className="active:opacity-70"
-    >
+    <Pressable onPress={handlePress} className="active:opacity-60">
       <View
         className={`flex-row items-center gap-3 py-2.5 ${
-          showDivider ? "border-b border-gray-100 dark:border-neutral-700" : ""
+          showDivider ? "border-b border-gray-100 dark:border-neutral-700/60" : ""
         }`}
       >
-        {/* Número de posición */}
-        <Text className="text-[13px] font-bold text-orange-500 tabular-nums w-5 text-center">
+        {/* Número de posición: monospace, acento solo en el #1 */}
+        <Text
+          className="w-4 text-center text-[12px] font-bold tabular-nums"
+          style={{ color: rank === 1 ? "#ea580c" : "#d1d5db" }}
+        >
           {rank}
         </Text>
 
         {/* Imagen miniatura cuadrada */}
-        <View className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-700 shrink-0">
+        <View className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-700">
           {hasImg ? (
             <Image
               source={{ uri: item.producto.imagen }}
-              style={{ width: 40, height: 40 }}
+              style={{ width: 36, height: 36 }}
               contentFit="cover"
               onError={() => setImgError(true)}
             />
           ) : (
-            <View className="w-full h-full items-center justify-center">
-              <IconSymbol name="photo.fill" size={16} color="#9ca3af" />
+            <View className="h-full w-full items-center justify-center">
+              <View className="h-4 w-4 rounded bg-gray-200 dark:bg-neutral-600" />
             </View>
           )}
         </View>
 
         {/* Nombre + marca */}
-        <View className="flex-1 min-w-0">
+        <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] font-semibold text-gray-800 dark:text-gray-200 leading-5"
+            className="text-[13px] leading-5 font-semibold text-gray-800 dark:text-gray-200"
             numberOfLines={1}
           >
             {item.producto.nombre}
           </Text>
           {item.producto.marca ? (
-            <Text className="text-[11px] text-gray-400 dark:text-gray-500" numberOfLines={1}>
+            <Text className="text-[10px] text-gray-400 dark:text-gray-500" numberOfLines={1}>
               {item.producto.marca}
             </Text>
           ) : null}
         </View>
 
         {/* Unidades + total */}
-        <View className="items-end shrink-0">
-          <Text className="text-[13px] font-bold text-gray-900 dark:text-white tabular-nums">
+        <View className="shrink-0 items-end">
+          <Text className="text-[13px] font-bold text-gray-900 tabular-nums dark:text-white">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+          <Text className="text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
             {item.cantidad} {pluralize(item.cantidad, "ud.", "uds.")}
           </Text>
         </View>
@@ -101,7 +98,7 @@ interface TopProductsListProps {
 
 export default function TopProductsList({ title, items }: TopProductsListProps) {
   return (
-    <SectionCard title={title} className="flex-1 min-w-0">
+    <SectionCard title={title} className="min-w-0 flex-1">
       {items.length === 0 ? (
         <EmptyState message="Sin datos disponibles" iconName="chart.bar.fill" />
       ) : (

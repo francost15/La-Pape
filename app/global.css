@@ -9,14 +9,55 @@
   --font-display: "Bebas Neue", "Oswald", "Arial Narrow", sans-serif;
   --font-heading: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
   --font-body: "Nunito Sans", "Segoe UI", sans-serif;
+  --focus-ring-color: #ea580c;
+  --focus-ring-offset: #ffffff;
 }
 
-/* Quitar outline de inputs en web */
-input:focus,
-textarea:focus {
-  outline: none !important;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --focus-ring-offset: #171717;
+  }
 }
 
-.outline-none {
-  outline: none !important;
+/* Focus visible consistente para navegación por teclado */
+:where(
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring-offset) 65%, transparent);
+}
+
+/* Solo suprimimos el foco por mouse/touch, no para teclado */
+:where(
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  [tabindex]:not([tabindex="-1"])
+):focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-contrast: more) {
+  :where(
+    a,
+    button,
+    [role="button"],
+    input,
+    textarea,
+    select,
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline-width: 3px;
+    box-shadow: none;
+  }
 }
