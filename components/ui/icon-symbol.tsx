@@ -1,10 +1,10 @@
 // Fallback for using MaterialIcons on Android and web.
 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight } from 'expo-symbols';
-import { ComponentProps } from 'react';
-import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
-type IconMapping = Record<string, ComponentProps<typeof MaterialIcons>['name']>;
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { SymbolWeight } from "expo-symbols";
+import { ComponentProps } from "react";
+import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
+type IconMapping = Record<string, ComponentProps<typeof MaterialIcons>["name"]>;
 export type IconSymbolName = keyof typeof MAPPING;
 
 /**
@@ -13,50 +13,54 @@ export type IconSymbolName = keyof typeof MAPPING;
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.left': 'chevron-left',
-  'chevron.right': 'chevron-right',
-  'cart.fill': 'shopping-cart',
-  'bag.fill': 'shopping-bag',
-  'clock.fill': 'history',
-  'doc.text': 'description',
-  'qrcode': 'qr-code-scanner',
-  'plus': 'add',
-  'minus': 'remove',
-  'checkmark': 'check',
-  'plus.circle.fill': 'add-circle',
-  'minus.circle.fill': 'remove-circle',
-  'magnifyingglass': 'search',
-  'camera.fill': 'camera-alt',
-  'photo.fill': 'photo-library',
-  'pencil': 'edit',
-  'pencil.circle.fill': 'edit',
-  'exclamationmark.triangle.fill': 'warning',
-  'trash': 'delete',
-  'trash.fill': 'delete',
-  'chevron.up': 'keyboard-arrow-up',
-  'chevron.down': 'keyboard-arrow-down',
-  'xmark': 'close',
-  'checkmark.circle.fill': 'check-circle',
-  'square.and.arrow.down': 'file-download',
-  'eye.fill': 'visibility',
-  'eye.slash.fill': 'visibility-off',
-  'person.fill': 'person',
-  'envelope.fill': 'email',
-  'building.2.fill': 'business',
-  'arrow.uturn.backward': 'replay',
-  'dollarsign.circle.fill': 'attach-money',
-  'gearshape.fill': 'settings',
-  'person.badge.plus': 'person-add',
-  'person.2.fill': 'group',
-  'checkmark.seal.fill': 'verified',
-  'xmark.circle.fill': 'cancel',
+  "house.fill": "home",
+  "paperplane.fill": "send",
+  "chevron.left.forwardslash.chevron.right": "code",
+  "chevron.left": "chevron-left",
+  "chevron.right": "chevron-right",
+  "cart.fill": "shopping-cart",
+  "bag.fill": "shopping-bag",
+  "clock.fill": "history",
+  "doc.text": "description",
+  qrcode: "qr-code-scanner",
+  plus: "add",
+  minus: "remove",
+  checkmark: "check",
+  "plus.circle.fill": "add-circle",
+  "minus.circle.fill": "remove-circle",
+  magnifyingglass: "search",
+  "camera.fill": "camera-alt",
+  "photo.fill": "photo-library",
+  pencil: "edit",
+  "pencil.circle.fill": "edit",
+  "exclamationmark.triangle.fill": "warning",
+  trash: "delete",
+  "trash.fill": "delete",
+  "chevron.up": "keyboard-arrow-up",
+  "chevron.down": "keyboard-arrow-down",
+  xmark: "close",
+  "checkmark.circle.fill": "check-circle",
+  "square.and.arrow.down": "file-download",
+  "eye.fill": "visibility",
+  "eye.slash.fill": "visibility-off",
+  "person.fill": "person",
+  "envelope.fill": "email",
+  "building.2.fill": "business",
+  "arrow.uturn.backward": "replay",
+  "dollarsign.circle.fill": "attach-money",
+  "gearshape.fill": "settings",
+  "person.badge.plus": "person-add",
+  "person.2.fill": "group",
+  "checkmark.seal.fill": "verified",
+  "xmark.circle.fill": "cancel",
   // Resumen / charts
-  'chart.line.uptrend.xyaxis': 'trending-up',
-  'chart.pie.fill': 'pie-chart',
-  'chart.bar.fill': 'bar-chart',
+  "chart.line.uptrend.xyaxis": "trending-up",
+  "chart.pie.fill": "pie-chart",
+  "chart.bar.fill": "bar-chart",
+  // Theme
+  "moon.fill": "nightlight-round",
+  "sun.max.fill": "brightness-high",
+  "circle.lefthalf.filled": "brightness-auto",
 } as const satisfies IconMapping;
 
 /**

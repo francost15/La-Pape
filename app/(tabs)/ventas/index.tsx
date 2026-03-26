@@ -5,10 +5,13 @@ import FooterProducts from "@/components/ventas/FooterProducts";
 import ProductListContent from "@/components/ventas/ProductListContent";
 import SidebarProducts from "@/components/ventas/SidebarProducts";
 import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
+import { Tour } from "@/components/onboarding/Tour";
+import { VENTAS_TOUR } from "@/constants/tours";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import React, { useCallback, useRef } from "react";
+import { useTour } from "@/hooks/useTour";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, useWindowDimensions, View } from "react-native";
 
 const DESKTOP_MIN_WIDTH = 768;
@@ -19,8 +22,13 @@ export default function VentasScreen() {
   const itemCount = useVentasStore((s) => s.getItemCount());
   const openConfirm = useCheckoutStore((s) => s.openConfirm);
   const searchInputRef = useRef<TextInput>(null);
+  const { isOpen, startTour, completeTour } = useTour("ventas", VENTAS_TOUR);
 
   useOnboardingAfterLogin();
+
+  useEffect(() => {
+    startTour();
+  }, [startTour]);
 
   const focusSearch = useCallback(() => {
     searchInputRef.current?.focus();
@@ -94,6 +102,7 @@ export default function VentasScreen() {
       {!isDesktop && <FooterProducts />}
 
       <OnboardingHint />
+      <Tour steps={VENTAS_TOUR} isOpen={isOpen} onClose={completeTour} onComplete={completeTour} />
     </AnimatedScreen>
   );
 }

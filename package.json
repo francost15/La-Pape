@@ -12,7 +12,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "e2e:build:ios": "detox build -c .detoxrc.js --configuration ios.simulator",
+    "e2e:build:android": "detox build -c .detoxrc.js --configuration android.emulator",
+    "e2e:test:ios": "detox test -c .detoxrc.js --configuration ios.simulator",
+    "e2e:test:android": "detox test -c .detoxrc.js --configuration android.emulator"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -68,6 +72,7 @@
     "@types/react": "~19.1.0",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.1",
+    "detox": "^20.50.1",
     "esbuild": "^0.27.4",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",

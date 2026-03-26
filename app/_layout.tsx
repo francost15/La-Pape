@@ -4,7 +4,7 @@ import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import NativeToaster from "@/components/NativeToaster";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SkipLink } from "@/components/ui/SkipLink";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from "@/hooks/useTheme";
 import { logger } from "@/lib/utils/logger";
 import { initSessionListener } from "@/store/session-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
@@ -25,7 +25,7 @@ if (Platform.OS === "web" && typeof window !== "undefined") {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const unsub = initSessionListener();
@@ -45,7 +45,7 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <ErrorBoundary
         onError={(error, info) => {
           logger.error("Layout error", { error: error.message, stack: info.componentStack });

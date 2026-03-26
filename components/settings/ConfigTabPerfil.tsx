@@ -1,11 +1,13 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { auth } from "@/lib/firebase";
 import { updateUsuario } from "@/lib/services/usuarios";
 import { notify } from "@/lib/notify";
 import { useSessionStore } from "@/store/session-store";
+import { resetAllTours } from "@/hooks/useTour";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { updateProfile , onAuthStateChanged, signOut } from "firebase/auth";
+import { updateProfile, onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -60,11 +62,7 @@ export default function ConfigTabPerfil() {
     if (!authUser?.uid || !editNombre.trim()) return;
     setSaving(true);
     try {
-      await updateUsuario(
-        authUser.uid,
-        { nombre: editNombre.trim() },
-        authUser.email ?? undefined
-      );
+      await updateUsuario(authUser.uid, { nombre: editNombre.trim() }, authUser.email ?? undefined);
       await updateProfile(auth.currentUser!, { displayName: editNombre.trim() });
       setAuthUser((p) => (p ? { ...p, displayName: editNombre.trim() } : null));
       setIsEditing(false);
@@ -78,21 +76,18 @@ export default function ConfigTabPerfil() {
   }, [authUser, editNombre]);
 
   const handleCancelEdit = useCallback(() => {
-    setEditNombre(
-      authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario"
-    );
+    setEditNombre(authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario");
     setIsEditing(false);
     Keyboard.dismiss();
   }, [authUser]);
 
-  const nombre =
-    authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario";
+  const nombre = authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario";
   const email = authUser?.email ?? "";
   const inicial = (nombre[0] ?? "?").toUpperCase();
 
   return (
     <View className="gap-4">
-      <View className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-100 dark:border-neutral-700 p-4">
+      <View className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-4">
           {authUser?.photoURL && !photoFailed ? (
             <Image
@@ -102,7 +97,7 @@ export default function ConfigTabPerfil() {
               onError={() => setPhotoFailed(true)}
             />
           ) : (
-            <View className="w-[72px] h-[72px] rounded-full bg-orange-100 dark:bg-orange-900/30 items-center justify-center">
+            <View className="h-[72px] w-[72px] items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
               <Text className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {inicial}
               </Text>
@@ -116,7 +111,7 @@ export default function ConfigTabPerfil() {
                   onChangeText={setEditNombre}
                   placeholder="Tu nombre"
                   placeholderTextColor="#9ca3af"
-                  className="bg-gray-100 dark:bg-neutral-700 rounded-xl px-4 py-2.5 text-base text-gray-900 dark:text-white"
+                  className="rounded-xl bg-gray-100 px-4 py-2.5 text-base text-gray-900 dark:bg-neutral-700 dark:text-white"
                   autoFocus
                   editable={!saving}
                 />
@@ -124,21 +119,19 @@ export default function ConfigTabPerfil() {
                   <Pressable
                     onPress={handleSave}
                     disabled={saving || !editNombre.trim()}
-                    className="flex-1 py-2.5 rounded-xl bg-orange-600 items-center active:opacity-90"
+                    className="flex-1 items-center rounded-xl bg-orange-600 py-2.5 active:opacity-90"
                     style={!editNombre.trim() ? { opacity: 0.5 } : undefined}
                   >
                     {saving ? (
                       <ActivityIndicator size="small" color="white" />
                     ) : (
-                      <Text className="text-sm font-semibold text-white">
-                        Guardar
-                      </Text>
+                      <Text className="text-sm font-semibold text-white">Guardar</Text>
                     )}
                   </Pressable>
                   <Pressable
                     onPress={handleCancelEdit}
                     disabled={saving}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-200 dark:bg-neutral-600 items-center active:opacity-90"
+                    className="flex-1 items-center rounded-xl bg-gray-200 py-2.5 active:opacity-90 dark:bg-neutral-600"
                   >
                     <Text className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                       Cancelar
@@ -148,15 +141,11 @@ export default function ConfigTabPerfil() {
               </View>
             ) : (
               <>
-                <Text className="text-lg font-bold text-gray-900 dark:text-white">
-                  {nombre}
-                </Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
-                  {email}
-                </Text>
+                <Text className="text-lg font-bold text-gray-900 dark:text-white">{nombre}</Text>
+                <Text className="text-sm text-gray-500 dark:text-gray-400">{email}</Text>
                 <Pressable
                   onPress={() => setIsEditing(true)}
-                  className="self-start mt-1 flex-row items-center gap-1.5 active:opacity-80"
+                  className="mt-1 flex-row items-center gap-1.5 self-start active:opacity-80"
                 >
                   <IconSymbol name="pencil" size={14} color="#9ca3af" />
                   <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -169,23 +158,30 @@ export default function ConfigTabPerfil() {
         </View>
       </View>
 
-      <View className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-100 dark:border-neutral-700 overflow-hidden">
+      <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm text-gray-500 dark:text-gray-400">Apariencia</Text>
+          <ThemeToggle />
+        </View>
+      </View>
+
+      <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="envelope.fill" size={16} color="#9ca3af" />
-          <Text className="text-sm text-gray-500 w-20">Email</Text>
+          <Text className="w-20 text-sm text-gray-500">Email</Text>
           <Text
-            className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 text-right"
+            className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
             numberOfLines={1}
           >
             {email || "—"}
           </Text>
         </View>
-        <View className="h-px bg-gray-100 dark:bg-neutral-700 mx-4" />
+        <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="building.2.fill" size={16} color="#9ca3af" />
-          <Text className="text-sm text-gray-500 w-20">Negocio</Text>
+          <Text className="w-20 text-sm text-gray-500">Negocio</Text>
           <Text
-            className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 text-right"
+            className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
             numberOfLines={1}
           >
             {negocioId ? `${negocioId.slice(0, 12)}…` : "Sin negocio"}
@@ -194,13 +190,23 @@ export default function ConfigTabPerfil() {
       </View>
 
       <TouchableOpacity
+        onPress={async () => {
+          await resetAllTours();
+          notify.success({ title: "Tours reiniciados" });
+        }}
+        className="border-t border-gray-100 py-3 dark:border-neutral-700"
+      >
+        <Text className="text-center text-sm text-orange-600 dark:text-orange-400">
+          Ver tutorial de nuevo
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         onPress={handleSignOut}
-        className="flex-row items-center justify-center gap-2 py-4 rounded-2xl bg-red-50 dark:bg-red-900/20 active:opacity-80"
+        className="flex-row items-center justify-center gap-2 rounded-2xl bg-red-50 py-4 active:opacity-80 dark:bg-red-900/20"
       >
         <IconSymbol name="arrow.uturn.backward" size={18} color="#dc2626" />
-        <Text className="text-sm font-semibold text-red-600 dark:text-red-400">
-          Cerrar sesión
-        </Text>
+        <Text className="text-sm font-semibold text-red-600 dark:text-red-400">Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   );
