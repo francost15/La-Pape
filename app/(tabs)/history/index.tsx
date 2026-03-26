@@ -16,20 +16,16 @@ import { groupVentasByDate } from "@/lib/utils/ventas-helpers";
 import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
-  Pressable,
   SectionList,
   Text,
-  TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 
 export default function HistoryScreen() {
   const { width } = useWindowDimensions();
@@ -45,8 +41,6 @@ export default function HistoryScreen() {
   const [refundTarget, setRefundTarget] = useState<Venta | null>(null);
   const [refunding, setRefunding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
-  const searchInputRef = useRef<TextInput>(null);
   const sucursalId = useSessionStore((s) => s.sucursalId);
   const userId = useSessionStore((s) => s.userId);
   const periodo = useFiltrosStore((s) => s.periodo);
@@ -138,44 +132,9 @@ export default function HistoryScreen() {
 
   const products = useProductosStore((s) => s.products);
 
-  const focusSearch = useCallback(() => {
-    searchInputRef.current?.focus();
-  }, []);
-
-  const shortcuts = useMemo(
-    () => [
-      {
-        key: "/",
-        handler: focusSearch,
-        description: "Enfocar búsqueda",
-      },
-    ],
-    [focusSearch]
-  );
-
-  useKeyboardShortcuts(shortcuts, Platform.OS === "web");
-
   const ventasFiltradas = useMemo(() => {
-    let filtered = filterVentasByPeriodo(ventas, periodo, rangoPersonalizado);
-    if (searchText.trim()) {
-      const searchLower = searchText.toLowerCase().trim();
-      filtered = filtered.filter((v) => {
-        const detalles = detallesMap[v.id] ?? [];
-        const productNames = detalles
-          .map((d) => {
-            const product = products.find((p) => p.id === d.producto_id);
-            return product?.nombre.toLowerCase() ?? "";
-          })
-          .join(" ");
-        return (
-          v.id.toLowerCase().includes(searchLower) ||
-          productNames.includes(searchLower) ||
-          v.total.toString().includes(searchLower)
-        );
-      });
-    }
-    return filtered;
-  }, [ventas, periodo, rangoPersonalizado, searchText, detallesMap, products]);
+    return filterVentasByPeriodo(ventas, periodo, rangoPersonalizado);
+  }, [ventas, periodo, rangoPersonalizado]);
 
   const ventasAgrupadas = useMemo(
     () => groupVentasByDate(ventasFiltradas, detallesMap),
@@ -329,35 +288,6 @@ export default function HistoryScreen() {
   const ListHeaderComponent = useMemo(
     () => (
       <View className={isTablet ? "mx-auto w-full max-w-2xl pb-2" : "pb-2"}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: Platform.OS === "web" ? "#F2F2F7" : undefined,
-            borderRadius: 10,
-            paddingHorizontal: 12,
-            marginBottom: 8,
-            gap: 8,
-          }}
-        >
-          <IconSymbol name="magnifyingglass" size={18} color="#8E8E93" />
-          <TextInput
-            ref={searchInputRef}
-            style={{ flex: 1, fontSize: 15, paddingVertical: 10 }}
-            placeholder="Buscar venta... ( presiona / )"
-            placeholderTextColor="#8E8E93"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          {searchText.length > 0 && (
-            <Pressable
-              onPress={() => setSearchText("")}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <IconSymbol name="xmark" size={14} color="#8E8E93" />
-            </Pressable>
-          )}
-        </View>
         <PeriodFilter
           periodo={periodo}
           onPeriodoChange={setPeriodo}
@@ -366,16 +296,7 @@ export default function HistoryScreen() {
         />
       </View>
     ),
-    [
-      isTablet,
-      periodo,
-      setPeriodo,
-      rangoPersonalizado,
-      setRangoPersonalizado,
-      searchText,
-      setSearchText,
-      searchInputRef,
-    ]
+    [isTablet, periodo, setPeriodo, rangoPersonalizado, setRangoPersonalizado]
   );
 
   const ListEmptyComponent = useMemo(

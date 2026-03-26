@@ -81,6 +81,18 @@ describe("createProductSchema", () => {
   });
 
   describe("validaciones de precio_mayoreo", () => {
+    it("precio_mayoreo igual a precio_venta es válido", () => {
+      const result = createProductSchema.safeParse({
+        nombre: "Test",
+        categoria_id: "cat-1",
+        precio_venta: 100,
+        precio_mayoreo: 100,
+        costo_promedio: 50,
+        cantidad: 10,
+      });
+      expect(result.success).toBe(true);
+    });
+
     it("precio_mayoreo > precio_venta retorna error", () => {
       const result = createProductSchema.safeParse({
         nombre: "Producto Test",

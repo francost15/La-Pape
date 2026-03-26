@@ -4,16 +4,11 @@ import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useEffect, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { Image } from "expo-image";
 import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
+import QuantityStepper from "./QuantityStepper";
 
 const DESKTOP_MIN_WIDTH = 768;
 
@@ -31,6 +26,10 @@ export default React.memo(function ProductItemVenta({
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
   const addItem = useVentasStore((s) => s.addItem);
+  const updateQuantity = useVentasStore((s) => s.updateQuantity);
+  const cartItem = useVentasStore((s) => s.items.find((i) => i.productId === product.id));
+  const quantity = cartItem?.quantity ?? 0;
+  const inCart = quantity > 0;
   const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -45,10 +44,22 @@ export default React.memo(function ProductItemVenta({
   }, [justAdded]);
 
   const handleAdd = () => {
+    if (!inCart) {
+      hapticMedium();
+      addItem(product, 1);
+      setJustAdded(true);
+      onProductAdded?.();
+    }
+  };
+
+  const handlePlus = () => {
     hapticMedium();
-    addItem(product, 1);
-    setJustAdded(true);
-    onProductAdded?.();
+    updateQuantity(product.id, quantity + 1);
+  };
+
+  const handleMinus = () => {
+    hapticMedium();
+    updateQuantity(product.id, quantity - 1);
   };
 
   const hasImage = product.imagen?.trim();
@@ -93,16 +104,12 @@ export default React.memo(function ProductItemVenta({
             />
           ) : (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <IconSymbol
-                name="photo.fill"
-                size={isDesktop ? 28 : 22}
-                color="#C7C7CC"
-              />
+              <IconSymbol name="photo.fill" size={isDesktop ? 28 : 22} color="#C7C7CC" />
             </View>
           )}
         </View>
 
-        <View className="flex-1 min-w-0 gap-0.5">
+        <View className="min-w-0 flex-1 gap-0.5">
           <Text
             className={`font-medium text-gray-900 dark:text-white ${
               isDesktop ? "text-base" : "text-sm"
@@ -111,22 +118,27 @@ export default React.memo(function ProductItemVenta({
           >
             {product.nombre}
           </Text>
-          <Text
-            className={`font-bold text-orange-600 ${
-              isDesktop ? "text-base" : "text-sm"
-            }`}
-          >
+          <Text className={`font-bold text-orange-600 ${isDesktop ? "text-base" : "text-sm"}`}>
             ${product.precio_venta.toLocaleString()}
           </Text>
         </View>
 
-        <CircleIconButton
-          icon={justAdded ? "checkmark" : "plus"}
-          variant={justAdded ? "success" : "primary"}
-          onPress={handleAdd}
-          size={btnSize}
-          interactive={false}
-        />
+        {inCart ? (
+          <QuantityStepper
+            quantity={quantity}
+            onMinus={handleMinus}
+            onPlus={handlePlus}
+            size={btnSize}
+          />
+        ) : (
+          <CircleIconButton
+            icon={justAdded ? "checkmark" : "plus"}
+            variant={justAdded ? "success" : "primary"}
+            onPress={handleAdd}
+            size={btnSize}
+            interactive={false}
+          />
+        )}
       </Pressable>
     );
   }
@@ -138,9 +150,7 @@ export default React.memo(function ProductItemVenta({
         borderRadius: 14,
         overflow: "hidden",
         backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-        ...(Platform.OS === "web"
-          ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }
-          : { elevation: 2 }),
+        ...(Platform.OS === "web" ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" } : { elevation: 2 }),
       }}
       accessibilityRole="button"
       accessibilityLabel={product.nombre}
@@ -196,13 +206,22 @@ export default React.memo(function ProductItemVenta({
           >
             ${product.precio_venta.toLocaleString()}
           </Text>
-          <CircleIconButton
-            icon={justAdded ? "checkmark" : "plus"}
-            variant={justAdded ? "success" : "primary"}
-            onPress={handleAdd}
-            size={36}
-            interactive={false}
-          />
+          {inCart ? (
+            <QuantityStepper
+              quantity={quantity}
+              onMinus={handleMinus}
+              onPlus={handlePlus}
+              size={36}
+            />
+          ) : (
+            <CircleIconButton
+              icon={justAdded ? "checkmark" : "plus"}
+              variant={justAdded ? "success" : "primary"}
+              onPress={handleAdd}
+              size={36}
+              interactive={false}
+            />
+          )}
         </View>
       </View>
     </Pressable>
