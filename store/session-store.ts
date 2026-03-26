@@ -1,10 +1,11 @@
-import { auth, db } from '@/lib/firebase';
-import { getUsuarioById, getUsuarioByEmail } from '@/lib/services/usuarios';
-import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
-import { getSucursalesByNegocio } from '@/lib/services/sucursales';
-import { doc, setDoc, Timestamp } from 'firebase/firestore';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { create } from 'zustand';
+import { auth, db } from "@/lib/firebase";
+import { getUsuarioById, getUsuarioByEmail } from "@/lib/services/usuarios";
+import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
+import { getSucursalesByNegocio } from "@/lib/services/sucursales";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { create } from "zustand";
+import { useVentasStore } from "./ventas-store";
 
 interface SessionStore {
   userId: string | null;
@@ -36,7 +37,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
 
   hydrate: async (user: User) => {
     const uid = user.uid;
-    const email = user.email ?? '';
+    const email = user.email ?? "";
     const displayName = user.displayName ?? null;
     const photoURL = user.photoURL ?? null;
 
@@ -46,7 +47,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       const negocioId = await getNegocioIdByUsuario(uid, email);
 
       if (!negocioId) {
-        set({ ready: true, error: 'No tienes un negocio asignado' });
+        set({ ready: true, error: "No tienes un negocio asignado" });
         return;
       }
 
@@ -56,15 +57,15 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       }
       if (!usuarioDoc) {
         try {
-          await setDoc(doc(db, 'usuarios', uid), {
+          await setDoc(doc(db, "usuarios", uid), {
             email: email.toLowerCase(),
-            nombre: (displayName ?? email.split('@')[0] ?? 'Usuario').trim(),
-            rol: 'VENDEDOR',
+            nombre: (displayName ?? email.split("@")[0] ?? "Usuario").trim(),
+            rol: "VENDEDOR",
             activo: true,
             createdAt: Timestamp.now(),
           });
         } catch (e) {
-          console.warn('No se pudo crear doc usuarios en hydrate:', e);
+          console.warn("No se pudo crear doc usuarios en hydrate:", e);
         }
       }
 
@@ -73,17 +74,20 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         const sucursales = await getSucursalesByNegocio(negocioId);
         sucursalId = sucursales.length > 0 ? sucursales[0].id : null;
       } catch {
-        console.warn('No se pudieron obtener sucursales, continuando sin sucursal');
+        console.warn("No se pudieron obtener sucursales, continuando sin sucursal");
       }
 
       set({ negocioId, sucursalId, ready: true });
     } catch (err) {
-      console.error('Error al hidratar sesión:', err);
-      set({ ready: true, error: 'Error al cargar datos del negocio' });
+      console.error("Error al hidratar sesión:", err);
+      set({ ready: true, error: "Error al cargar datos del negocio" });
     }
   },
 
-  clear: () => set(initialState),
+  clear: () => {
+    useVentasStore.getState().clearCart();
+    set(initialState);
+  },
 }));
 
 /** Inicializa la escucha de auth y sincroniza la session store. */
