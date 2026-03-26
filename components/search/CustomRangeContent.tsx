@@ -1,15 +1,35 @@
+import type { RangoFechas } from "@/interface";
 import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
-import type { RangoFechas } from "./PeriodFilter";
+import { Pressable, Text, View } from "react-native";
 
 const MONTH_NAMES = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
 ];
 
 const MONTH_FULL = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
 ];
 
 const DAY_HEADERS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
@@ -98,9 +118,7 @@ function RangeCalendar({
     const isStart = sameDay(rango.inicio, d);
     const isEnd = sameDay(rango.fin, d);
     const isToday =
-      now.getFullYear() === viewYear &&
-      now.getMonth() === viewMonth &&
-      now.getDate() === day;
+      now.getFullYear() === viewYear && now.getMonth() === viewMonth && now.getDate() === day;
 
     let inRange = false;
     if (rango.inicio && rango.fin) {
@@ -115,8 +133,13 @@ function RangeCalendar({
   const navigateMonth = (delta: number) => {
     let m = viewMonth + delta;
     let y = viewYear;
-    if (m < 0) { m = 11; y--; }
-    else if (m > 11) { m = 0; y++; }
+    if (m < 0) {
+      m = 11;
+      y--;
+    } else if (m > 11) {
+      m = 0;
+      y++;
+    }
     setViewMonth(m);
     setViewYear(y);
   };
@@ -128,19 +151,19 @@ function RangeCalendar({
   }, [currentYear]);
   const blanks = useMemo(
     () => Array.from({ length: firstDayOfWeek }, (_, i) => i),
-    [firstDayOfWeek],
+    [firstDayOfWeek]
   );
   const daysList = useMemo(
     () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
-    [daysInMonth],
+    [daysInMonth]
   );
 
   if (calendarView === "years") {
     return (
-      <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
+      <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
         <Pressable
           onPress={() => setCalendarView("days")}
-          className="items-center mb-3"
+          className="mb-3 items-center"
           accessibilityRole="button"
           accessibilityLabel="Volver al calendario de días"
         >
@@ -154,8 +177,11 @@ function RangeCalendar({
             return (
               <Pressable
                 key={y}
-                onPress={() => { setViewYear(y); setCalendarView("months"); }}
-                className={`py-2 px-3 rounded-xl ${
+                onPress={() => {
+                  setViewYear(y);
+                  setCalendarView("months");
+                }}
+                className={`rounded-xl px-3 py-2 ${
                   active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
                 }`}
                 accessibilityRole="button"
@@ -179,10 +205,10 @@ function RangeCalendar({
 
   if (calendarView === "months") {
     return (
-      <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
+      <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
         <Pressable
           onPress={() => setCalendarView("years")}
-          className="items-center mb-3"
+          className="mb-3 items-center"
           accessibilityRole="button"
           accessibilityLabel="Seleccionar año"
         >
@@ -196,9 +222,12 @@ function RangeCalendar({
             return (
               <Pressable
                 key={m}
-                onPress={() => { setViewMonth(idx); setCalendarView("days"); }}
+                onPress={() => {
+                  setViewMonth(idx);
+                  setCalendarView("days");
+                }}
                 style={{ width: "31%" }}
-                className={`py-2.5 items-center rounded-xl ${
+                className={`items-center rounded-xl py-2.5 ${
                   active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
                 }`}
                 accessibilityRole="button"
@@ -221,15 +250,15 @@ function RangeCalendar({
   }
 
   return (
-    <View className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-3">
-      <View className="flex-row items-center justify-between mb-3">
+    <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
+      <View className="mb-3 flex-row items-center justify-between">
         <Pressable
           onPress={() => navigateMonth(-1)}
-          className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
           accessibilityRole="button"
           accessibilityLabel="Mes anterior"
         >
-          <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">‹</Text>
+          <Text className="text-lg font-bold text-gray-600 dark:text-gray-300">‹</Text>
         </Pressable>
         <Pressable
           onPress={() => setCalendarView("months")}
@@ -243,18 +272,18 @@ function RangeCalendar({
         </Pressable>
         <Pressable
           onPress={() => navigateMonth(1)}
-          className="w-9 h-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
           accessibilityRole="button"
           accessibilityLabel="Mes siguiente"
         >
-          <Text className="text-gray-600 dark:text-gray-300 text-lg font-bold">›</Text>
+          <Text className="text-lg font-bold text-gray-600 dark:text-gray-300">›</Text>
         </Pressable>
       </View>
 
-      <View className="flex-row mb-1">
+      <View className="mb-1 flex-row">
         {DAY_HEADERS.map((d) => (
           <View key={d} style={{ width: "14.28%" }} className="items-center py-1">
-            <Text className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase">
+            <Text className="text-[11px] font-semibold text-gray-400 uppercase dark:text-gray-500">
               {d}
             </Text>
           </View>
@@ -269,23 +298,23 @@ function RangeCalendar({
           const { isStart, isEnd, inRange, isToday } = getDayStatus(day);
           const isEndpoint = isStart || isEnd;
 
-          const rangeBg = inRange && !isEndpoint
-            ? "bg-orange-100 dark:bg-orange-900/25"
-            : "";
+          const rangeBg = inRange && !isEndpoint ? "bg-orange-100 dark:bg-orange-900/25" : "";
 
-          const startEdge = isStart && rango.fin ? "rounded-l-full bg-orange-100 dark:bg-orange-900/25" : "";
-          const endEdge = isEnd && rango.inicio ? "rounded-r-full bg-orange-100 dark:bg-orange-900/25" : "";
+          const startEdge =
+            isStart && rango.fin ? "rounded-l-full bg-orange-100 dark:bg-orange-900/25" : "";
+          const endEdge =
+            isEnd && rango.inicio ? "rounded-r-full bg-orange-100 dark:bg-orange-900/25" : "";
           const edgeBg = startEdge || endEdge;
 
           return (
             <View
               key={day}
               style={{ width: "14.28%", height: 38 }}
-              className={`justify-center items-center ${rangeBg} ${edgeBg}`}
+              className={`items-center justify-center ${rangeBg} ${edgeBg}`}
             >
               <Pressable
                 onPress={() => handleDayPress(day)}
-                className={`w-9 h-9 items-center justify-center rounded-full ${
+                className={`h-9 w-9 items-center justify-center rounded-full ${
                   isEndpoint
                     ? "bg-orange-600"
                     : isToday
@@ -300,12 +329,12 @@ function RangeCalendar({
                 <Text
                   className={`text-[13px] ${
                     isEndpoint
-                      ? "text-white font-bold"
+                      ? "font-bold text-white"
                       : isToday
-                        ? "text-orange-600 dark:text-orange-400 font-bold"
+                        ? "font-bold text-orange-600 dark:text-orange-400"
                         : inRange
-                          ? "text-orange-700 dark:text-orange-300 font-medium"
-                          : "text-gray-700 dark:text-gray-300 font-medium"
+                          ? "font-medium text-orange-700 dark:text-orange-300"
+                          : "font-medium text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {day}
@@ -338,38 +367,34 @@ export default function CustomRangeContent({
 }: CustomRangeContentProps) {
   const canConfirm = Boolean(rangoTemporal.inicio && rangoTemporal.fin);
 
-  const selectingStep = !rangoTemporal.inicio
-    ? "inicio"
-    : !rangoTemporal.fin
-      ? "fin"
-      : "done";
+  const selectingStep = !rangoTemporal.inicio ? "inicio" : !rangoTemporal.fin ? "fin" : "done";
 
   return (
     <>
       <Text
-        className={`font-bold text-gray-800 dark:text-gray-100 text-center ${
-          isMobile ? "text-lg mb-1" : "text-xl mb-1"
+        className={`text-center font-bold text-gray-800 dark:text-gray-100 ${
+          isMobile ? "mb-1 text-lg" : "mb-1 text-xl"
         }`}
         accessibilityRole="header"
       >
         Período Personalizado
       </Text>
 
-      <Text className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+      <Text className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
         {selectingStep === "inicio" && "Selecciona la fecha de inicio"}
         {selectingStep === "fin" && "Ahora selecciona la fecha de fin"}
         {selectingStep === "done" && "Toca un día para reiniciar la selección"}
       </Text>
 
-      <View className="flex-row gap-2 mb-4">
+      <View className="mb-4 flex-row gap-2">
         <View
-          className={`flex-1 py-2.5 px-3 rounded-xl border ${
+          className={`flex-1 rounded-xl border px-3 py-2.5 ${
             selectingStep === "inicio"
               ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-              : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+              : "border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800"
           }`}
         >
-          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
             Desde
           </Text>
           <Text
@@ -384,17 +409,17 @@ export default function CustomRangeContent({
         </View>
 
         <View className="justify-center">
-          <Text className="text-gray-400 dark:text-gray-500 font-medium">→</Text>
+          <Text className="font-medium text-gray-400 dark:text-gray-500">→</Text>
         </View>
 
         <View
-          className={`flex-1 py-2.5 px-3 rounded-xl border ${
+          className={`flex-1 rounded-xl border px-3 py-2.5 ${
             selectingStep === "fin"
               ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-              : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+              : "border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800"
           }`}
         >
-          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
             Hasta
           </Text>
           <Text
@@ -414,31 +439,30 @@ export default function CustomRangeContent({
       </View>
 
       <View className="flex-row gap-3">
-        <TouchableOpacity
+        <Pressable
           onPress={onCancel}
-          className="flex-1 bg-gray-100 dark:bg-neutral-700 rounded-2xl py-3.5 items-center"
-          activeOpacity={0.7}
+          className="flex-1 items-center justify-center rounded-2xl bg-gray-100 py-3.5 dark:bg-neutral-700"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           accessibilityRole="button"
           accessibilityLabel="Cancelar selección de período"
         >
-          <Text className="text-gray-700 dark:text-gray-200 font-semibold text-[15px]">
+          <Text className="text-[15px] font-semibold text-gray-700 dark:text-gray-200">
             Cancelar
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           onPress={onConfirm}
-          className="flex-1 bg-orange-600 rounded-2xl py-3.5 items-center"
           disabled={!canConfirm}
-          activeOpacity={0.8}
-          style={{ opacity: canConfirm ? 1 : 0.4 }}
+          className="flex-1 items-center justify-center rounded-2xl bg-orange-600 py-3.5"
+          style={({ pressed }) => ({
+            opacity: canConfirm ? (pressed ? 0.8 : 1) : 0.4,
+          })}
           accessibilityRole="button"
           accessibilityLabel="Confirmar período personalizado"
           accessibilityHint="Aplica el rango de fechas seleccionado"
         >
-          <Text className="text-white font-semibold text-[15px]">
-            Confirmar
-          </Text>
-        </TouchableOpacity>
+          <Text className="text-[15px] font-semibold text-white">Confirmar</Text>
+        </Pressable>
       </View>
     </>
   );

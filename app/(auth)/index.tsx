@@ -1,11 +1,7 @@
 import AuthForm from "@/components/auth/AuthForm";
-import { AppFonts } from "@/constants/typography";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { signIn, signUp } from "@/lib/auth";
-import {
-  getGoogleRedirectResult,
-  signInWithGoogle,
-} from "@/lib/authWithGoogle";
+import { getGoogleRedirectResult, signInWithGoogle } from "@/lib/authWithGoogle";
 import { auth } from "@/lib/firebase";
 import { LoginFormData, loginSchema } from "@/lib/validations/auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +10,7 @@ import { router } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Platform, Text, View } from "react-native";
+import { Platform, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {
@@ -61,7 +57,7 @@ export default function AuthScreen() {
             router.replace("/ventas");
           }
         })
-        .catch(() => {});
+        .catch((err) => console.error("Error en getGoogleRedirectResult:", err));
     }
 
     return unsubscribe;
@@ -114,11 +110,7 @@ export default function AuthScreen() {
         isWeb ? "px-6" : "items-center"
       }`}
     >
-      <View
-        className={`space-y-4 ${
-          isWeb ? "w-full max-w-md mx-auto" : "w-full p-4 mt-20"
-        }`}
-      >
+      <View className={`space-y-4 ${isWeb ? "mx-auto w-full max-w-md" : "mt-20 w-full p-4"}`}>
         <Image
           source={require("@/assets/images/pape.webp")}
           style={{
@@ -127,29 +119,7 @@ export default function AuthScreen() {
             alignSelf: "center",
           }}
         />
-        <Text
-          style={{
-            fontFamily: AppFonts.display,
-            fontSize: 34,
-            letterSpacing: 1.1,
-            textAlign: "center",
-            color: isDark ? "#f5f5f5" : "#1f2937",
-            marginTop: 4,
-          }}
-        >
-          La Pape POS
-        </Text>
-        <Text
-          style={{
-            fontFamily: AppFonts.body,
-            fontSize: 14,
-            textAlign: "center",
-            color: isDark ? "#a3a3a3" : "#6b7280",
-            marginTop: -2,
-          }}
-        >
-          Punto de venta ágil para caja, inventario y reportes
-        </Text>
+
         <AuthForm
           control={control}
           errors={errors}

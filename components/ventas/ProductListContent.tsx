@@ -2,11 +2,13 @@ import SearchProducts from "@/components/search/SearchProducts";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
 import type { SearchContextId } from "@/store/product-search-store";
+import EmptyState from "@/components/ui/EmptyState";
 import React from "react";
 import {
   FlatList,
   RefreshControl,
   Text,
+  TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View,
@@ -27,6 +29,7 @@ interface ProductListContentProps {
   contentContainerStyle?: object;
   keyboardDismissMode?: "none" | "on-drag" | "interactive";
   keyboardShouldPersistTaps?: "always" | "never" | "handled";
+  searchInputRef?: React.RefObject<TextInput | null>;
 }
 
 /**
@@ -43,12 +46,12 @@ export default function ProductListContent({
   contentContainerStyle,
   keyboardDismissMode,
   keyboardShouldPersistTaps,
+  searchInputRef,
 }: ProductListContentProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
   const { products, error, retry, refresh, loading } = useProductosScreen();
-  const { searchText, setSearchText, filteredProducts } =
-    useProductSearch(searchContextId);
+  const { searchText, setSearchText, filteredProducts } = useProductSearch(searchContextId);
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {
@@ -61,6 +64,7 @@ export default function ProductListContent({
     <View style={{ flex: 1, minHeight: 0 }}>
       <View style={{ paddingHorizontal: 8, marginBottom: 8 }}>
         <SearchProducts
+          ref={searchInputRef}
           searchText={searchText}
           onSearchChange={setSearchText}
           size={searchSize}
@@ -77,11 +81,7 @@ export default function ProductListContent({
             padding: 16,
           }}
         >
-          <Text
-            style={{ color: "#dc2626", textAlign: "center", marginBottom: 16 }}
-          >
-            {error}
-          </Text>
+          <Text style={{ color: "#dc2626", textAlign: "center", marginBottom: 16 }}>{error}</Text>
           <TouchableOpacity
             style={{
               backgroundColor: "#ea580c",
@@ -91,9 +91,7 @@ export default function ProductListContent({
             }}
             onPress={retry}
           >
-            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
-              Reintentar
-            </Text>
+            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>Reintentar</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -107,32 +105,30 @@ export default function ProductListContent({
             contentContainerStyle,
           ]}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#ea580c"
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ea580c" />
           }
           ListEmptyComponent={
-            loading ? null : (
-              <View style={{ paddingVertical: 32, alignItems: "center" }}>
-                <Text style={{ color: "#6b7280", textAlign: "center" }}>
-                  {products.length === 0
-                    ? "No hay productos"
-                    : "No hay resultados"}
-                </Text>
-              </View>
+            loading ? null : products.length === 0 ? (
+              <EmptyState
+                icon="products"
+                title="No hay productos"
+                description="Crea productos para comenzar a vender"
+                iconColor="#9ca3af"
+              />
+            ) : (
+              <EmptyState
+                icon="search"
+                title="Sin resultados"
+                description="No hay productos que coincidan con tu búsqueda"
+                iconColor="#9ca3af"
+              />
             )
           }
           keyboardDismissMode={keyboardDismissMode}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
           renderItem={({ item, index }) => (
             <Animated.View
-              entering={
-                index < STAGGER_LIMIT
-                  ? FadeIn.delay(index * 40).duration(200)
-                  : undefined
-              }
+              entering={index < STAGGER_LIMIT ? FadeIn.delay(index * 40).duration(200) : undefined}
               style={{ marginBottom: isDesktop ? 10 : 0 }}
             >
               {isDesktop ? (

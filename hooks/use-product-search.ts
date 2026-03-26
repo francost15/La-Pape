@@ -1,7 +1,8 @@
-import type { SearchContextId } from '@/store/product-search-store';
-import { useProductSearchStore } from '@/store/product-search-store';
-import { useProductosStore } from '@/store/productos-store';
-import { useMemo } from 'react';
+import { useDebounce } from "@/hooks/useDebounce";
+import type { SearchContextId } from "@/store/product-search-store";
+import { useProductSearchStore } from "@/store/product-search-store";
+import { useProductosStore } from "@/store/productos-store";
+import { useMemo } from "react";
 
 /**
  * Hook de búsqueda por contexto. Cada pantalla (productos tab, ventas sheet)
@@ -9,13 +10,13 @@ import { useMemo } from 'react';
  */
 export const useProductSearch = (contextId: SearchContextId) => {
   const { products, categories } = useProductosStore();
-  const { searchText, selectedCategoryId } = useProductSearchStore((s) =>
-    s.contexts[contextId] ?? { searchText: '', selectedCategoryId: null }
+  const { searchText, selectedCategoryId } = useProductSearchStore(
+    (s) => s.contexts[contextId] ?? { searchText: "", selectedCategoryId: null }
   );
   const setSearchText = useProductSearchStore((s) => s.setSearchText);
-  const setSelectedCategoryId = useProductSearchStore(
-    (s) => s.setSelectedCategoryId
-  );
+  const setSelectedCategoryId = useProductSearchStore((s) => s.setSelectedCategoryId);
+
+  const debouncedSearchText = useDebounce(searchText, 300);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -24,17 +25,15 @@ export const useProductSearch = (contextId: SearchContextId) => {
       filtered = filtered.filter((p) => p.categoria_id === selectedCategoryId);
     }
 
-    if (searchText.trim()) {
-      const searchLower = searchText.toLowerCase().trim();
+    if (debouncedSearchText.trim()) {
+      const searchLower = debouncedSearchText.toLowerCase().trim();
       const searchTerms = searchLower.split(/\s+/);
-      const categoriaMap = new Map(
-        categories.map((c) => [c.id, c.nombre.toLowerCase()])
-      );
+      const categoriaMap = new Map(categories.map((c) => [c.id, c.nombre.toLowerCase()]));
 
       filtered = filtered.filter((product) => {
         const nombreLower = product.nombre.toLowerCase();
-        const marcaLower = (product.marca || '').toLowerCase();
-        const categoriaNombre = categoriaMap.get(product.categoria_id) || '';
+        const marcaLower = (product.marca || "").toLowerCase();
+        const categoriaNombre = categoriaMap.get(product.categoria_id) || "";
         return searchTerms.every(
           (term) =>
             nombreLower.includes(term) ||
@@ -45,14 +44,13 @@ export const useProductSearch = (contextId: SearchContextId) => {
     }
 
     return filtered;
-  }, [products, categories, searchText, selectedCategoryId]);
+  }, [products, categories, debouncedSearchText, selectedCategoryId]);
 
   return {
     searchText,
     setSearchText: (text: string) => setSearchText(contextId, text),
     selectedCategoryId,
-    setSelectedCategoryId: (id: string | null) =>
-      setSelectedCategoryId(contextId, id),
+    setSelectedCategoryId: (id: string | null) => setSelectedCategoryId(contextId, id),
     filteredProducts,
   };
 };

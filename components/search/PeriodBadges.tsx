@@ -1,9 +1,9 @@
+import type { Periodo } from "@/interface";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
 import { LayoutChangeEvent, Platform, Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import type { Periodo } from "./PeriodFilter";
 
 const PERIODOS: Periodo[] = ["semana", "mes", "año", "personalizado"];
 
@@ -110,9 +110,11 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
             key={p}
             onLayout={handleLayout(p)}
             onPress={() => handlePress(p)}
-            // Mobile: flex-1 para ocupar todo el ancho
-            // Desktop: ancho natural según el texto + padding
-            style={{ zIndex: 1, ...(isMobile ? { flex: 1 } : {}) }}
+            style={{
+              zIndex: 1,
+              // Mobile: flex-1 reparte ancho para touch targets más grandes; desktop mantiene ancho natural
+              ...(isMobile ? { flex: 1 } : {}),
+            }}
             className={`items-center justify-center ${isMobile ? "py-2.5" : "px-4 py-2"}`}
             accessibilityLabel={`Período ${LABELS[p]}`}
             accessibilityRole="tab"

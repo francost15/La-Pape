@@ -1,5 +1,6 @@
 import { notify } from "@/lib/notify";
 import { AppFonts } from "@/constants/typography";
+import { Strings } from "@/constants/strings";
 import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useProductosStore } from "@/store/productos-store";
@@ -19,6 +20,7 @@ import {
 import { Image } from "expo-image";
 import ConfirmAlert from "../ui/ConfirmAlert";
 import { IconSymbol } from "../ui/icon-symbol";
+import EmptyState from "../ui/EmptyState";
 import QuantityStepper from "./QuantityStepper";
 
 const DESKTOP_MIN_WIDTH = 768;
@@ -55,7 +57,7 @@ export default function CartPanel() {
   const handleConfirmClearCart = useCallback(() => {
     clearCart();
     setClearCartConfirmVisible(false);
-    notify.info({ title: "Carrito vaciado" });
+    notify.info({ title: Strings.ventas.cartEmptied });
   }, [clearCart]);
 
   const handleCancelClearCart = useCallback(() => {
@@ -73,7 +75,7 @@ export default function CartPanel() {
         updateQuantity(item.productId, item.quantity - 1);
       }
     },
-    [openDeleteConfirm, updateQuantity],
+    [openDeleteConfirm, updateQuantity]
   );
 
   const handleConfirmRemove = () => {
@@ -92,7 +94,7 @@ export default function CartPanel() {
     closeConfirm();
 
     if (!negocioId || !userId) {
-      notify.error({ title: "No se pudo completar: sesión incompleta" });
+      notify.error({ title: Strings.errors.session });
       setProcessing(false);
       return;
     }
@@ -101,7 +103,7 @@ export default function CartPanel() {
       const result = await completeVentaFlow({
         items,
         negocioId,
-        sucursalId: sucursalId ?? '',
+        sucursalId: sucursalId ?? "",
         userId,
         total: subtotal,
         subtotal,
@@ -111,9 +113,7 @@ export default function CartPanel() {
       const products = useProductosStore.getState().products;
       const updated = products.map((p) => {
         const cartItem = items.find((i) => i.productId === p.id);
-        return cartItem
-          ? { ...p, cantidad: p.cantidad - cartItem.quantity }
-          : p;
+        return cartItem ? { ...p, cantidad: p.cantidad - cartItem.quantity } : p;
       });
       useProductosStore.getState().setProducts(updated);
 
@@ -149,7 +149,7 @@ export default function CartPanel() {
       });
     } catch (err) {
       console.error("Error al completar venta:", err);
-      notify.error({ title: "Error al registrar la venta" });
+      notify.error({ title: Strings.ventas.errorRegisteringSale });
       setProcessing(false);
       closeConfirm();
     }
@@ -157,27 +157,14 @@ export default function CartPanel() {
 
   if (items.length === 0) {
     return (
-      <>
-        <View className="flex-1 items-center justify-center py-16 px-4">
-          <View className="items-center gap-3">
-            <View className="w-20 h-20 rounded-full bg-gray-100 dark:bg-neutral-800 items-center justify-center">
-              <IconSymbol size={40} name="cart.fill" color="#9ca3af" />
-            </View>
-            <Text
-              className="text-center text-gray-500 dark:text-gray-400 text-base font-medium"
-              style={{ fontFamily: AppFonts.heading }}
-            >
-              Carrito vacío
-            </Text>
-            <Text
-              className="text-center text-gray-400 dark:text-gray-500 text-sm"
-              style={{ fontFamily: AppFonts.body }}
-            >
-              Agrega productos desde el panel lateral
-            </Text>
-          </View>
-        </View>
-      </>
+      <View className="flex-1 items-center justify-center px-4 py-16">
+        <EmptyState
+          icon="cart"
+          title={Strings.ventas.emptyCart}
+          description={Strings.ventas.emptyCartHint}
+          iconColor="#9ca3af"
+        />
+      </View>
     );
   }
 
@@ -190,21 +177,21 @@ export default function CartPanel() {
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <View className="flex-row items-center px-4 py-3 border-b border-gray-100 dark:border-neutral-800 gap-3">
-            <View className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-neutral-700 overflow-hidden shrink-0">
+          <View className="flex-row items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-neutral-800">
+            <View className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-gray-200 dark:bg-neutral-700">
               {item.product.imagen?.trim() ? (
                 <Image
                   source={{ uri: item.product.imagen }}
-                  className="w-full h-full"
+                  className="h-full w-full"
                   contentFit="cover"
                 />
               ) : (
-                <View className="w-full h-full items-center justify-center">
+                <View className="h-full w-full items-center justify-center">
                   <IconSymbol name="photo.fill" size={28} color="#9ca3af" />
                 </View>
               )}
             </View>
-            <View className="flex-1 min-w-0 shrink justify-center gap-0.5 pr-2">
+            <View className="min-w-0 flex-1 shrink justify-center gap-0.5 pr-2">
               <Text
                 className="text-sm font-medium text-gray-900 dark:text-white"
                 style={{ fontFamily: AppFonts.bodyStrong }}
@@ -231,14 +218,10 @@ export default function CartPanel() {
 
       <ConfirmAlert
         visible={!!deleteConfirmItem}
-        title="Eliminar del carrito"
-        message={
-          deleteConfirmItem
-            ? `¿Quitar "${deleteConfirmItem.nombre}" del carrito?`
-            : ""
-        }
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        title={Strings.ventas.removeFromCart}
+        message={deleteConfirmItem ? `¿Quitar "${deleteConfirmItem.nombre}" del carrito?` : ""}
+        confirmText={Strings.common.delete}
+        cancelText={Strings.common.cancel}
         onConfirm={handleConfirmRemove}
         onCancel={closeDeleteConfirm}
         danger
@@ -246,10 +229,10 @@ export default function CartPanel() {
 
       <ConfirmAlert
         visible={confirmVisible}
-        title="Completar venta"
-        message="¿Estás seguro de completar esta venta? Se generará el recibo y se vaciará el carrito."
-        confirmText="Aceptar"
-        cancelText="Cancelar"
+        title={Strings.ventas.completeSale}
+        message={Strings.ventas.confirmComplete}
+        confirmText={Strings.ventas.accept}
+        cancelText={Strings.common.cancel}
         onConfirm={handleCompleteVenta}
         onCancel={closeConfirm}
         danger={false}
@@ -257,19 +240,19 @@ export default function CartPanel() {
 
       <ConfirmAlert
         visible={clearCartConfirmVisible}
-        title="Vaciar carrito"
-        message="¿Estás seguro de vaciar el carrito? Se eliminarán todos los productos."
-        confirmText="Vaciar"
-        cancelText="Cancelar"
+        title={Strings.ventas.clearCartTitle}
+        message={Strings.ventas.confirmClear}
+        confirmText={Strings.common.empty}
+        cancelText={Strings.common.cancel}
         onConfirm={handleConfirmClearCart}
         onCancel={handleCancelClearCart}
         danger
       />
 
-      <View className="px-3 pt-3 pb-2 border-t border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-        <View className="flex-row justify-between items-center mb-2.5 px-1">
+      <View className="border-t border-gray-200 bg-white px-3 pt-3 pb-2 dark:border-neutral-800 dark:bg-neutral-900">
+        <View className="mb-2.5 flex-row items-center justify-between px-1">
           <Text
-            className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+            className="text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             Total
@@ -283,7 +266,7 @@ export default function CartPanel() {
         </View>
 
         <TouchableOpacity
-          className="rounded-2xl py-3.5 bg-orange-500 items-center justify-center active:opacity-90"
+          className="items-center justify-center rounded-2xl bg-orange-500 py-3.5 active:opacity-90"
           activeOpacity={0.9}
           onPress={openConfirm}
           disabled={processing}
@@ -296,17 +279,17 @@ export default function CartPanel() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text
-              className="text-base font-semibold text-white tracking-tight"
+              className="text-base font-semibold tracking-tight text-white"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
-              Completar venta
+              {Strings.ventas.completeSale}
             </Text>
           )}
         </TouchableOpacity>
 
         {isDesktop && (
           <TouchableOpacity
-            className="mt-2 rounded-2xl py-3 flex-row items-center justify-center gap-1.5 border border-orange-500/40 active:opacity-90"
+            className="mt-2 flex-row items-center justify-center gap-1.5 rounded-2xl border border-orange-500/40 py-3 active:opacity-90"
             activeOpacity={0.85}
             onPress={handleClearCartPress}
             accessibilityRole="button"
@@ -317,7 +300,7 @@ export default function CartPanel() {
               className="text-sm font-semibold text-orange-600 dark:text-orange-400"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
-              Limpiar
+              {Strings.ventas.clearCart}
             </Text>
           </TouchableOpacity>
         )}

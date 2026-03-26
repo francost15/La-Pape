@@ -1,3 +1,5 @@
+import type { Periodo, RangoFechas } from "@/interface";
+import { formatDate as formatDateUtil } from "@/lib/utils/format";
 import { useLayoutStore } from "@/store/layout-store";
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
@@ -12,12 +14,7 @@ import Animated, {
 import CustomRangeContent from "./CustomRangeContent";
 import PeriodBadges from "./PeriodBadges";
 
-export type Periodo = "semana" | "mes" | "año" | "personalizado";
-
-export interface RangoFechas {
-  inicio: Date | null;
-  fin: Date | null;
-}
+export type { Periodo, RangoFechas };
 
 export interface PeriodFilterProps {
   periodo: Periodo;
@@ -27,16 +24,8 @@ export interface PeriodFilterProps {
   formatDate?: (date: Date | null) => string;
 }
 
-const shortFormatDate = (date: Date | null): string => {
-  if (!date) return "Seleccionar";
-  return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-// ─── Modals ──────────────────────────────────────────────────────────
+// Dos variantes de modal: mobile usa slide-up desde abajo (UX móvil nativa);
+// desktop usa zoom centrado para no ocupar toda la pantalla
 
 function MobileModal({
   visible,
@@ -156,7 +145,7 @@ export default function PeriodFilter({
   onPeriodoChange,
   rangoPersonalizado,
   onRangoPersonalizadoChange,
-  formatDate = shortFormatDate,
+  formatDate = (d) => formatDateUtil(d, "Seleccionar"),
 }: PeriodFilterProps) {
   const isMobile = useLayoutStore((s) => s.isMobile);
   const [showModal, setShowModal] = useState(false);
@@ -191,17 +180,19 @@ export default function PeriodFilter({
     }
   }, [rangoTemporal, onPeriodoChange, onRangoPersonalizadoChange]);
 
-  const hasCustomRange =
-    periodo === "personalizado" && rangoPersonalizado?.inicio && rangoPersonalizado?.fin;
+  // RN Core: ternario evita crash si valor fuera falsy; mostrar chip solo cuando hay rango válido
+  const hasCustomRange = Boolean(
+    periodo === "personalizado" && rangoPersonalizado?.inicio && rangoPersonalizado?.fin
+  );
 
   const ModalWrapper = isMobile ? MobileModal : DesktopModal;
 
   return (
     <>
-      <View className="mb-4" style={!isMobile ? { alignSelf: "flex-start" } : undefined}>
+      <View className="mb-4 items-center" style={!isMobile ? { alignSelf: "center" } : undefined}>
         <PeriodBadges periodo={periodo} onSelect={handleSelect} isMobile={isMobile} />
 
-        {hasCustomRange && (
+        {hasCustomRange ? (
           <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
             <Pressable
               onPress={() => setShowModal(true)}
@@ -215,7 +206,7 @@ export default function PeriodFilter({
               </Text>
             </Pressable>
           </Animated.View>
-        )}
+        ) : null}
       </View>
 
       <ModalWrapper visible={showModal} onClose={handleCloseModal}>

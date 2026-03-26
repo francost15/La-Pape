@@ -5,10 +5,9 @@ import TopProductsList from "@/components/resumen/TopProductsList";
 import VentasPorUsuario from "@/components/resumen/VentasPorUsuario";
 import PeriodFilter from "@/components/search/PeriodFilter";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import EmptyState from "@/components/ui/EmptyState";
 import { useUsuariosMap } from "@/hooks/use-usuarios-map";
 import { getProductosScreenData } from "@/lib";
-import { formatDate } from "@/lib/utils/format";
 import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
 import { useLayoutStore } from "@/store/layout-store";
 import { useProductosStore } from "@/store/productos-store";
@@ -69,7 +68,7 @@ export default function ResumenScreen() {
   // Filtramos las ventas según el período seleccionado antes de pasarlas a los selectores
   const ventasFiltradas = useMemo(
     () => filterVentasByPeriodo(ventas, periodo, rangoPersonalizado),
-    [ventas, periodo, rangoPersonalizado],
+    [ventas, periodo, rangoPersonalizado]
   );
 
   // ── Usuarios ───────────────────────────────────────────────────────────────
@@ -97,48 +96,44 @@ export default function ResumenScreen() {
         setProducts(p);
         setCategories(c);
       })
-      .catch(() => {});
+      .catch((err) => console.error("Error cargando productos:", err));
   }, [sessionReady, negocioId, userId, userEmail, products.length, setProducts, setCategories]);
 
   // ── Datos derivados (memoizados para evitar recálculo innecesario) ──────────
   const metricas = useMemo(
     () => selectMetricas(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products],
+    [ventasFiltradas, detallesMap, products]
   );
 
   const ranking = useMemo(
     () => selectProductosRanking(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products],
+    [ventasFiltradas, detallesMap, products]
   );
 
   const categorias = useMemo(
     () => selectCategorias(ventasFiltradas, detallesMap, products, categories),
-    [ventasFiltradas, detallesMap, products, categories],
+    [ventasFiltradas, detallesMap, products, categories]
   );
 
   const ventasPorUsuario = useMemo(
     () => selectVentasPorUsuario(ventasFiltradas, usuariosMap),
-    [ventasFiltradas, usuariosMap],
+    [ventasFiltradas, usuariosMap]
   );
 
-  const productosBajoStock = useMemo(
-    () => selectProductosBajoStock(products),
-    [products],
-  );
+  const productosBajoStock = useMemo(() => selectProductosBajoStock(products), [products]);
 
   // ── Estados especiales ─────────────────────────────────────────────────────
 
   if (sessionReady && !negocioId) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-neutral-900 px-6 gap-3">
-          <IconSymbol name="building.2.fill" size={48} color="#9ca3af" />
-          <Text className="text-base font-medium text-gray-700 dark:text-gray-300 text-center">
-            {sessionError ?? "No tienes un negocio asignado"}
-          </Text>
-          <Text className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            Configura tu negocio para ver el resumen de ventas
-          </Text>
+        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+          <EmptyState
+            icon="error"
+            title={sessionError ?? "No tienes un negocio asignado"}
+            description="Configura tu negocio para ver el resumen de ventas"
+            iconColor="#9ca3af"
+          />
         </View>
       </AnimatedScreen>
     );
@@ -147,8 +142,9 @@ export default function ResumenScreen() {
   if (loading) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-neutral-900">
+        <View className="flex-1 items-center justify-center gap-4 bg-gray-50 dark:bg-neutral-900">
           <ActivityIndicator size="large" color="#ea580c" />
+          <Text className="text-sm text-gray-500 dark:text-gray-400">Cargando resumen...</Text>
         </View>
       </AnimatedScreen>
     );
@@ -157,11 +153,13 @@ export default function ResumenScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-neutral-900 px-6 gap-3">
-          <IconSymbol name="exclamationmark.triangle.fill" size={48} color="#ef4444" />
-          <Text className="text-base font-medium text-gray-700 dark:text-gray-300 text-center">
-            {error}
-          </Text>
+        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+          <EmptyState
+            icon="error"
+            title={error}
+            description="Verifica tu conexión e intenta nuevamente"
+            iconColor="#ef4444"
+          />
         </View>
       </AnimatedScreen>
     );
@@ -189,7 +187,6 @@ export default function ResumenScreen() {
             onPeriodoChange={setPeriodo}
             rangoPersonalizado={rangoPersonalizado}
             onRangoPersonalizadoChange={setRangoPersonalizado}
-            formatDate={(d) => formatDate(d)}
           />
 
           {/* KPIs principales — siempre en fila horizontal */}
@@ -206,7 +203,7 @@ export default function ResumenScreen() {
               <CategoryBreakdown data={categorias} isMobile={isMobile} />
             </>
           ) : (
-            <View className="flex-row gap-4 items-start">
+            <View className="flex-row items-start gap-4">
               {/* 40% — lista de vendedores */}
               <View style={{ flex: 2 }}>
                 <VentasPorUsuario data={ventasPorUsuario} />
@@ -229,7 +226,7 @@ export default function ResumenScreen() {
               <ProductosBajoStockList items={productosBajoStock} />
             </>
           ) : (
-            <View className="flex-row gap-4 items-start">
+            <View className="flex-row items-start gap-4">
               <View style={{ flex: 3 }}>
                 <TopProductsList title="Productos Más Vendidos" items={ranking.top} />
               </View>

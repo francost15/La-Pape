@@ -3,8 +3,9 @@ import { useHaptic } from "@/hooks/use-haptic";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency, formatTime } from "@/lib/utils/format";
 import React, { useEffect } from "react";
-import { Platform, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import Animated, {
+  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -45,74 +46,69 @@ export default React.memo(function VentaCard({
   }));
 
   return (
-    <View
-      className="bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700"
-      style={
-        Platform.OS === "web"
-          ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }
-          : { elevation: 2 }
-      }
+    <Animated.View
+      entering={FadeInDown.duration(280).springify().damping(18)}
+      className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800"
+      style={Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" } : { elevation: 3 }}
     >
-      <TouchableOpacity
-        onPress={() => {
-          haptic();
-          onToggle();
-        }}
-        className="flex-row items-center justify-between px-4 py-3.5"
-        activeOpacity={0.7}
-        accessibilityRole="button"
-        accessibilityLabel={`Venta ${formatCurrency(venta.total)}, ${detalles.length} productos`}
-      >
-        <View className="flex-1 min-w-0">
-          <Text className="text-sm font-medium text-gray-600 dark:text-gray-300">
-            {formatTime(fecha)}
-          </Text>
-          <Text
-            className="text-xs text-gray-400 dark:text-gray-500 mt-0.5"
-            numberOfLines={1}
-          >
-            {detalles.length} producto{detalles.length !== 1 ? "s" : ""}
-          </Text>
-        </View>
-        <Text
-          className={`text-lg font-bold mr-2 ${
-            isReembolso
-              ? "text-red-600 dark:text-red-400"
-              : "text-gray-900 dark:text-white"
-          }`}
+      <View className="border-l-4" style={{ borderLeftColor: isReembolso ? "#ef4444" : "#ea580c" }}>
+        <Pressable
+          onPress={() => {
+            haptic();
+            onToggle();
+          }}
+          className="flex-row items-center justify-between px-4 py-4"
+          style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+          accessibilityRole="button"
+          accessibilityLabel={`Venta ${formatCurrency(venta.total)}, ${detalles.length} productos`}
         >
-          {formatCurrency(venta.total)}
-        </Text>
-        <View className="w-8 h-8 rounded-full bg-gray-100 dark:bg-neutral-700 items-center justify-center">
-          <IconSymbol
-            name={expandido ? "chevron.up" : "chevron.down"}
-            size={14}
-            color="#78716c"
-          />
-        </View>
-      </TouchableOpacity>
+          <View className="min-w-0 flex-1">
+            <Text className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              {formatTime(fecha)}
+            </Text>
+            <Text className="mt-0.5 text-xs text-gray-400 dark:text-gray-500" numberOfLines={1}>
+              {detalles.length} producto{detalles.length !== 1 ? "s" : ""}
+            </Text>
+          </View>
+          <Text
+            className={`mr-2 text-lg font-bold ${
+              isReembolso ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"
+            }`}
+          >
+            {formatCurrency(venta.total)}
+          </Text>
+          <View
+            className={`h-9 w-9 items-center justify-center rounded-full ${
+              expandido ? "bg-orange-100 dark:bg-orange-900/30" : "bg-gray-100 dark:bg-neutral-700"
+            }`}
+          >
+            <IconSymbol
+              name={expandido ? "chevron.up" : "chevron.down"}
+              size={14}
+              color={expandido ? "#ea580c" : "#78716c"}
+            />
+          </View>
+        </Pressable>
+      </View>
 
       {expandido ? (
         <Animated.View style={animatedStyle}>
-          <View className="border-t border-gray-100 dark:border-neutral-700 px-4 pt-3 pb-4">
-            <Text className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+          <View className="border-t border-gray-100 bg-gray-50/50 px-4 pt-4 pb-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+            <Text className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
               Productos ({detalles.length})
             </Text>
-            <View className="gap-2 mb-4">
+            <View className="mb-4 gap-2">
               {detalles.map((d) => {
                 const nombre = productNames[d.producto_id] ?? "Producto";
                 return (
-                  <View
-                    key={d.id}
-                    className="flex-row justify-between items-center py-1.5"
-                  >
+                  <View key={d.id} className="flex-row items-center justify-between py-1.5">
                     <Text
-                      className="text-gray-700 dark:text-gray-300 flex-1 mr-2"
+                      className="mr-2 flex-1 text-gray-700 dark:text-gray-300"
                       numberOfLines={1}
                     >
                       {d.cantidad}× {nombre}
                     </Text>
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm tabular-nums">
+                    <Text className="text-sm text-gray-500 tabular-nums dark:text-gray-400">
                       {formatCurrency(d.total_linea)}
                     </Text>
                   </View>
@@ -121,34 +117,31 @@ export default React.memo(function VentaCard({
             </View>
 
             <View className="flex-row gap-3">
-              <TouchableOpacity
+              <Pressable
                 onPress={() => {
                   haptic();
                   onVerRecibo(venta);
                 }}
-                className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl bg-orange-600"
-                activeOpacity={0.85}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-orange-600 py-3.5"
+                style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
                 accessibilityRole="button"
                 accessibilityLabel="Ver recibo"
               >
                 <IconSymbol name="eye.fill" size={18} color="white" />
-                <Text className="text-white font-semibold text-[15px]">
-                  Ver Recibo
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+                <Text className="text-[15px] font-semibold text-white">Ver Recibo</Text>
+              </Pressable>
+              <Pressable
                 onPress={() => {
                   haptic();
                   onReembolso(venta);
                 }}
                 disabled={isReembolso}
-                style={isReembolso ? { opacity: 0.6 } : undefined}
-                className={`flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl ${
-                  isReembolso
-                    ? "bg-gray-100 dark:bg-neutral-700"
-                    : "bg-red-50 dark:bg-red-900/20"
+                style={({ pressed }) => ({
+                  opacity: isReembolso ? 0.5 : pressed ? 0.88 : 1,
+                })}
+                className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3.5 ${
+                  isReembolso ? "bg-gray-100 dark:bg-neutral-700" : "bg-red-50 dark:bg-red-900/20"
                 }`}
-                activeOpacity={0.85}
                 accessibilityRole="button"
                 accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
               >
@@ -158,7 +151,7 @@ export default React.memo(function VentaCard({
                   color={isReembolso ? "#9ca3af" : "#dc2626"}
                 />
                 <Text
-                  className={`font-semibold text-[15px] ${
+                  className={`text-[15px] font-semibold ${
                     isReembolso
                       ? "text-gray-500 dark:text-gray-500"
                       : "text-red-700 dark:text-red-300"
@@ -166,11 +159,11 @@ export default React.memo(function VentaCard({
                 >
                   Reembolso
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </Animated.View>
       ) : null}
-    </View>
+    </Animated.View>
   );
 });

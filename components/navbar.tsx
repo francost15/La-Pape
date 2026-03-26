@@ -7,14 +7,7 @@ import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Modal, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 export default function Navbar() {
   const isWeb = Platform.OS === "web";
@@ -28,7 +21,8 @@ export default function Navbar() {
     try {
       const data = await getUsuarioById(uid);
       setUsuarioData(data);
-    } catch {
+    } catch (error) {
+      console.error("Error cargando usuario:", error);
       setUsuarioData(null);
     }
   }, []);
@@ -55,20 +49,15 @@ export default function Navbar() {
 
   const nombre = usuarioData?.nombre ?? user?.displayName ?? null;
   const email = user?.email ?? usuarioData?.email ?? "";
-  const inicial = (
-    nombre?.[0] ??
-    user?.displayName?.[0] ??
-    email?.[0] ??
-    "?"
-  ).toUpperCase();
+  const inicial = (nombre?.[0] ?? user?.displayName?.[0] ?? email?.[0] ?? "?").toUpperCase();
 
   return (
     <View
-      className={`${isWeb ? "web-navbar" : "mobile-navbar"} flex-row justify-between items-center bg-gray-100 dark:bg-neutral-800 px-4 py-3 ${isWeb ? "" : "pt-18"}`}
+      className={`${isWeb ? "web-navbar" : "mobile-navbar"} flex-row items-center justify-between bg-gray-100 px-4 py-3 dark:bg-neutral-800 ${isWeb ? "" : "pt-18"}`}
     >
       <Link
         href="/ventas"
-        className={`${isWeb ? "px-2 py-2 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-lg transition-colors" : ""}`}
+        className={`${isWeb ? "rounded-lg px-2 py-2 transition-colors hover:bg-gray-200 dark:hover:bg-neutral-700" : ""}`}
       >
         <Image
           source={require("@/assets/images/pape.webp")}
@@ -84,7 +73,7 @@ export default function Navbar() {
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
             activeOpacity={0.8}
-            className="rounded-full overflow-hidden bg-gray-200 dark:bg-neutral-600"
+            className="overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-600"
             style={{ width: 60, height: 60 }}
             accessibilityRole="button"
             accessibilityLabel="Abrir menú de usuario"
@@ -129,7 +118,7 @@ export default function Navbar() {
             >
               <Pressable
                 onPress={(e) => e.stopPropagation()}
-                className="rounded-t-2xl bg-gray-100 dark:bg-neutral-800 p-6"
+                className="rounded-t-2xl bg-gray-100 p-6 dark:bg-neutral-800"
               >
                 <View className="mb-4 flex-row items-center gap-3">
                   {user.photoURL && !photoLoadFailed ? (
@@ -186,7 +175,7 @@ export default function Navbar() {
                     setMenuVisible(false);
                     router.push("/configuracion");
                   }}
-                  className="flex-row items-center gap-3 py-3 px-4 rounded-xl bg-gray-200 dark:bg-neutral-700 mb-3 active:opacity-80"
+                  className="mb-3 flex-row items-center gap-3 rounded-xl bg-gray-200 px-4 py-3 active:opacity-80 dark:bg-neutral-700"
                   accessibilityRole="button"
                   accessibilityLabel="Configuración"
                 >

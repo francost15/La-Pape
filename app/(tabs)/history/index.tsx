@@ -2,33 +2,34 @@ import VentaCard from "@/components/history/VentaCard";
 import PeriodFilter from "@/components/search/PeriodFilter";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import ConfirmAlert from "@/components/ui/ConfirmAlert";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import EmptyState from "@/components/ui/EmptyState";
 import { Venta, VentaDetalle } from "@/interface";
+import { Strings } from "@/constants/strings";
 import { notify } from "@/lib/notify";
 import { generateAndShareRecibo } from "@/lib/pdf/generate-recibo";
 import type { ReciboData } from "@/lib/pdf/recibo-template";
 import { onVentasByNegocio } from "@/lib/services/ventas";
 import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
 import { refundVentaFlow } from "@/lib/services/ventas/refund-venta";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatCurrency } from "@/lib/utils/format";
 import { groupVentasByDate } from "@/lib/utils/ventas-helpers";
 import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
+  Pressable,
   SectionList,
   Text,
+  TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 
 export default function HistoryScreen() {
   const { width } = useWindowDimensions();
@@ -38,14 +39,14 @@ export default function HistoryScreen() {
   const sessionReady = useSessionStore((s) => s.ready);
 
   const [ventas, setVentas] = useState<Venta[]>([]);
-  const [detallesMap, setDetallesMap] = useState<
-    Record<string, VentaDetalle[]>
-  >({});
+  const [detallesMap, setDetallesMap] = useState<Record<string, VentaDetalle[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refundTarget, setRefundTarget] = useState<Venta | null>(null);
   const [refunding, setRefunding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const searchInputRef = useRef<TextInput>(null);
   const sucursalId = useSessionStore((s) => s.sucursalId);
   const userId = useSessionStore((s) => s.userId);
   const periodo = useFiltrosStore((s) => s.periodo);
@@ -60,7 +61,7 @@ export default function HistoryScreen() {
 
     if (!negocioId) {
       setLoading(false);
-      setError("No tienes un negocio asignado");
+      setError(Strings.history.noNegocioAssigned);
       return;
     }
 
@@ -76,7 +77,7 @@ export default function HistoryScreen() {
         ids.map(async (id) => ({
           id,
           dets: await getDetallesByVenta(id),
-        })),
+        }))
       );
       const updated = { ...detallesCacheRef.current };
       const stillEmpty: string[] = [];
@@ -124,9 +125,9 @@ export default function HistoryScreen() {
       },
       (err) => {
         console.error("Error en listener de historial:", err);
-        setError("No se pudo cargar el historial de ventas");
+        setError(Strings.history.loadHistory);
         setLoading(false);
-      },
+      }
     );
 
     return () => {
@@ -135,32 +136,66 @@ export default function HistoryScreen() {
     };
   }, [sessionReady, negocioId]);
 
-  const ventasFiltradas = useMemo(
-    () => filterVentasByPeriodo(ventas, periodo, rangoPersonalizado),
-    [ventas, periodo, rangoPersonalizado],
+  const products = useProductosStore((s) => s.products);
+
+  const focusSearch = useCallback(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+  const shortcuts = useMemo(
+    () => [
+      {
+        key: "/",
+        handler: focusSearch,
+        description: "Enfocar búsqueda",
+      },
+    ],
+    [focusSearch]
   );
+
+  useKeyboardShortcuts(shortcuts, Platform.OS === "web");
+
+  const ventasFiltradas = useMemo(() => {
+    let filtered = filterVentasByPeriodo(ventas, periodo, rangoPersonalizado);
+    if (searchText.trim()) {
+      const searchLower = searchText.toLowerCase().trim();
+      filtered = filtered.filter((v) => {
+        const detalles = detallesMap[v.id] ?? [];
+        const productNames = detalles
+          .map((d) => {
+            const product = products.find((p) => p.id === d.producto_id);
+            return product?.nombre.toLowerCase() ?? "";
+          })
+          .join(" ");
+        return (
+          v.id.toLowerCase().includes(searchLower) ||
+          productNames.includes(searchLower) ||
+          v.total.toString().includes(searchLower)
+        );
+      });
+    }
+    return filtered;
+  }, [ventas, periodo, rangoPersonalizado, searchText, detallesMap, products]);
 
   const ventasAgrupadas = useMemo(
     () => groupVentasByDate(ventasFiltradas, detallesMap),
-    [ventasFiltradas, detallesMap],
+    [ventasFiltradas, detallesMap]
   );
 
-  const products = useProductosStore((s) => s.products);
   const productNames = useMemo(
     () => Object.fromEntries(products.map((p) => [p.id, p.nombre])),
-    [products],
+    [products]
   );
 
   const handleVerRecibo = useCallback(
     async (venta: Venta) => {
       const detalles = detallesMap[venta.id] ?? [];
       if (detalles.length === 0) {
-        notify.warning({ title: "Sin detalles para esta venta" });
+        notify.warning({ title: Strings.history.noSaleDetails });
         return;
       }
 
-      const fecha =
-        venta.fecha instanceof Date ? venta.fecha : new Date(venta.fecha);
+      const fecha = venta.fecha instanceof Date ? venta.fecha : new Date(venta.fecha);
 
       const reciboData: ReciboData = {
         ventaId: venta.id,
@@ -181,10 +216,10 @@ export default function HistoryScreen() {
         await generateAndShareRecibo(reciboData);
       } catch (err) {
         console.error("Error generando recibo:", err);
-        notify.error({ title: "No se pudo generar el recibo" });
+        notify.error({ title: Strings.history.couldNotGenerateReceipt });
       }
     },
-    [detallesMap, productNames],
+    [detallesMap, productNames]
   );
 
   const toggleCard = useCallback((ventaId: string) => {
@@ -214,10 +249,10 @@ export default function HistoryScreen() {
       });
       useProductosStore.getState().setProducts(updated);
 
-      notify.success({ title: "Reembolso procesado correctamente" });
+      notify.success({ title: Strings.history.refundSuccess });
     } catch (err) {
       console.error("Error al procesar reembolso:", err);
-      notify.error({ title: "No se pudo procesar el reembolso" });
+      notify.error({ title: Strings.history.refundError });
     } finally {
       setRefunding(false);
       setRefundTarget(null);
@@ -232,29 +267,48 @@ export default function HistoryScreen() {
         total: group.total,
         data: group.ventas,
       })),
-    [ventasAgrupadas],
+    [ventasAgrupadas]
   );
 
   const renderSectionHeader = useCallback(
-    ({ section }: { section: { label: string; total: number } }) => (
-      <View className="flex-row items-center justify-between mb-3 px-1 pt-4 bg-gray-50 dark:bg-neutral-900">
-        <Text className="text-base font-bold text-gray-800 dark:text-gray-100 capitalize">
-          {section.label}
-        </Text>
-        <Text className="text-xl font-semibold text-gray-500 dark:text-gray-400 tabular-nums">
-          Total: {formatCurrency(section.total)}
-        </Text>
-      </View>
-    ),
-    [],
+    ({ section }: { section: { label: string; total: number } }) => {
+      const isTodayOrYesterday = section.label === "Hoy" || section.label === "Ayer";
+      return (
+        <Animated.View
+          entering={FadeIn.duration(320)}
+          className="mt-2 mb-4 flex-row items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3.5 dark:border-neutral-700 dark:bg-neutral-800"
+          style={
+            Platform.OS === "web" ? { boxShadow: "0 2px 6px rgba(0,0,0,0.06)" } : { elevation: 2 }
+          }
+        >
+          <View className="flex-row items-center gap-3">
+            <View
+              className="h-8 w-1 rounded-full"
+              style={{
+                backgroundColor: isTodayOrYesterday ? "#ea580c" : "#e5e7eb",
+              }}
+            />
+            <Text
+              className={`text-base font-bold capitalize ${
+                isTodayOrYesterday
+                  ? "text-orange-600 dark:text-orange-400"
+                  : "text-gray-800 dark:text-gray-100"
+              }`}
+            >
+              {section.label}
+            </Text>
+          </View>
+          <Text className="text-lg font-bold text-gray-700 tabular-nums dark:text-gray-300">
+            {formatCurrency(section.total)}
+          </Text>
+        </Animated.View>
+      );
+    },
+    []
   );
 
   const renderVentaItem = useCallback(
-    ({
-      item,
-    }: {
-      item: { venta: Venta; detalles: VentaDetalle[]; fecha: Date };
-    }) => (
+    ({ item }: { item: { venta: Venta; detalles: VentaDetalle[]; fecha: Date } }) => (
       <View style={{ marginBottom: 12 }}>
         <VentaCard
           venta={item.venta}
@@ -269,48 +323,81 @@ export default function HistoryScreen() {
         />
       </View>
     ),
-    [expandedIds, productNames, toggleCard, handleVerRecibo, handleReembolso],
+    [expandedIds, productNames, toggleCard, handleVerRecibo, handleReembolso]
   );
 
   const ListHeaderComponent = useMemo(
     () => (
-      <View className={isTablet ? "max-w-5xl mx-auto w-full" : ""}>
+      <View className={isTablet ? "mx-auto w-full max-w-2xl pb-2" : "pb-2"}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: Platform.OS === "web" ? "#F2F2F7" : undefined,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            marginBottom: 8,
+            gap: 8,
+          }}
+        >
+          <IconSymbol name="magnifyingglass" size={18} color="#8E8E93" />
+          <TextInput
+            ref={searchInputRef}
+            style={{ flex: 1, fontSize: 15, paddingVertical: 10 }}
+            placeholder="Buscar venta... ( presiona / )"
+            placeholderTextColor="#8E8E93"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          {searchText.length > 0 && (
+            <Pressable
+              onPress={() => setSearchText("")}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <IconSymbol name="xmark" size={14} color="#8E8E93" />
+            </Pressable>
+          )}
+        </View>
         <PeriodFilter
           periodo={periodo}
           onPeriodoChange={setPeriodo}
           rangoPersonalizado={rangoPersonalizado}
           onRangoPersonalizadoChange={setRangoPersonalizado}
-          formatDate={formatDate}
         />
       </View>
     ),
-    [isTablet, periodo, setPeriodo, rangoPersonalizado, setRangoPersonalizado],
+    [
+      isTablet,
+      periodo,
+      setPeriodo,
+      rangoPersonalizado,
+      setRangoPersonalizado,
+      searchText,
+      setSearchText,
+      searchInputRef,
+    ]
   );
 
   const ListEmptyComponent = useMemo(
     () => (
-      <View className="mt-12 items-center justify-center py-16 bg-white dark:bg-neutral-800 rounded-2xl border border-gray-100 dark:border-neutral-700">
-        <IconSymbol
-          name="clock.fill"
-          size={64}
-          color="#9ca3af"
-          style={{ marginBottom: 16 }}
+      <Animated.View entering={FadeIn.duration(400)} className="mt-20 px-10">
+        <EmptyState
+          icon="clock"
+          title={Strings.history.emptySales}
+          description={Strings.history.emptySalesHint}
         />
-        <Text className="text-lg font-medium text-gray-600 dark:text-gray-400 text-center px-4">
-          No hay ventas en este período
-        </Text>
-        <Text className="text-gray-500 dark:text-gray-500 text-center px-4 mt-2">
-          Cambia el filtro o registra nuevas ventas
-        </Text>
-      </View>
+      </Animated.View>
     ),
-    [],
+    []
   );
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-neutral-900">
+      <View className="flex-1 items-center justify-center gap-4 bg-gray-50 dark:bg-neutral-900">
         <ActivityIndicator size="large" color="#ea580c" />
+        <Text className="text-sm text-gray-500 dark:text-gray-400">
+          {Strings.history.loadingHistory}
+        </Text>
       </View>
     );
   }
@@ -318,16 +405,13 @@ export default function HistoryScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-neutral-900 px-6">
-          <IconSymbol
-            name="exclamationmark.triangle.fill"
-            size={48}
-            color="#ef4444"
-            style={{ marginBottom: 12 }}
+        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+          <EmptyState
+            icon="error"
+            title={error}
+            description={Strings.errors.connection}
+            iconColor="#ef4444"
           />
-          <Text className="text-base font-medium text-gray-700 dark:text-gray-300 text-center">
-            {error}
-          </Text>
         </View>
       </AnimatedScreen>
     );
@@ -341,13 +425,11 @@ export default function HistoryScreen() {
         renderItem={renderVentaItem}
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={
-          ventasFiltradas.length === 0 ? ListEmptyComponent : undefined
-        }
+        ListEmptyComponent={ventasFiltradas.length === 0 ? ListEmptyComponent : undefined}
         className="flex-1 bg-gray-50 dark:bg-neutral-900"
         contentContainerStyle={{
-          paddingHorizontal: isTablet ? 32 : 16,
-          paddingVertical: 20,
+          paddingHorizontal: isTablet ? 24 : 16,
+          paddingTop: 12,
           paddingBottom: 120,
         }}
         stickySectionHeadersEnabled={false}
@@ -356,14 +438,14 @@ export default function HistoryScreen() {
 
       <ConfirmAlert
         visible={!!refundTarget}
-        title="Confirmar reembolso"
+        title={Strings.history.refundConfirm}
         message={
           refundTarget
             ? `¿Reembolsar la venta por ${formatCurrency(refundTarget.total)}? Se devolverá el stock de los productos.`
             : ""
         }
-        confirmText={refunding ? "Procesando..." : "Reembolsar"}
-        cancelText="Cancelar"
+        confirmText={refunding ? Strings.history.processingRefund : Strings.history.refund}
+        cancelText={Strings.common.cancel}
         onConfirm={handleConfirmRefund}
         onCancel={() => setRefundTarget(null)}
         danger

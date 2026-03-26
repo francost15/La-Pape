@@ -1,3 +1,4 @@
+import React from "react";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import { Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
@@ -11,13 +12,10 @@ interface SearchProductsProps {
   onQrPress?: () => void;
 }
 
-export default function SearchProducts({
-  searchText,
-  onSearchChange,
-  size = "default",
-  showQrButton = false,
-  onQrPress,
-}: SearchProductsProps) {
+const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function SearchProducts(
+  { searchText, onSearchChange, size = "default", showQrButton = false, onQrPress },
+  ref
+) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const haptic = useHaptic();
@@ -45,6 +43,7 @@ export default function SearchProducts({
       >
         <IconSymbol name="magnifyingglass" size={iconSize} color={placeholderColor} />
         <TextInput
+          ref={ref}
           style={[
             {
               flex: 1,
@@ -53,7 +52,7 @@ export default function SearchProducts({
               paddingVertical: 0,
               letterSpacing: -0.2,
             },
-            // @ts-expect-error outlineStyle is web-only; RN types don't include it
+            // @ts-expect-error outlineStyle is web-only
             Platform.OS === "web" ? { outlineStyle: "none" as const } : undefined,
           ]}
           placeholder="Buscar producto..."
@@ -101,4 +100,6 @@ export default function SearchProducts({
       )}
     </View>
   );
-}
+});
+
+export default SearchProducts;

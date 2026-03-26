@@ -1,17 +1,12 @@
-import type { Venta } from "@/interface";
+import type { Periodo, RangoFechas, Venta } from "@/interface";
 import { create } from "zustand";
 
-export type Periodo = "semana" | "mes" | "año" | "personalizado";
-
-export interface RangoFechas {
-  inicio: Date | null;
-  fin: Date | null;
-}
+export type { Periodo, RangoFechas };
 
 export function filterVentasByPeriodo(
   ventas: Venta[],
   periodo: Periodo,
-  rango: RangoFechas,
+  rango: RangoFechas
 ): Venta[] {
   const ahora = new Date();
   ahora.setHours(23, 59, 59, 999);
@@ -60,7 +55,7 @@ interface FiltrosStore {
 }
 
 export const useFiltrosStore = create<FiltrosStore>((set) => ({
-  periodo: 'semana',
+  periodo: "semana",
   rangoPersonalizado: { inicio: null, fin: null },
 
   setPeriodo: (periodo) => set({ periodo }),
