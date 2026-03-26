@@ -10,7 +10,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -21,6 +23,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@shopify/flash-list": "^2.3.1",
     "expo": "~54.0.30",
     "expo-blur": "~15.0.8",
     "expo-camera": "~17.0.10",
@@ -60,9 +63,11 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.1",
     "esbuild": "^0.27.4",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
@@ -70,6 +75,7 @@
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "react-test-renderer": "^19.1.0",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.9.2",
     "vitest": "^4.1.1"

@@ -3,8 +3,9 @@ import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
+import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Image } from "expo-image";
 import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
@@ -27,6 +28,7 @@ export default React.memo(function ProductItemVenta({
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
   const addItem = useVentasStore((s) => s.addItem);
   const updateQuantity = useVentasStore((s) => s.updateQuantity);
+  const removeItem = useVentasStore((s) => s.removeItem);
   const cartItem = useVentasStore((s) => s.items.find((i) => i.productId === product.id));
   const quantity = cartItem?.quantity ?? 0;
   const inCart = quantity > 0;
@@ -35,6 +37,9 @@ export default React.memo(function ProductItemVenta({
   const isDark = colorScheme === "dark";
   const [imageError, setImageError] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+
+  const buttonScale = useSharedValue(1);
+  const quantityScale = useSharedValue(1);
 
   useEffect(() => {
     if (justAdded) {
@@ -46,21 +51,40 @@ export default React.memo(function ProductItemVenta({
   const handleAdd = () => {
     if (!inCart) {
       hapticMedium();
+      buttonScale.value = withSpring(0.85, { damping: 6, stiffness: 500 }, () => {
+        buttonScale.value = withSpring(1.1, { damping: 4, stiffness: 400 }, () => {
+          buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
+        });
+      });
       addItem(product, 1);
       setJustAdded(true);
       onProductAdded?.();
     }
   };
 
-  const handlePlus = () => {
+  const handlePlus = useCallback(() => {
     hapticMedium();
+    quantityScale.value = withSpring(1.2, { damping: 4, stiffness: 300 }, () => {
+      quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
+    });
     updateQuantity(product.id, quantity + 1);
-  };
+  }, [hapticMedium, product.id, quantity, quantityScale, updateQuantity]);
 
-  const handleMinus = () => {
+  const handleMinus = useCallback(() => {
     hapticMedium();
-    updateQuantity(product.id, quantity - 1);
-  };
+    if (quantity === 1) {
+      buttonScale.value = withSpring(0.95, { damping: 6, stiffness: 400 });
+      setTimeout(() => {
+        removeItem(product.id);
+        buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
+      }, 150);
+    } else {
+      quantityScale.value = withSpring(0.85, { damping: 4, stiffness: 300 }, () => {
+        quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
+      });
+      updateQuantity(product.id, quantity - 1);
+    }
+  }, [hapticMedium, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
 
   const hasImage = product.imagen?.trim();
   const placeholderBg = isDark ? "#2C2C2E" : "#F2F2F7";
@@ -124,20 +148,24 @@ export default React.memo(function ProductItemVenta({
         </View>
 
         {inCart ? (
-          <QuantityStepper
-            quantity={quantity}
-            onMinus={handleMinus}
-            onPlus={handlePlus}
-            size={btnSize}
-          />
+          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
+            <QuantityStepper
+              quantity={quantity}
+              onMinus={handleMinus}
+              onPlus={handlePlus}
+              size={btnSize}
+            />
+          </Animated.View>
         ) : (
-          <CircleIconButton
-            icon={justAdded ? "checkmark" : "plus"}
-            variant={justAdded ? "success" : "primary"}
-            onPress={handleAdd}
-            size={btnSize}
-            interactive={false}
-          />
+          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+            <CircleIconButton
+              icon={justAdded ? "checkmark" : "plus"}
+              variant={justAdded ? "success" : "primary"}
+              onPress={handleAdd}
+              size={btnSize}
+              interactive={false}
+            />
+          </Animated.View>
         )}
       </Pressable>
     );
@@ -207,20 +235,24 @@ export default React.memo(function ProductItemVenta({
             ${product.precio_venta.toLocaleString()}
           </Text>
           {inCart ? (
-            <QuantityStepper
-              quantity={quantity}
-              onMinus={handleMinus}
-              onPlus={handlePlus}
-              size={36}
-            />
+            <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
+              <QuantityStepper
+                quantity={quantity}
+                onMinus={handleMinus}
+                onPlus={handlePlus}
+                size={36}
+              />
+            </Animated.View>
           ) : (
-            <CircleIconButton
-              icon={justAdded ? "checkmark" : "plus"}
-              variant={justAdded ? "success" : "primary"}
-              onPress={handleAdd}
-              size={36}
-              interactive={false}
-            />
+            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+              <CircleIconButton
+                icon={justAdded ? "checkmark" : "plus"}
+                variant={justAdded ? "success" : "primary"}
+                onPress={handleAdd}
+                size={36}
+                interactive={false}
+              />
+            </Animated.View>
           )}
         </View>
       </View>

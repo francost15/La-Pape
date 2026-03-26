@@ -4,12 +4,9 @@ import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
-import React, { useEffect, useState } from "react";
-import {
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Image } from "expo-image";
 import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
@@ -22,10 +19,6 @@ interface ProductCardMobileProps {
   onProductAdded?: () => void;
 }
 
-/**
- * Item de lista optimizado para móvil (diseño compacto "List Item").
- * Usa ventas-store (addItem, items, updateQuantity).
- */
 export default React.memo(function ProductCardMobile({
   product,
   onProductAdded,
@@ -37,11 +30,13 @@ export default React.memo(function ProductCardMobile({
   const [imageError, setImageError] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
+  const buttonScale = useSharedValue(1);
+  const quantityScale = useSharedValue(1);
+
   const addItem = useVentasStore((s) => s.addItem);
   const updateQuantity = useVentasStore((s) => s.updateQuantity);
-  const cartItem = useVentasStore((s) =>
-    s.items.find((i) => i.productId === product.id)
-  );
+  const removeItem = useVentasStore((s) => s.removeItem);
+  const cartItem = useVentasStore((s) => s.items.find((i) => i.productId === product.id));
 
   const quantity = cartItem?.quantity ?? 0;
   const inCart = quantity > 0;
@@ -54,21 +49,42 @@ export default React.memo(function ProductCardMobile({
   }, [justAdded]);
 
   const handleAdd = () => {
-    hapticMedium();
-    addItem(product, 1);
-    setJustAdded(true);
-    onProductAdded?.();
+    if (!inCart) {
+      hapticMedium();
+      buttonScale.value = withSpring(0.85, { damping: 6, stiffness: 500 }, () => {
+        buttonScale.value = withSpring(1.1, { damping: 4, stiffness: 400 }, () => {
+          buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
+        });
+      });
+      addItem(product, 1);
+      setJustAdded(true);
+      onProductAdded?.();
+    }
   };
 
-  const handlePlus = () => {
+  const handlePlus = useCallback(() => {
     haptic();
+    quantityScale.value = withSpring(1.2, { damping: 4, stiffness: 300 }, () => {
+      quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
+    });
     updateQuantity(product.id, quantity + 1);
-  };
+  }, [haptic, product.id, quantity, quantityScale, updateQuantity]);
 
-  const handleMinus = () => {
+  const handleMinus = useCallback(() => {
     haptic();
-    updateQuantity(product.id, quantity - 1);
-  };
+    if (quantity === 1) {
+      buttonScale.value = withSpring(0.95, { damping: 6, stiffness: 400 });
+      setTimeout(() => {
+        removeItem(product.id);
+        buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
+      }, 150);
+    } else {
+      quantityScale.value = withSpring(0.85, { damping: 4, stiffness: 300 }, () => {
+        quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
+      });
+      updateQuantity(product.id, quantity - 1);
+    }
+  }, [haptic, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
 
   const hasImage = product.imagen?.trim();
   const placeholderBg = isDark ? "#2C2C2E" : "#F2F2F7";
@@ -125,7 +141,14 @@ export default React.memo(function ProductCardMobile({
       </View>
 
       <View style={{ flex: 1, minWidth: 0, justifyContent: "center" }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 2 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: 2,
+          }}
+        >
           <Text
             style={{
               fontSize: 15,
@@ -144,7 +167,7 @@ export default React.memo(function ProductCardMobile({
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           {product.marca ? (
-             <Text
+            <Text
               style={{
                 fontSize: 13,
                 color: isDark ? "#9CA3AF" : "#6B7280",
@@ -156,7 +179,6 @@ export default React.memo(function ProductCardMobile({
               {product.marca}
             </Text>
           ) : null}
-          
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 4 }}>
@@ -176,20 +198,24 @@ export default React.memo(function ProductCardMobile({
 
       <View style={{ alignItems: "center", justifyContent: "center", paddingLeft: 4 }}>
         {inCart ? (
-          <QuantityStepper
-            quantity={quantity}
-            onMinus={handleMinus}
-            onPlus={handlePlus}
-            size={32}
-          />
+          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
+            <QuantityStepper
+              quantity={quantity}
+              onMinus={handleMinus}
+              onPlus={handlePlus}
+              size={32}
+            />
+          </Animated.View>
         ) : (
-          <CircleIconButton
-            icon={justAdded ? "checkmark" : "plus"}
-            variant={justAdded ? "success" : "primary"}
-            onPress={handleAdd}
-            size={40}
-            interactive={true}
-          />
+          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+            <CircleIconButton
+              icon={justAdded ? "checkmark" : "plus"}
+              variant={justAdded ? "success" : "primary"}
+              onPress={handleAdd}
+              size={40}
+              interactive={true}
+            />
+          </Animated.View>
         )}
       </View>
     </Pressable>

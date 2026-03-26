@@ -161,3 +161,51 @@ describe("filterVentasByPeriodo", () => {
     expect(resultado2).toHaveLength(0);
   });
 });
+
+describe("filterVentasByPeriodo edge cases", () => {
+  it("handles empty ventas array", () => {
+    expect(filterVentasByPeriodo([], "semana", { inicio: null, fin: null })).toEqual([]);
+  });
+
+  it("handles future dates gracefully", () => {
+    const now = new Date("2026-03-25T12:00:00");
+    vi.setSystemTime(now);
+
+    const ventas = [
+      {
+        id: "1",
+        negocio_id: "negocio-1",
+        sucursal_id: "sucursal-1",
+        usuario_id: "usuario-1",
+        fecha: new Date("2099-01-01"),
+        subtotal: 100,
+        descuento: 0,
+        total: 100,
+        estado: "PAGADA" as const,
+        tipo_venta: "CONTADO" as const,
+      },
+    ];
+    const result = filterVentasByPeriodo(ventas, "semana", { inicio: null, fin: null });
+    expect(result).toHaveLength(0);
+  });
+
+  it("handles invalid dates", () => {
+    const ventas = [
+      {
+        id: "1",
+        negocio_id: "negocio-1",
+        sucursal_id: "sucursal-1",
+        usuario_id: "usuario-1",
+        fecha: new Date("invalid"),
+        subtotal: 100,
+        descuento: 0,
+        total: 100,
+        estado: "PAGADA" as const,
+        tipo_venta: "CONTADO" as const,
+      },
+    ];
+    expect(() =>
+      filterVentasByPeriodo(ventas, "semana", { inicio: null, fin: null })
+    ).not.toThrow();
+  });
+});

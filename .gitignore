@@ -45,3 +45,4 @@ app-example
 
 # Claude Code local settings (hooks, personal overrides)
 .claude/settings.local.json
+coverage/

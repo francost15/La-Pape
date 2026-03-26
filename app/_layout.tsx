@@ -2,7 +2,10 @@ import LayoutSync from "@/components/LayoutSync";
 import AddProductsSheet from "@/components/ventas/AddProductsSheet";
 import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import NativeToaster from "@/components/NativeToaster";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { SkipLink } from "@/components/ui/SkipLink";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { logger } from "@/lib/utils/logger";
 import { initSessionListener } from "@/store/session-store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
@@ -43,17 +46,24 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <View className="flex-1">
-        <LayoutSync />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="configuracion" />
-        </Stack>
-        <AddProductsSheet />
-        <NativeToaster />
-        <VentaExitosaOverlay />
-      </View>
+      <ErrorBoundary
+        onError={(error, info) => {
+          logger.error("Layout error", { error: error.message, stack: info.componentStack });
+        }}
+      >
+        <SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>
+        <View className="flex-1" id="main-content">
+          <LayoutSync />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="configuracion" />
+          </Stack>
+          <AddProductsSheet />
+          <NativeToaster />
+          <VentaExitosaOverlay />
+        </View>
+      </ErrorBoundary>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

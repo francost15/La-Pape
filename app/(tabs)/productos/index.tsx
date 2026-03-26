@@ -12,9 +12,9 @@ import { useLayoutStore } from "@/store/layout-store";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { FlashList } from "@shopify/flash-list";
 import {
   ActivityIndicator,
-  FlatList,
   Platform,
   RefreshControl,
   Text,
@@ -39,8 +39,6 @@ export default function ProductosScreen() {
     () => filteredProducts.slice(0, page * PAGE_SIZE),
     [filteredProducts, page]
   );
-
-  const numColumns = isMobile ? 1 : 3;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -208,24 +206,22 @@ export default function ProductosScreen() {
 
   return (
     <AnimatedScreen>
-      <FlatList
-        key={numColumns}
+      <FlashList
         data={visibleProducts}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        numColumns={isMobile ? 1 : numColumns}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
-        onEndReached={loadMore}
+        onEndReached={() => {
+          if (hasMore && !loadingMore) loadMore();
+        }}
         onEndReachedThreshold={0.5}
-        className="flex-1 bg-gray-100 dark:bg-neutral-900"
         contentContainerStyle={
           isMobile
             ? { paddingTop: 8, paddingBottom: 120, paddingHorizontal: 0 }
             : { padding: 21, paddingBottom: 21, alignItems: "center" }
         }
-        columnWrapperStyle={!isMobile ? { justifyContent: "center" } : undefined}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

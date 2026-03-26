@@ -1,12 +1,13 @@
-import "@testing-library/jest-native";
+// @testing-library/jest-native has compatibility issues - removed temporarily
+// import "@testing-library/jest-native";
 import { vi } from "vitest";
-import * as asyncStorageMock from "@react-native-async-storage/async-storage/jest/async-storage-mock";
+// import * as asyncStorageMock from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 
 vi.mock("expo-image", () => ({
   Image: "Image",
 }));
 
-vi.mock("@react-native-async-storage/async-storage", () => asyncStorageMock);
+// vi.mock("@react-native-async-storage/async-storage", () => asyncStorageMock);
 
 vi.mock("react-native-reanimated", () => {
   // Need to use require for reanimated mock - it's a CommonJS module
@@ -78,8 +79,7 @@ vi.mock("expo-router", () => ({
   Link: "Link",
 }));
 
-(global as typeof globalThis & { __reanimatedWorkletInit: typeof vi.fn }).__reanimatedWorkletInit =
-  vi.fn();
+(global as unknown as { __reanimatedWorkletInit: typeof vi.fn }).__reanimatedWorkletInit = vi.fn();
 
 // Silence console warnings from reanimated during tests
 const originalWarn = console.warn;
