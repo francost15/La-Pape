@@ -1,7 +1,10 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import React from "react";
 import {
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -20,6 +23,12 @@ export interface ConfirmAlertProps {
   danger?: boolean;
 }
 
+/**
+ * ConfirmAlert — Digital Atelier style.
+ *
+ * Minimalist alert dialog with premium typography and flat surfaces.
+ * Navy dark mode and Stone light mode.
+ */
 export default function ConfirmAlert({
   visible,
   title,
@@ -31,11 +40,10 @@ export default function ConfirmAlert({
   danger = true,
 }: ConfirmAlertProps) {
   const colorScheme = useColorScheme();
-  const cardBg = colorScheme === "dark" ? "#262626" : "#ffffff";
-  const borderColor = colorScheme === "dark" ? "#404040" : "#e5e7eb";
-  const titleColor = colorScheme === "dark" ? "#fafafa" : "#111827";
-  const messageColor = colorScheme === "dark" ? "#a3a3a3" : "#4b5563";
-  const cancelColor = colorScheme === "dark" ? "#d4d4d4" : "#4b5563";
+  const isDark = colorScheme === "dark";
+  
+  const colors = isDark ? AppColors.dark : AppColors.light;
+  const overlayBg = isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.4)";
 
   return (
     <Modal
@@ -46,28 +54,33 @@ export default function ConfirmAlert({
       accessibilityViewIsModal
     >
       <View style={styles.container}>
-        <View style={[StyleSheet.absoluteFillObject, styles.overlay]} />
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: overlayBg }]} />
         <Pressable style={styles.pressable} onPress={onCancel}>
           <Pressable
             style={[
               styles.card,
               {
-                backgroundColor: cardBg,
-                borderRadius: 16,
+                backgroundColor: colors.surface,
+                borderRadius: 20,
                 overflow: "hidden",
-                borderWidth: 1,
-                borderColor,
+                borderWidth: 1.5,
+                borderColor: colors.border,
+                ...(Platform.OS === "web"
+                  ? { boxShadow: isDark ? "0 8px 32px rgba(0,0,0,0.5)" : "0 8px 32px rgba(0,0,0,0.12)" }
+                  : { elevation: 10 }),
               },
             ]}
             onPress={() => {}}
           >
-            <View style={{ padding: 20, paddingBottom: 16 }}>
+            <View style={{ padding: 24, paddingBottom: 20 }}>
               <Text
                 style={{
-                  fontSize: 18,
+                  fontSize: 19,
                   fontWeight: "700",
-                  color: titleColor,
-                  marginBottom: 4,
+                  color: colors.textPrimary,
+                  marginBottom: 8,
+                  fontFamily: AppFonts.heading,
+                  letterSpacing: -0.4,
                 }}
                 accessibilityRole="header"
               >
@@ -75,8 +88,10 @@ export default function ConfirmAlert({
               </Text>
               <Text
                 style={{
-                  fontSize: 16,
-                  color: messageColor,
+                  fontSize: 15,
+                  lineHeight: 22,
+                  color: colors.textSecondary,
+                  fontFamily: AppFonts.body,
                 }}
               >
                 {message}
@@ -86,27 +101,28 @@ export default function ConfirmAlert({
               style={{
                 flexDirection: "row",
                 borderTopWidth: 1,
-                borderTopColor: borderColor,
+                borderTopColor: colors.border,
               }}
             >
               <TouchableOpacity
                 onPress={onCancel}
                 style={{
                   flex: 1,
-                  paddingVertical: 16,
+                  paddingVertical: 18,
                   alignItems: "center",
                   borderRightWidth: 1,
-                  borderRightColor: borderColor,
+                  borderRightColor: colors.border,
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={cancelText}
-                accessibilityHint="Cierra este diálogo sin aplicar cambios"
+                activeOpacity={0.7}
               >
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: "600",
-                    color: cancelColor,
+                    color: colors.textSecondary,
+                    fontFamily: AppFonts.bodyStrong,
                   }}
                 >
                   {cancelText}
@@ -114,16 +130,17 @@ export default function ConfirmAlert({
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={onConfirm}
-                style={{ flex: 1, paddingVertical: 16, alignItems: "center" }}
+                style={{ flex: 1, paddingVertical: 18, alignItems: "center" }}
                 accessibilityRole="button"
                 accessibilityLabel={confirmText}
-                accessibilityHint="Confirma la acción y continúa"
+                activeOpacity={0.7}
               >
                 <Text
                   style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: danger ? "#dc2626" : "#ea580c",
+                    fontSize: 15,
+                    fontWeight: "700",
+                    color: danger ? "#f43f5e" : "#ea580c",
+                    fontFamily: AppFonts.bodyStrong,
                   }}
                 >
                   {confirmText}
@@ -141,9 +158,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  overlay: {
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
   pressable: {
     flex: 1,
     justifyContent: "center",
@@ -152,6 +166,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    maxWidth: 360,
+    maxWidth: 340,
   },
 });

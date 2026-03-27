@@ -1,4 +1,6 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { Categoria } from "@/interface/categorias";
 import { useLayoutStore } from "@/store/layout-store";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -13,6 +15,12 @@ interface BadgeCategoryProductsProps {
 
 const ACTIVE_BG = "#ea580c";
 
+/**
+ * BadgeItem — Digital Atelier style.
+ *
+ * Compact chips for product classification.
+ * Navy dark mode and Stone light mode for inactive states.
+ */
 function BadgeItem({
   label,
   isSelected,
@@ -25,8 +33,10 @@ function BadgeItem({
   onPress: () => void;
 }) {
   const haptic = useHaptic();
-  const bgInactive = isDark ? "#2C2C2E" : "#F2F2F7";
-  const textInactive = isDark ? "#E5E5EA" : "#3A3A3C";
+  const colors = isDark ? AppColors.dark : AppColors.light;
+  
+  const bgInactive = isDark ? "#1A1F2B" : "#F5F5F4";
+  const textInactive = isDark ? "#A1A1AA" : "#71717A";
 
   return (
     <TouchableOpacity
@@ -35,19 +45,22 @@ function BadgeItem({
         onPress();
       }}
       style={{
-        paddingHorizontal: 18,
+        paddingHorizontal: 16,
         paddingVertical: 10,
-        borderRadius: 24,
+        borderRadius: 14,
         backgroundColor: isSelected ? ACTIVE_BG : bgInactive,
+        borderWidth: 1,
+        borderColor: isSelected ? "transparent" : colors.border,
       }}
       activeOpacity={0.8}
     >
       <Text
         style={{
-          fontSize: 15,
-          fontWeight: isSelected ? "600" : "500",
+          fontSize: 14,
+          fontWeight: isSelected ? "700" : "500",
           color: isSelected ? "#FFFFFF" : textInactive,
-          letterSpacing: -0.1,
+          letterSpacing: -0.2,
+          fontFamily: AppFonts.bodyStrong,
         }}
       >
         {label}
@@ -105,8 +118,8 @@ export default function BadgeCategoryProducts({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10, gap: 8, paddingVertical: 4 }}
-        style={{ marginBottom: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingVertical: 4 }}
+        style={{ marginBottom: 12 }}
       >
         {allBadges}
       </ScrollView>
@@ -114,7 +127,7 @@ export default function BadgeCategoryProducts({
   }
 
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 8, paddingVertical: 4, marginBottom: 16 }}>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingVertical: 4, marginBottom: 16 }}>
       {allBadges}
     </View>
   );

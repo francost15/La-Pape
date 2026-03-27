@@ -1,4 +1,6 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import type { VentaCompletada } from "@/store/checkout-store";
 import { useHaptic } from "@/hooks/use-haptic";
 import React from "react";
@@ -14,10 +16,6 @@ import {
 
 import { IconSymbol } from "../ui/icon-symbol";
 
-const SUCCESS_GREEN = "#34C759";
-const ORANGE_PRIMARY = "#ea580c";
-const TOTAL_HIGHLIGHT = "#f97316";
-
 interface VentaExitosaModalProps {
   visible: boolean;
   venta: VentaCompletada;
@@ -26,6 +24,10 @@ interface VentaExitosaModalProps {
   onEnviarRecibo?: () => void;
 }
 
+/**
+ * VentaExitosaModal — Digital Atelier style.
+ * Cleaner surface, navy dark mode, accent success icon.
+ */
 export default function VentaExitosaModal({
   visible,
   venta,
@@ -42,7 +44,7 @@ export default function VentaExitosaModal({
     onClose();
   };
 
-  const styles = useStyles(isDark);
+  const colors = isDark ? AppColors.dark : AppColors.light;
 
   return (
     <Modal
@@ -52,64 +54,169 @@ export default function VentaExitosaModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
-          {/* Header con ícono de éxito */}
-          <View style={styles.header}>
-            <View style={styles.successBadge}>
-              <IconSymbol
-                name="checkmark.circle.fill"
-                size={56}
-                color={SUCCESS_GREEN}
-              />
+      <Pressable
+        style={{
+          flex: 1,
+          backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.35)",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        }}
+        onPress={handleClose}
+      >
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            width: "100%",
+            maxWidth: Platform.OS === "web" ? 420 : 340,
+            backgroundColor: colors.surface,
+            borderRadius: 20,
+            overflow: "hidden",
+            ...(Platform.OS === "web"
+              ? {
+                  boxShadow: isDark
+                    ? "0 12px 40px rgba(0,0,0,0.5)"
+                    : "0 12px 40px rgba(0,0,0,0.12)",
+                }
+              : {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: isDark ? 0.5 : 0.12,
+                  shadowRadius: 24,
+                  elevation: 16,
+                }),
+          }}
+        >
+          {/* Header */}
+          <View style={{ alignItems: "center", paddingTop: 36, paddingBottom: 28, paddingHorizontal: 24 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: "rgba(22,163,74,0.1)",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <IconSymbol name="checkmark.circle.fill" size={48} color={AppColors.success} />
             </View>
-            <Text style={styles.title}>¡Venta Exitosa!</Text>
-            <Text style={styles.subtitle}>
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: "700",
+                color: colors.textPrimary,
+                letterSpacing: -0.4,
+                fontFamily: AppFonts.heading,
+              }}
+            >
+              ¡Venta Exitosa!
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "400",
+                color: colors.textSecondary,
+                marginTop: 6,
+                fontFamily: AppFonts.body,
+              }}
+            >
               La venta se completó correctamente
             </Text>
           </View>
 
-          {/* Grupo tipo Settings de Apple */}
-          <View style={styles.detailsGroup}>
-            <DetailRow
-              label="Fecha"
-              value={venta.fecha}
-              isLast={false}
-              labelColor={styles.labelColor}
-              valueColor={styles.valueColor}
-              dividerColor={styles.dividerColor}
-              rowStyle={styles.rowStyle}
-              labelStyle={styles.labelStyle}
-              valueStyle={styles.valueStyle}
-            />
-            <DetailRow
-              label="Total"
-              value={`$${venta.total.toLocaleString()}`}
-              isLast
-              valueBold
-              valueHighlight
-              valueLarge
-              labelColor={styles.labelColor}
-              valueColor={styles.valueColor}
-              dividerColor={styles.dividerColor}
-              rowStyle={[styles.rowStyle, styles.rowTotal]}
-              labelStyle={styles.labelStyle}
-              valueStyle={styles.valueStyle}
-            />
+          {/* Details */}
+          <View
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F8F8F7",
+              borderRadius: 14,
+              paddingHorizontal: 16,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingVertical: 14,
+                borderBottomWidth: StyleSheet.hairlineWidth,
+                borderBottomColor: colors.border,
+              }}
+            >
+              <Text style={{ fontSize: 14, color: colors.textSecondary, fontFamily: AppFonts.body }}>
+                Fecha
+              </Text>
+              <Text
+                style={{ fontSize: 14, fontWeight: "500", color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
+              >
+                {venta.fecha}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingVertical: 18,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: colors.textPrimary,
+                  fontFamily: AppFonts.bodyStrong,
+                }}
+              >
+                Total
+              </Text>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "800",
+                  color: isDark ? "#F97316" : "#ea580c",
+                  fontFamily: AppFonts.display,
+                  letterSpacing: -0.5,
+                }}
+              >
+                ${venta.total.toLocaleString()}
+              </Text>
+            </View>
           </View>
 
-          {/* Acciones */}
-          <View style={styles.actions}>
+          {/* Actions */}
+          <View style={{ padding: 20, gap: 10 }}>
             <TouchableOpacity
               onPress={() => {
                 haptic();
                 onDescargarRecibo?.();
               }}
-              style={[styles.button, styles.buttonPrimary]}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                paddingVertical: 15,
+                borderRadius: 14,
+                backgroundColor: "#ea580c",
+              }}
               activeOpacity={0.85}
             >
-              <IconSymbol name="square.and.arrow.down" size={20} color="#fff" />
-              <Text style={styles.buttonPrimaryText}>Descargar Recibo</Text>
+              <IconSymbol name="square.and.arrow.down" size={18} color="#fff" />
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "700",
+                  color: "#fff",
+                  fontFamily: AppFonts.bodyStrong,
+                  letterSpacing: -0.2,
+                }}
+              >
+                Descargar Recibo
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -117,241 +224,73 @@ export default function VentaExitosaModal({
                 haptic();
                 onEnviarRecibo?.();
               }}
-              style={[styles.button, styles.buttonSecondary]}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                paddingVertical: 15,
+                borderRadius: 14,
+                backgroundColor: AppColors.success,
+              }}
               activeOpacity={0.85}
             >
-              <IconSymbol name="paperplane.fill" size={18} color="#fff" />
-              <Text style={styles.buttonSecondaryText}>Enviar Recibo</Text>
+              <IconSymbol name="paperplane.fill" size={16} color="#fff" />
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "700",
+                  color: "#fff",
+                  fontFamily: AppFonts.bodyStrong,
+                  letterSpacing: -0.2,
+                }}
+              >
+                Enviar Recibo
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleClose}
-              style={styles.buttonTertiary}
+              style={{
+                paddingVertical: 14,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
               activeOpacity={0.7}
             >
-              <Text style={styles.buttonTertiaryText}>Continuar</Text>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "600",
+                  color: isDark ? "#60A5FA" : "#2563EB",
+                  fontFamily: AppFonts.bodyStrong,
+                }}
+              >
+                Continuar
+              </Text>
             </TouchableOpacity>
           </View>
 
+          {/* Close button */}
           <TouchableOpacity
             onPress={handleClose}
             hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
-            style={styles.closeButton}
+            style={{
+              position: "absolute",
+              top: 14,
+              right: 14,
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <IconSymbol name="xmark" size={14} color={styles.labelColor} />
+            <IconSymbol name="xmark" size={12} color={colors.textMuted} />
           </TouchableOpacity>
         </Pressable>
       </Pressable>
     </Modal>
   );
-}
-
-function DetailRow({
-  label,
-  value,
-  isLast,
-  valueBold,
-  valueHighlight,
-  valueLarge,
-  labelColor,
-  valueColor,
-  dividerColor,
-  rowStyle,
-  labelStyle,
-  valueStyle,
-}: {
-  label: string;
-  value: string;
-  isLast: boolean;
-  valueBold?: boolean;
-  valueHighlight?: boolean;
-  valueLarge?: boolean;
-  labelColor: string;
-  valueColor: string;
-  dividerColor: string;
-  rowStyle: object | object[];
-  labelStyle: object;
-  valueStyle: object;
-}) {
-  const highlightColor = valueLarge ? TOTAL_HIGHLIGHT : ORANGE_PRIMARY;
-  return (
-    <>
-      <View style={rowStyle}>
-        <Text
-          style={[
-            labelStyle,
-            { color: labelColor },
-            valueLarge && { fontSize: 16, fontWeight: "600" },
-          ]}
-        >
-          {label}
-        </Text>
-        <Text
-          style={[
-            valueStyle,
-            {
-              color: valueHighlight ? highlightColor : valueColor,
-              fontSize: valueLarge ? 22 : undefined,
-              fontWeight: valueBold || valueLarge ? "700" : undefined,
-            },
-          ]}
-          numberOfLines={1}
-        >
-          {value}
-        </Text>
-      </View>
-      {!isLast && (
-        <View
-          style={{
-            height: StyleSheet.hairlineWidth,
-            backgroundColor: dividerColor,
-          }}
-        />
-      )}
-    </>
-  );
-}
-
-function useStyles(isDark: boolean) {
-  const bgCard = isDark ? "#1C1C1E" : "#FFFFFF";
-  const labelColor = isDark ? "#8E8E93" : "#6B7280";
-  const valueColor = isDark ? "#F5F5F7" : "#1D1D1F";
-  const dividerColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const tertiaryBg = isDark ? "#2C2C2E" : "#F2F2F7";
-
-  return {
-    labelColor,
-    valueColor,
-    backdrop: {
-      flex: 1,
-      backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 24,
-    } as const,
-    card: {
-      width: "100%",
-      maxWidth: Platform.OS === "web" ? 480 : 340,
-      backgroundColor: bgCard,
-      borderRadius: 14,
-      overflow: "hidden",
-      ...Platform.select({
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: isDark ? 0.5 : 0.12,
-          shadowRadius: 24,
-        },
-        android: { elevation: 16 },
-        web: {
-          boxShadow: isDark
-            ? "0 8px 32px rgba(0,0,0,0.4)"
-            : "0 8px 32px rgba(0,0,0,0.12)",
-        },
-      }),
-    } as const,
-    header: {
-      alignItems: "center",
-      paddingTop: 32,
-      paddingBottom: 24,
-      paddingHorizontal: 24,
-    } as const,
-    successBadge: {
-      marginBottom: 12,
-    } as const,
-    title: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: valueColor,
-      letterSpacing: -0.4,
-    } as const,
-    subtitle: {
-      fontSize: 15,
-      fontWeight: "400",
-      color: labelColor,
-      marginTop: 4,
-      letterSpacing: -0.2,
-    } as const,
-    detailsGroup: {
-      marginHorizontal: 16,
-      backgroundColor: tertiaryBg,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      overflow: "hidden",
-    } as const,
-    rowStyle: {
-      flexDirection: "row" as const,
-      justifyContent: "space-between" as const,
-      alignItems: "center" as const,
-      paddingVertical: 14,
-    } as const,
-    rowTotal: {
-      paddingVertical: 18,
-    } as const,
-    labelStyle: {
-      fontSize: 15,
-      fontWeight: "400",
-      letterSpacing: -0.2,
-    } as const,
-    valueStyle: {
-      fontSize: 15,
-      fontWeight: "500",
-      letterSpacing: -0.2,
-      maxWidth: "60%",
-    } as const,
-    dividerColor,
-    actions: {
-      padding: 20,
-      paddingTop: 20,
-      gap: 10,
-    } as const,
-    button: {
-      flexDirection: "row" as const,
-      alignItems: "center" as const,
-      justifyContent: "center" as const,
-      gap: 8,
-      paddingVertical: 14,
-      borderRadius: 12,
-    } as const,
-    buttonPrimary: {
-      backgroundColor: ORANGE_PRIMARY,
-    } as const,
-    buttonPrimaryText: {
-      fontSize: 17,
-      fontWeight: "600",
-      color: "#fff",
-      letterSpacing: -0.2,
-    } as const,
-    buttonSecondary: {
-      backgroundColor: SUCCESS_GREEN,
-    } as const,
-    buttonSecondaryText: {
-      fontSize: 17,
-      fontWeight: "600",
-      color: "#fff",
-      letterSpacing: -0.2,
-    } as const,
-    buttonTertiary: {
-      paddingVertical: 14,
-      alignItems: "center" as const,
-      justifyContent: "center" as const,
-    } as const,
-    buttonTertiaryText: {
-      fontSize: 17,
-      fontWeight: "600",
-      color: isDark ? "#0A84FF" : "#007AFF",
-      letterSpacing: -0.2,
-    } as const,
-    closeButton: {
-      position: "absolute" as const,
-      top: 12,
-      right: 12,
-      width: 30,
-      height: 30,
-      borderRadius: 15,
-      backgroundColor: tertiaryBg,
-      alignItems: "center" as const,
-      justifyContent: "center" as const,
-    } as const,
-  };
 }

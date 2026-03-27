@@ -208,10 +208,14 @@ export default function CartPanel() {
   const renderItem = useCallback(
     ({ item }: { item: CartItem }) => (
       <View
-        className="flex-row items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-neutral-800"
+        className="flex-row items-center gap-3 px-5 py-3.5"
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: "rgba(0,0,0,0.04)",
+        }}
         accessibilityLabel={`${item.product.nombre}, cantidad ${item.quantity}, precio ${item.unitPrice}`}
       >
-        <View className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-gray-200 dark:bg-neutral-700">
+        <View className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#F5F5F4] dark:bg-[#1A1F2B]">
           {item.product.imagen?.trim() ? (
             <Image
               source={{ uri: item.product.imagen }}
@@ -220,20 +224,20 @@ export default function CartPanel() {
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <IconSymbol name="photo.fill" size={28} color="#9ca3af" />
+              <IconSymbol name="photo.fill" size={24} color="#9ca3af" />
             </View>
           )}
         </View>
         <View className="min-w-0 flex-1 shrink justify-center gap-0.5 pr-2">
           <Text
-            className="text-sm font-medium text-gray-900 dark:text-white"
+            className="text-sm font-medium text-[#1A1A1A] dark:text-[#F0F0F0]"
             style={{ fontFamily: AppFonts.bodyStrong }}
             numberOfLines={2}
           >
             {item.product.nombre}
           </Text>
           <Text
-            className="text-sm font-semibold text-orange-600"
+            className="text-sm font-semibold text-[#ea580c] dark:text-[#F97316]"
             style={{ fontFamily: AppFonts.heading }}
             numberOfLines={1}
           >
@@ -310,7 +314,14 @@ export default function CartPanel() {
         danger
       />
 
-      <View className="border-t border-gray-200 bg-white px-3 pt-3 pb-2 dark:border-neutral-800 dark:bg-neutral-900">
+      {/* ── Footer: Total + Action Buttons ─────────────────── */}
+      <View
+        className="bg-white px-5 pt-4 pb-3 dark:bg-[#141820]"
+        style={{
+          borderTopWidth: 1,
+          borderTopColor: "rgba(0,0,0,0.06)",
+        }}
+      >
         <Animated.View
           style={[
             {
@@ -328,27 +339,27 @@ export default function CartPanel() {
           </View>
         </Animated.View>
 
-        <View className="mb-2.5 flex-row items-center justify-between px-1">
+        <View className="mb-3 flex-row items-baseline justify-between px-1">
           <Text
-            className="text-sm font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400"
-            style={{ fontFamily: AppFonts.bodyStrong }}
+            className="text-xs font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+            style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.4 }}
           >
             Total
           </Text>
           <Text
-            className="text-xl font-bold text-orange-600"
-            style={{ fontFamily: AppFonts.display, letterSpacing: 0.4 }}
+            className="text-2xl font-bold text-[#ea580c] dark:text-[#F97316]"
+            style={{ fontFamily: AppFonts.display, letterSpacing: -0.5 }}
           >
             ${total.toLocaleString()}
           </Text>
         </View>
 
         {isDesktop && (canUndo || canRedo) && (
-          <View className="mb-2 flex-row items-center justify-center gap-2">
+          <View className="mb-2.5 flex-row items-center justify-center gap-2">
             <TouchableOpacity
               onPress={undo}
               disabled={!canUndo}
-              className={`flex-row items-center gap-1.5 rounded-lg px-3 py-2 ${canUndo ? "bg-gray-100 dark:bg-neutral-800" : "opacity-40"}`}
+              className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${canUndo ? "bg-[#F5F5F4] dark:bg-[#1A1F2B]" : "opacity-30"}`}
               accessibilityRole="button"
               accessibilityLabel="Deshacer"
               accessibilityHint="Revertir el último cambio en el carrito"
@@ -356,11 +367,11 @@ export default function CartPanel() {
             >
               <IconSymbol
                 name="arrow.uturn.backward"
-                size={16}
-                color={canUndo ? "#f97316" : "#9ca3af"}
+                size={14}
+                color={canUndo ? "#ea580c" : "#9ca3af"}
               />
               <Text
-                className={`text-sm font-medium ${canUndo ? "text-orange-600 dark:text-orange-400" : "text-gray-400"}`}
+                className={`text-xs font-medium ${canUndo ? "text-[#ea580c] dark:text-[#F97316]" : "text-[#9CA3AF]"}`}
                 style={{ fontFamily: AppFonts.bodyStrong }}
               >
                 Deshacer
@@ -369,7 +380,7 @@ export default function CartPanel() {
             <TouchableOpacity
               onPress={redo}
               disabled={!canRedo}
-              className={`flex-row items-center gap-1.5 rounded-lg px-3 py-2 ${canRedo ? "bg-gray-100 dark:bg-neutral-800" : "opacity-40"}`}
+              className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${canRedo ? "bg-[#F5F5F4] dark:bg-[#1A1F2B]" : "opacity-30"}`}
               accessibilityRole="button"
               accessibilityLabel="Rehacer"
               accessibilityHint="Restaurar el cambio revertido"
@@ -377,11 +388,11 @@ export default function CartPanel() {
             >
               <IconSymbol
                 name="arrow.uturn.backward"
-                size={16}
-                color={canRedo ? "#f97316" : "#9ca3af"}
+                size={14}
+                color={canRedo ? "#ea580c" : "#9ca3af"}
               />
               <Text
-                className={`text-sm font-medium ${canRedo ? "text-orange-600 dark:text-orange-400" : "text-gray-400"}`}
+                className={`text-xs font-medium ${canRedo ? "text-[#ea580c] dark:text-[#F97316]" : "text-[#9CA3AF]"}`}
                 style={{ fontFamily: AppFonts.bodyStrong }}
               >
                 Rehacer
@@ -391,11 +402,14 @@ export default function CartPanel() {
         )}
 
         <TouchableOpacity
-          className="items-center justify-center rounded-2xl bg-orange-500 py-3.5 active:opacity-90"
+          className="items-center justify-center rounded-2xl py-4 active:opacity-90"
           activeOpacity={0.9}
           onPress={openConfirm}
           disabled={processing || isClearing}
-          style={processing || isClearing ? { opacity: 0.6 } : undefined}
+          style={{
+            backgroundColor: "#ea580c",
+            opacity: processing || isClearing ? 0.6 : 1,
+          }}
           accessibilityRole="button"
           accessibilityLabel="Completar venta"
           accessibilityHint="Confirma y registra la venta actual"
@@ -405,7 +419,7 @@ export default function CartPanel() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text
-              className="text-base font-semibold tracking-tight text-white"
+              className="text-[15px] font-bold tracking-tight text-white"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {Strings.ventas.completeSale}
@@ -415,16 +429,20 @@ export default function CartPanel() {
 
         {isDesktop && (
           <TouchableOpacity
-            className="mt-2 flex-row items-center justify-center gap-1.5 rounded-2xl border border-orange-500/40 py-3 active:opacity-90"
+            className="mt-2 flex-row items-center justify-center gap-1.5 rounded-2xl py-3.5 active:opacity-90"
             activeOpacity={0.85}
             onPress={handleClearCartPress}
             disabled={processing || isClearing}
+            style={{
+              borderWidth: 1.5,
+              borderColor: "rgba(234,88,12,0.25)",
+            }}
             accessibilityRole="button"
             accessibilityLabel="Limpiar carrito"
             accessibilityHint="Vacía todos los productos del carrito"
           >
             <Text
-              className="text-sm font-semibold text-orange-600 dark:text-orange-400"
+              className="text-sm font-semibold text-[#ea580c] dark:text-[#F97316]"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {Strings.ventas.clearCart}

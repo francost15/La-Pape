@@ -3,6 +3,7 @@ import ConfigTabEquipo from "@/components/settings/ConfigTabEquipo";
 import ConfigTabPerfil from "@/components/settings/ConfigTabPerfil";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppFonts } from "@/constants/typography";
 import { auth } from "@/lib/firebase";
 import { useEquipoStore } from "@/store/equipo-store";
 import { useLayoutStore } from "@/store/layout-store";
@@ -28,7 +29,12 @@ function TabBar({
   onChange: (t: TabId) => void;
 }) {
   return (
-    <View className="flex-row gap-1 bg-gray-100 dark:bg-neutral-800 rounded-2xl p-1 mb-6">
+    <View
+      className="flex-row gap-1 rounded-xl p-1 mb-6"
+      style={{
+        backgroundColor: Platform.OS === "web" ? "var(--bg-surface-hover)" : undefined,
+      }}
+    >
       {TABS.map((tab) => {
         const isActive = tab.id === active;
         return (
@@ -38,18 +44,24 @@ function TabBar({
               if (Platform.OS !== "web") Haptics.selectionAsync();
               onChange(tab.id);
             }}
-            className={`flex-1 flex-row items-center justify-center gap-2 py-3 px-4 rounded-xl ${
+            className={`flex-1 flex-row items-center justify-center gap-2 py-3 px-4 rounded-lg ${
               isActive
-                ? "bg-white dark:bg-neutral-700 shadow-sm"
+                ? "bg-white dark:bg-[#1A1F2B]"
                 : "active:opacity-70"
             }`}
+            style={isActive ? {
+              ...(Platform.OS === "web"
+                ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }
+                : { elevation: 1 }),
+            } : undefined}
           >
             <Text
               className={`text-sm font-semibold ${
                 isActive
-                  ? "text-gray-900 dark:text-white"
-                  : "text-gray-400 dark:text-gray-500"
+                  ? "text-[#1A1A1A] dark:text-[#F0F0F0]"
+                  : "text-[#9CA3AF] dark:text-[#5A6478]"
               }`}
+              style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {tab.label}
             </Text>
@@ -111,7 +123,7 @@ export default function ConfiguracionScreen() {
       <Navbar />
       <AnimatedScreen>
         <ScrollView
-          className="flex-1 bg-gray-50 dark:bg-neutral-900"
+          className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
           contentContainerStyle={{
             paddingHorizontal: isTablet ? 40 : 16,
             paddingVertical: isTablet ? 28 : 20,
@@ -124,21 +136,33 @@ export default function ConfiguracionScreen() {
               onPress={() => router.back()}
               className="flex-row items-center gap-2 mb-6 active:opacity-70"
             >
-              <IconSymbol name="chevron.left" size={20} color="#6b7280" />
-              <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <IconSymbol name="chevron.left" size={18} color="#9CA3AF" />
+              <Text
+                className="text-sm font-medium text-[#9CA3AF] dark:text-[#5A6478]"
+                style={{ fontFamily: AppFonts.body }}
+              >
                 Volver
               </Text>
             </Pressable>
 
-            <View className="flex-row items-center gap-2 mb-2">
-              <View className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 items-center justify-center">
+            <View className="flex-row items-center gap-3 mb-2">
+              <View
+                className="w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: "rgba(234,88,12,0.08)" }}
+              >
                 <IconSymbol name="gearshape.fill" size={20} color="#ea580c" />
               </View>
-              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+              <Text
+                className="text-2xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                style={{ fontFamily: AppFonts.heading }}
+              >
                 Configuración
               </Text>
             </View>
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            <Text
+              className="text-sm text-[#9CA3AF] dark:text-[#5A6478] mb-6"
+              style={{ fontFamily: AppFonts.body }}
+            >
               Gestiona tu perfil y el equipo del negocio
             </Text>
 

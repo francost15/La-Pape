@@ -229,35 +229,36 @@ export default function HistoryScreen() {
     [ventasAgrupadas]
   );
 
+  /**
+   * Section headers — Digital Atelier style.
+   * No card wrapper. Just bold text with accent bar and total.
+   */
   const renderSectionHeader = useCallback(
     ({ section }: { section: { label: string; total: number } }) => {
       const isTodayOrYesterday = section.label === "Hoy" || section.label === "Ayer";
       return (
         <Animated.View
           entering={FadeIn.duration(320)}
-          className="mt-2 mb-4 flex-row items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3.5 dark:border-neutral-700 dark:bg-neutral-800"
-          style={
-            Platform.OS === "web" ? { boxShadow: "0 2px 6px rgba(0,0,0,0.06)" } : { elevation: 2 }
-          }
+          className="mt-4 mb-3 flex-row items-center justify-between py-2"
         >
           <View className="flex-row items-center gap-3">
             <View
-              className="h-8 w-1 rounded-full"
+              className="h-6 w-[3px] rounded-full"
               style={{
-                backgroundColor: isTodayOrYesterday ? "#ea580c" : "#e5e7eb",
+                backgroundColor: isTodayOrYesterday ? "#ea580c" : "rgba(0,0,0,0.1)",
               }}
             />
             <Text
-              className={`text-base font-bold capitalize ${
+              className={`text-[15px] font-bold capitalize ${
                 isTodayOrYesterday
-                  ? "text-orange-600 dark:text-orange-400"
-                  : "text-gray-800 dark:text-gray-100"
+                  ? "text-[#ea580c] dark:text-[#F97316]"
+                  : "text-[#1A1A1A] dark:text-[#F0F0F0]"
               }`}
             >
               {section.label}
             </Text>
           </View>
-          <Text className="text-lg font-bold text-gray-700 tabular-nums dark:text-gray-300">
+          <Text className="text-[15px] font-bold tabular-nums text-[#1A1A1A] dark:text-[#F0F0F0]">
             {formatCurrency(section.total)}
           </Text>
         </Animated.View>
@@ -268,7 +269,7 @@ export default function HistoryScreen() {
 
   const renderVentaItem = useCallback(
     ({ item }: { item: { venta: Venta; detalles: VentaDetalle[]; fecha: Date } }) => (
-      <View style={{ marginBottom: 12 }}>
+      <View style={{ marginBottom: 8 }}>
         <VentaCard
           venta={item.venta}
           detalles={item.detalles}
@@ -314,9 +315,9 @@ export default function HistoryScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-gray-50 dark:bg-neutral-900">
+      <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
         <ActivityIndicator size="large" color="#ea580c" />
-        <Text className="text-sm text-gray-500 dark:text-gray-400">
+        <Text className="text-sm text-[#9CA3AF] dark:text-[#5A6478]">
           {Strings.history.loadingHistory}
         </Text>
       </View>
@@ -326,7 +327,7 @@ export default function HistoryScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
           <EmptyState
             icon="error"
             title={error}
@@ -347,7 +348,7 @@ export default function HistoryScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ventasFiltradas.length === 0 ? ListEmptyComponent : undefined}
-        className="flex-1 bg-gray-50 dark:bg-neutral-900"
+        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
         contentContainerStyle={{
           paddingHorizontal: isTablet ? 24 : 16,
           paddingTop: 12,

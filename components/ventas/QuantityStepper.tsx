@@ -1,4 +1,7 @@
 import CircleIconButton from "@/components/ui/CircleIconButton";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
 import { Text, View } from "react-native";
 
@@ -9,16 +12,32 @@ interface QuantityStepperProps {
   size?: number;
 }
 
+/**
+ * QuantityStepper — Digital Atelier style.
+ */
 export default function QuantityStepper({
   quantity,
   onMinus,
   onPlus,
   size = 36,
 }: QuantityStepperProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = isDark ? AppColors.dark : AppColors.light;
+
   return (
-    <View className="flex-row items-center shrink-0 gap-2">
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
       <CircleIconButton icon="minus" variant="secondary" onPress={onMinus} size={size} />
-      <Text className="min-w-7 text-center text-base font-semibold text-gray-900 dark:text-white">
+      <Text
+        style={{
+          minWidth: 28,
+          textAlign: "center",
+          fontSize: 16,
+          fontWeight: "700",
+          color: colors.textPrimary,
+          fontFamily: AppFonts.bodyStrong,
+        }}
+      >
         {quantity}
       </Text>
       <CircleIconButton icon="plus" variant="primary" onPress={onPlus} size={size} />

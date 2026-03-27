@@ -2,6 +2,8 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import ProductListContent from "@/components/ventas/ProductListContent";
 import QrScannerSheet from "@/components/ventas/QrScannerSheet";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { notify } from "@/lib/notify";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -25,8 +27,11 @@ const DISMISS_THRESHOLD = 80;
 const MOBILE_MAX_WIDTH = 768;
 
 /**
- * Sheet "Agregar productos" como overlay (sin Modal) para permitir que las
- * notificaciones dynamic island queden encima y no bloqueen interacción.
+ * AddProductsSheet — Digital Atelier style.
+ *
+ * Immersive bottom sheet for mobile.
+ * Navy dark mode (#0C0F14), stone light mode (#FAFAF9).
+ * Premium handles and borders.
  */
 export default function AddProductsSheet() {
   const { height, width } = useWindowDimensions();
@@ -35,8 +40,11 @@ export default function AddProductsSheet() {
   const isDark = colorScheme === "dark";
 
   const haptic = useHaptic();
-  const sheetBg = isDark ? "#1C1C1E" : "#F2F2F7";
-  const backdropBg = isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)";
+  
+  const colors = isDark ? AppColors.dark : AppColors.light;
+  const sheetBg = colors.surface;
+  const backdropBg = isDark ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.45)";
+  
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
@@ -153,22 +161,22 @@ export default function AddProductsSheet() {
             right: 0,
             height: sheetHeight,
             backgroundColor: sheetBg,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
             overflow: "hidden",
             transform: [{ translateY: slideAnim }],
             ...(Platform.OS === "web"
               ? {
                   boxShadow: isDark
-                    ? "0px -4px 20px 0px rgba(0,0,0,0.4)"
-                    : "0px -4px 16px 0px rgba(0,0,0,0.12)",
+                    ? "0px -4px 32px 0px rgba(0,0,0,0.6)"
+                    : "0px -4px 32px 0px rgba(0,0,0,0.14)",
                 }
               : {
                   shadowColor: "#000",
-                  shadowOffset: { width: 0, height: -4 },
-                  shadowOpacity: isDark ? 0.4 : 0.12,
-                  shadowRadius: 16,
-                  elevation: 16,
+                  shadowOffset: { width: 0, height: -6 },
+                  shadowOpacity: isDark ? 0.6 : 0.14,
+                  shadowRadius: 24,
+                  elevation: 20,
                 }),
           }}
         >
@@ -178,16 +186,18 @@ export default function AddProductsSheet() {
                 paddingTop: 12,
                 paddingBottom: 12,
                 paddingHorizontal: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: colors.border,
               }}
             >
               <View
                 style={{
-                  width: 36,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: isDark ? "#48484A" : "#C7C7CC",
+                  width: 40,
+                  height: 5,
+                  borderRadius: 2.5,
+                  backgroundColor: isDark ? "#2C3440" : "#E5E5EA",
                   alignSelf: "center",
-                  marginBottom: 14,
+                  marginBottom: 16,
                 }}
               />
               <View
@@ -195,14 +205,16 @@ export default function AddProductsSheet() {
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  marginBottom: 4,
                 }}
               >
                 <Text
                   style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    color: isDark ? "#F5F5F7" : "#1D1D1F",
-                    letterSpacing: -0.3,
+                    fontSize: 20,
+                    fontWeight: "800",
+                    color: colors.textPrimary,
+                    letterSpacing: -0.5,
+                    fontFamily: AppFonts.heading,
                   }}
                 >
                   Agregar productos
@@ -210,10 +222,10 @@ export default function AddProductsSheet() {
                 <TouchableOpacity
                   onPress={closeSheet}
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: 15,
-                    backgroundColor: isDark ? "#2C2C2E" : "#E8E8ED",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: isDark ? "#1A1F2B" : "#F5F5F4",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -222,7 +234,7 @@ export default function AddProductsSheet() {
                   <IconSymbol
                     name="xmark"
                     size={14}
-                    color={isDark ? "#8E8E93" : "#6B7280"}
+                    color={colors.textSecondary}
                   />
                 </TouchableOpacity>
               </View>

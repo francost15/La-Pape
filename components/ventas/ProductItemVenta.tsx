@@ -1,4 +1,6 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
@@ -19,6 +21,12 @@ interface ProductItemVentaProps {
   onProductAdded?: () => void;
 }
 
+/**
+ * ProductItemVenta — Digital Atelier style.
+ *
+ * Immersive list item for sales catalog.
+ * Supports compact (sidebar) and full grid layouts.
+ */
 export default React.memo(function ProductItemVenta({
   product,
   compact = false,
@@ -38,6 +46,7 @@ export default React.memo(function ProductItemVenta({
   const [imageError, setImageError] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
+  const colors = isDark ? AppColors.dark : AppColors.light;
   const buttonScale = useSharedValue(1);
   const quantityScale = useSharedValue(1);
 
@@ -87,25 +96,44 @@ export default React.memo(function ProductItemVenta({
   }, [hapticMedium, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
 
   const hasImage = product.imagen?.trim();
-  const placeholderBg = isDark ? "#2C2C2E" : "#F2F2F7";
+  const placeholderBg = isDark ? "#1A1F2B" : "#F5F5F4";
 
-  const imgSize = isDesktop ? 72 : 52;
-  const cardGap = isDesktop ? 16 : 12;
-  const imgRadius = isDesktop ? 14 : 12;
-  const btnSize = isDesktop ? 48 : 36;
+  const imgSize = isDesktop ? 64 : 52;
+  const cardGap = isDesktop ? 16 : 14;
+  const imgRadius = 14;
+  const btnSize = isDesktop ? 44 : 38;
+
+  const PriceText = () => (
+    <Text
+      style={{
+        fontSize: isDesktop ? 17 : 16,
+        fontWeight: "800",
+        color: isDark ? "#F97316" : "#ea580c",
+        fontFamily: AppFonts.display,
+        letterSpacing: -0.5,
+      }}
+    >
+      ${product.precio_venta.toLocaleString()}
+    </Text>
+  );
 
   if (compact) {
     return (
       <Pressable
         onPress={handleAdd}
-        className={`flex-row items-center rounded-2xl ${
-          isDark ? "bg-[#1C1C1E]" : "bg-white"
-        } ${Platform.OS === "web" ? "shadow-sm" : ""}`}
-        style={{
+        style={({ pressed }) => ({
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: pressed && !inCart ? colors.surfaceHover : colors.surfaceElevated,
+          borderRadius: 20,
+          padding: 12,
           gap: cardGap,
-          padding: isDesktop ? 14 : 10,
-          ...(Platform.OS !== "web" ? { elevation: 1 } : {}),
-        }}
+          borderWidth: 1.5,
+          borderColor: colors.border,
+          ...(Platform.OS === "web"
+            ? { boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }
+            : { elevation: 1 }),
+        })}
         accessibilityRole="button"
         accessibilityLabel={product.nombre}
         accessibilityHint="Agregar al carrito"
@@ -117,6 +145,8 @@ export default React.memo(function ProductItemVenta({
             borderRadius: imgRadius,
             backgroundColor: placeholderBg,
             overflow: "hidden",
+            borderWidth: 1,
+            borderColor: colors.border,
           }}
         >
           {hasImage && !imageError ? (
@@ -128,66 +158,74 @@ export default React.memo(function ProductItemVenta({
             />
           ) : (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <IconSymbol name="photo.fill" size={isDesktop ? 28 : 22} color="#C7C7CC" />
+              <IconSymbol name="photo.fill" size={isDesktop ? 22 : 20} color={isDark ? "#48484A" : "#D1D1D6"} />
             </View>
           )}
         </View>
 
-        <View className="min-w-0 flex-1 gap-0.5">
+        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text
-            className={`font-medium text-gray-900 dark:text-white ${
-              isDesktop ? "text-base" : "text-sm"
-            }`}
+            style={{
+              fontSize: isDesktop ? 15 : 14,
+              fontWeight: "600",
+              color: colors.textPrimary,
+              fontFamily: AppFonts.bodyStrong,
+              letterSpacing: -0.2,
+            }}
             numberOfLines={1}
           >
             {product.nombre}
           </Text>
-          <Text className={`font-bold text-orange-600 ${isDesktop ? "text-base" : "text-sm"}`}>
-            ${product.precio_venta.toLocaleString()}
-          </Text>
+          <PriceText />
         </View>
 
-        {inCart ? (
-          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
-            <QuantityStepper
-              quantity={quantity}
-              onMinus={handleMinus}
-              onPlus={handlePlus}
-              size={btnSize}
-            />
-          </Animated.View>
-        ) : (
-          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-            <CircleIconButton
-              icon={justAdded ? "checkmark" : "plus"}
-              variant={justAdded ? "success" : "primary"}
-              onPress={handleAdd}
-              size={btnSize}
-              interactive={false}
-            />
-          </Animated.View>
-        )}
+        <View style={{ paddingLeft: 4 }}>
+          {inCart ? (
+            <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
+              <QuantityStepper
+                quantity={quantity}
+                onMinus={handleMinus}
+                onPlus={handlePlus}
+                size={34}
+              />
+            </Animated.View>
+          ) : (
+            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+              <CircleIconButton
+                icon={justAdded ? "checkmark" : "plus"}
+                variant={justAdded ? "success" : "primary"}
+                onPress={handleAdd}
+                size={btnSize}
+                interactive={true}
+              />
+            </Animated.View>
+          )}
+        </View>
       </Pressable>
     );
   }
 
+  // Full variant (grid)
   return (
     <Pressable
       onPress={handleAdd}
-      style={{
-        borderRadius: 14,
+      style={({ pressed }) => ({
+        borderRadius: 20,
         overflow: "hidden",
-        backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-        ...(Platform.OS === "web" ? { boxShadow: "0 1px 3px rgba(0,0,0,0.06)" } : { elevation: 2 }),
-      }}
+        backgroundColor: pressed && !inCart ? colors.surfaceHover : colors.surface,
+        borderWidth: 1.5,
+        borderColor: colors.border,
+        ...(Platform.OS === "web"
+          ? { boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }
+          : { elevation: 3 }),
+      })}
       accessibilityRole="button"
       accessibilityLabel={product.nombre}
-      accessibilityHint="Agregar al carrito"
     >
       <View
         style={{
           width: "100%",
-          height: 100,
+          height: 120,
           backgroundColor: placeholderBg,
           overflow: "hidden",
         }}
@@ -201,16 +239,17 @@ export default React.memo(function ProductItemVenta({
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <IconSymbol name="photo.fill" size={28} color="#C7C7CC" />
+            <IconSymbol name="photo.fill" size={32} color={isDark ? "#48484A" : "#D1D1D6"} />
           </View>
         )}
       </View>
-      <View style={{ padding: 10, gap: 4 }}>
+      <View style={{ padding: 14, gap: 10 }}>
         <Text
           style={{
-            fontSize: 14,
-            fontWeight: "500",
-            color: isDark ? "#F5F5F7" : "#1D1D1F",
+            fontSize: 15,
+            fontWeight: "600",
+            color: colors.textPrimary,
+            fontFamily: AppFonts.bodyStrong,
             letterSpacing: -0.2,
           }}
           numberOfLines={2}
@@ -224,16 +263,7 @@ export default React.memo(function ProductItemVenta({
             justifyContent: "space-between",
           }}
         >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#ea580c",
-              letterSpacing: -0.2,
-            }}
-          >
-            ${product.precio_venta.toLocaleString()}
-          </Text>
+          <PriceText />
           {inCart ? (
             <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
               <QuantityStepper
@@ -249,8 +279,8 @@ export default React.memo(function ProductItemVenta({
                 icon={justAdded ? "checkmark" : "plus"}
                 variant={justAdded ? "success" : "primary"}
                 onPress={handleAdd}
-                size={36}
-                interactive={false}
+                size={btnSize}
+                interactive={true}
               />
             </Animated.View>
           )}

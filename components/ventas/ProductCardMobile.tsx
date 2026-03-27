@@ -1,5 +1,6 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { Product } from "@/interface/products";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
@@ -12,13 +13,17 @@ import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
 
-const IMG_SIZE = 56;
+const IMG_SIZE = 52;
 
 interface ProductCardMobileProps {
   product: Product;
   onProductAdded?: () => void;
 }
 
+/**
+ * ProductCardMobile — Digital Atelier style.
+ * Clean row with subtle separator. No card chrome.
+ */
 export default React.memo(function ProductCardMobile({
   product,
   onProductAdded,
@@ -87,9 +92,8 @@ export default React.memo(function ProductCardMobile({
   }, [haptic, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
 
   const hasImage = product.imagen?.trim();
-  const placeholderBg = isDark ? "#2C2C2E" : "#F2F2F7";
-  const borderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const pressedBg = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)";
+  const colors = isDark ? AppColors.dark : AppColors.light;
+  const borderColor = colors.border;
 
   return (
     <Pressable
@@ -98,8 +102,8 @@ export default React.memo(function ProductCardMobile({
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: pressed && !inCart ? pressedBg : "transparent",
+        paddingVertical: 14,
+        backgroundColor: pressed && !inCart ? colors.surfaceHover : "transparent",
         borderBottomWidth: 1,
         borderBottomColor: borderColor,
         gap: 14,
@@ -108,16 +112,15 @@ export default React.memo(function ProductCardMobile({
       accessibilityLabel={product.nombre}
       accessibilityHint={inCart ? "Producto en el carrito" : "Agregar al carrito"}
     >
+      {/* Image */}
       <View
         style={{
           width: IMG_SIZE,
           height: IMG_SIZE,
-          borderRadius: 8,
-          backgroundColor: placeholderBg,
+          borderRadius: 10,
+          backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4",
           overflow: "hidden",
           flexShrink: 0,
-          borderWidth: 1,
-          borderColor: borderColor,
         }}
       >
         {hasImage && !imageError ? (
@@ -128,74 +131,57 @@ export default React.memo(function ProductCardMobile({
             onError={() => setImageError(true)}
           />
         ) : (
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <IconSymbol name="photo.fill" size={24} color="#C7C7CC" />
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <IconSymbol name="photo.fill" size={22} color={isDark ? "#5A6478" : "#C7C7CC"} />
           </View>
         )}
       </View>
 
+      {/* Text content */}
       <View style={{ flex: 1, minWidth: 0, justifyContent: "center" }}>
-        <View
+        <Text
           style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 2,
+            fontSize: 15,
+            fontWeight: "600",
+            color: colors.textPrimary,
+            letterSpacing: -0.2,
+            fontFamily: AppFonts.bodyStrong,
+          }}
+          numberOfLines={2}
+        >
+          {product.nombre}
+        </Text>
+
+        {product.marca ? (
+          <Text
+            style={{
+              fontSize: 13,
+              color: colors.textSecondary,
+              fontWeight: "500",
+              fontFamily: AppFonts.body,
+              marginTop: 2,
+            }}
+            numberOfLines={1}
+          >
+            {product.marca}
+          </Text>
+        ) : null}
+
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: isDark ? "#F97316" : "#ea580c",
+            letterSpacing: -0.3,
+            fontFamily: AppFonts.display,
+            marginTop: 4,
           }}
         >
-          <Text
-            style={{
-              fontSize: 15,
-              fontWeight: "600",
-              color: isDark ? "#F5F5F7" : "#1D1D1F",
-              letterSpacing: -0.2,
-              flex: 1,
-              marginRight: 8,
-              fontFamily: AppFonts.bodyStrong,
-            }}
-            numberOfLines={2}
-          >
-            {product.nombre}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          {product.marca ? (
-            <Text
-              style={{
-                fontSize: 13,
-                color: isDark ? "#9CA3AF" : "#6B7280",
-                fontWeight: "500",
-                fontFamily: AppFonts.body,
-              }}
-              numberOfLines={1}
-            >
-              {product.marca}
-            </Text>
-          ) : null}
-        </View>
-
-        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 4 }}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#ea580c",
-              letterSpacing: -0.3,
-              fontFamily: AppFonts.display,
-            }}
-          >
-            ${product.precio_venta.toLocaleString()}
-          </Text>
-        </View>
+          ${product.precio_venta.toLocaleString()}
+        </Text>
       </View>
 
+      {/* Action button */}
       <View style={{ alignItems: "center", justifyContent: "center", paddingLeft: 4 }}>
         {inCart ? (
           <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
@@ -212,7 +198,7 @@ export default React.memo(function ProductCardMobile({
               icon={justAdded ? "checkmark" : "plus"}
               variant={justAdded ? "success" : "primary"}
               onPress={handleAdd}
-              size={40}
+              size={38}
               interactive={true}
             />
           </Animated.View>

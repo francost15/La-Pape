@@ -65,26 +65,60 @@ export default function VentasScreen() {
   const shortcutsHint = React.useMemo(() => {
     if (!isDesktop) return null;
     return (
-      <View className="flex-row items-center gap-4">
-        <Text className="text-xs text-gray-400 dark:text-gray-500">Ctrl+N para buscar</Text>
+      <View className="flex-row items-center gap-3">
+        <View className="flex-row items-center gap-1.5">
+          <View className="rounded-md bg-[#F5F5F4] dark:bg-[#1A1F2B] px-1.5 py-0.5">
+            <Text className="text-[10px] font-medium text-[#9CA3AF] dark:text-[#5A6478]">⌘N</Text>
+          </View>
+          <Text className="text-[11px] text-[#9CA3AF] dark:text-[#5A6478]">buscar</Text>
+        </View>
+        <View className="flex-row items-center gap-1.5">
+          <View className="rounded-md bg-[#F5F5F4] dark:bg-[#1A1F2B] px-1.5 py-0.5">
+            <Text className="text-[10px] font-medium text-[#9CA3AF] dark:text-[#5A6478]">↵</Text>
+          </View>
+          <Text className="text-[11px] text-[#9CA3AF] dark:text-[#5A6478]">completar</Text>
+        </View>
       </View>
     );
   }, [isDesktop]);
 
   return (
-    <AnimatedScreen className="flex-1 flex-row bg-white dark:bg-neutral-900">
+    <AnimatedScreen className="flex-1 flex-row bg-[#FAFAF9] dark:bg-[#0C0F14]">
       {isDesktop && <SidebarProducts />}
 
       <View
-        className={`flex-1 ${isDesktop ? "border-l border-gray-200 dark:border-neutral-800" : "pb-36"}`}
+        className={`flex-1 ${isDesktop ? "" : "pb-36"}`}
+        style={
+          isDesktop
+            ? {
+                borderLeftWidth: 1,
+                borderLeftColor: "rgba(0,0,0,0.06)",
+              }
+            : undefined
+        }
       >
-        <View className="flex-row items-center justify-between border-b border-gray-200 px-4 py-4 dark:border-neutral-800">
-          <Text
-            className="text-xl font-bold text-gray-900 dark:text-white"
-            style={{ fontFamily: AppFonts.heading }}
-          >
-            Carrito ({itemCount})
-          </Text>
+        <View
+          className="flex-row items-center justify-between px-5 py-4"
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: "rgba(0,0,0,0.04)",
+          }}
+        >
+          <View className="flex-row items-baseline gap-2">
+            <Text
+              className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+              style={{ fontFamily: AppFonts.heading }}
+            >
+              Carrito
+            </Text>
+            {itemCount > 0 && (
+              <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
+                <Text className="text-[11px] font-bold text-white">
+                  {itemCount}
+                </Text>
+              </View>
+            )}
+          </View>
           {shortcutsHint}
         </View>
 

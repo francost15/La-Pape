@@ -103,7 +103,7 @@ export default function ProductosScreen() {
   const ListHeader = useMemo(
     () => (
       <>
-        <View className={`flex-row items-stretch gap-3 ${isMobile ? "mb-4 px-2" : "mb-4"}`}>
+        <View className={`flex-row items-stretch gap-3 ${isMobile ? "mb-4 px-3" : "mb-4"}`}>
           <View className="min-w-0 flex-1">
             <SearchProducts
               ref={searchInputRef}
@@ -151,7 +151,11 @@ export default function ProductosScreen() {
         {loadingMore ? (
           <ActivityIndicator color="#ea580c" />
         ) : hasMore ? (
-          <TouchableOpacity className="rounded-lg bg-orange-600 px-6 py-3" onPress={loadMore}>
+          <TouchableOpacity
+            className="rounded-xl px-6 py-3"
+            style={{ backgroundColor: "#ea580c" }}
+            onPress={loadMore}
+          >
             <Text className="font-semibold text-white">{Strings.productos.loadMore}</Text>
           </TouchableOpacity>
         ) : null}
@@ -172,7 +176,8 @@ export default function ProductosScreen() {
               iconColor="#ea580c"
             />
             <TouchableOpacity
-              className="mt-4 rounded-lg bg-orange-600 px-4 py-3"
+              className="mt-4 rounded-xl px-5 py-3.5"
+              style={{ backgroundColor: "#ea580c" }}
               onPress={goToCreateProduct}
             >
               <Text className="font-semibold text-white">
@@ -195,9 +200,13 @@ export default function ProductosScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-100 p-4 dark:bg-neutral-900">
-        <Text className="mb-4 text-center text-red-600">{error}</Text>
-        <TouchableOpacity className="rounded-lg bg-orange-600 px-4 py-3" onPress={retry}>
+      <View className="flex-1 items-center justify-center bg-[#FAFAF9] p-4 dark:bg-[#0C0F14]">
+        <Text className="mb-4 text-center text-red-500">{error}</Text>
+        <TouchableOpacity
+          className="rounded-xl px-5 py-3.5"
+          style={{ backgroundColor: "#ea580c" }}
+          onPress={retry}
+        >
           <Text className="font-semibold text-white">{Strings.common.retry}</Text>
         </TouchableOpacity>
       </View>

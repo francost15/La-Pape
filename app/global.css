@@ -1,25 +1,88 @@
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Merriweather:wght@400;700&family=Nunito+Sans:wght@400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
 
+/* ─── Digital Atelier Design Tokens ─────────────────────────────── */
 :root {
-  --font-display: "Bebas Neue", "Oswald", "Arial Narrow", sans-serif;
-  --font-heading: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
-  --font-body: "Nunito Sans", "Segoe UI", sans-serif;
+  /* Background canvas */
+  --bg-canvas: #FAFAF9;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-hover: #F5F5F4;
+
+  /* Borders */
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+
+  /* Text */
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+
+  /* Accent */
+  --accent-primary: #EA580C;
+  --accent-primary-hover: #DC4F08;
+  --accent-primary-light: rgba(234, 88, 12, 0.08);
+  --accent-success: #16A34A;
+  --accent-danger: #DC2626;
+  --accent-info: #2563EB;
+
+  /* Typography */
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-heading: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+
+  /* Focus ring */
   --focus-ring-color: #ea580c;
   --focus-ring-offset: #ffffff;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px rgba(234, 88, 12, 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --focus-ring-offset: #171717;
+    /* Navy dark mode */
+    --bg-canvas: #0C0F14;
+    --bg-surface: #141820;
+    --bg-surface-elevated: #1A1F2B;
+    --bg-surface-hover: #1E2433;
+
+    /* Borders */
+    --border-default: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text */
+    --text-primary: #F0F0F0;
+    --text-secondary: #8B95A5;
+    --text-muted: #5A6478;
+
+    /* Accent adjustments for dark */
+    --accent-primary: #F97316;
+    --accent-primary-hover: #FB923C;
+    --accent-primary-light: rgba(249, 115, 22, 0.12);
+    --accent-success: #22C55E;
+    --accent-danger: #EF4444;
+    --accent-info: #3B82F6;
+
+    /* Focus */
+    --focus-ring-offset: #0C0F14;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(249, 115, 22, 0.2);
   }
 }
 
-/* Focus visible consistente para navegación por teclado */
+/* ─── Focus Styles ────────────────────────────────────────────────── */
 :where(
   a,
   button,
@@ -34,7 +97,6 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring-offset) 65%, transparent);
 }
 
-/* Solo suprimimos el foco por mouse/touch, no para teclado */
 :where(
   a,
   button,
@@ -60,4 +122,35 @@
     outline-width: 3px;
     box-shadow: none;
   }
+}
+
+/* ─── Smooth transitions ─────────────────────────────────────────── */
+* {
+  transition-property: background-color, border-color, color, opacity;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent transition on page load */
+.no-transitions * {
+  transition: none !important;
+}
+
+/* ─── Scrollbar styling (web) ─────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

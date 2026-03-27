@@ -1,11 +1,13 @@
 import { Platform } from 'react-native';
 
 /**
- * Jerarquía tipográfica centralizada.
- * - `display`: titulares con personalidad
- * - `heading`: subtítulos y encabezados de sección
- * - `body`: texto de lectura normal
- * - `bodyStrong`: botones/labels destacados
+ * Digital Atelier — Typography System
+ *
+ * Jerarquía:
+ * - `display`: KPIs, precios grandes, titulares con impacto — Space Grotesk Bold
+ * - `heading`: subtítulos, encabezados de sección — Space Grotesk SemiBold
+ * - `body`: texto de lectura, descripciones — Inter Regular
+ * - `bodyStrong`: botones, labels, énfasis — Inter Medium/SemiBold
  */
 export const AppFonts = Platform.select({
   ios: {
@@ -21,10 +23,10 @@ export const AppFonts = Platform.select({
     bodyStrong: 'sans-serif-medium',
   },
   web: {
-    display: "'Bebas Neue', 'Oswald', 'Arial Narrow', sans-serif",
-    heading: "'Nunito Sans', 'Avenir Next', 'Segoe UI', sans-serif",
-    body: "'Nunito Sans', 'Segoe UI', sans-serif",
-    bodyStrong: "'Nunito Sans', 'Avenir Next Demi Bold', sans-serif",
+    display: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+    heading: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+    body: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    bodyStrong: "'Inter', 'Segoe UI', system-ui, sans-serif",
   },
   default: {
     display: 'sans-serif',

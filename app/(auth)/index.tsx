@@ -21,7 +21,6 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
 
-  // Evita navegación doble
   const navigatingRef = useRef(false);
 
   const {
@@ -38,9 +37,6 @@ export default function AuthScreen() {
     },
   });
 
-  /**
-   * Redirección cuando ya hay sesión o cuando vuelve de Google redirect (web).
-   */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && !navigatingRef.current) {
@@ -63,9 +59,6 @@ export default function AuthScreen() {
     return unsubscribe;
   }, [isWeb]);
 
-  /**
-   * Submit Login / Register
-   */
   const onSubmit = async (data: LoginFormData) => {
     try {
       setLoading(true);
@@ -106,17 +99,29 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView
-      className={`flex-1 justify-center bg-gray-100 dark:bg-neutral-900 ${
-        isWeb ? "px-6" : "items-center"
-      }`}
+      className="flex-1 justify-center"
+      style={{
+        backgroundColor: isDark ? "#0C0F14" : "#FAFAF9",
+        paddingHorizontal: isWeb ? 24 : 0,
+        alignItems: isWeb ? undefined : "center",
+      }}
     >
-      <View className={`space-y-4 ${isWeb ? "mx-auto w-full max-w-md" : "mt-20 w-full p-4"}`}>
+      <View
+        style={{
+          width: "100%",
+          maxWidth: isWeb ? 420 : undefined,
+          alignSelf: "center",
+          padding: isWeb ? 0 : 20,
+          marginTop: isWeb ? 0 : 40,
+        }}
+      >
         <Image
           source={require("@/assets/images/pape.webp")}
           style={{
-            width: 250,
-            height: 150,
+            width: 200,
+            height: 120,
             alignSelf: "center",
+            marginBottom: 32,
           }}
         />
 

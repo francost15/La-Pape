@@ -61,13 +61,13 @@ function VentasPorUsuarioRow({
 
   return (
     <Animated.View
-      style={animatedStyle}
-      className={`gap-1.5 py-2.5 ${showDivider ? "border-b border-gray-100 dark:border-neutral-700/60" : ""}`}
+      className={`gap-1.5 py-2.5 ${showDivider ? "border-b" : ""}`}
+      style={[animatedStyle, showDivider ? { borderBottomColor: "rgba(0,0,0,0.04)" } : undefined]}
     >
       {/* Avatar + nombre + ventas + monto */}
       <View className="flex-row items-center gap-3">
         {/* Avatar circular */}
-        <View className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-orange-50 dark:bg-orange-900/20">
+        <View className="h-8 w-8 shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(234,88,12,0.08)" }}>
           {showPhoto ? (
             <Image
               source={{ uri: item.foto }}
@@ -77,7 +77,7 @@ function VentasPorUsuarioRow({
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <Text className="text-[11px] font-bold text-orange-500 dark:text-orange-400">
+              <Text className="text-[11px] font-bold text-[#ea580c] dark:text-[#F97316]">
                 {getInitials(item.nombre)}
               </Text>
             </View>
@@ -87,31 +87,31 @@ function VentasPorUsuarioRow({
         {/* Nombre y subtítulo */}
         <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] font-semibold text-gray-800 dark:text-gray-200"
+            className="text-[13px] font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
             numberOfLines={1}
           >
             {item.nombre}
           </Text>
-          <Text className="text-[10px] text-gray-400 dark:text-gray-500">
+          <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]">
             {item.transacciones} {pluralize(item.transacciones, "venta", "ventas")}
           </Text>
         </View>
 
         {/* Monto + porcentaje */}
         <View className="shrink-0 items-end">
-          <Text className="text-[13px] font-bold text-gray-900 tabular-nums dark:text-white">
+          <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
+          <Text className="text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
             {porcentajeDelTotal.toFixed(0)}%
           </Text>
         </View>
       </View>
 
       {/* Barra de participación: 2px, discreta */}
-      <View className="ml-11 h-0.5 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-700/80">
+      <View className="ml-11 h-0.5 overflow-hidden rounded-full bg-[#F5F5F4] dark:bg-[#1A1F2B]">
         <View
-          className="h-full rounded-full bg-orange-400 dark:bg-orange-500"
+          className="h-full rounded-full bg-[#ea580c]"
           style={{ width: `${porcentajeDelTotal}%` }}
         />
       </View>

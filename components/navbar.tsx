@@ -1,5 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { Usuario } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { getUsuarioById } from "@/lib/services/usuarios";
@@ -9,12 +10,12 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { useCallback, useEffect, useState } from "react";
 import { Modal, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 
+const isWeb = Platform.OS === "web";
+
 export default function Navbar() {
-  const isWeb = Platform.OS === "web";
   const [user, setUser] = useState<User | null>(null);
   const [usuarioData, setUsuarioData] = useState<Usuario | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
-  /** En web el navegador puede bloquear la foto (ORB/CORS); si falla, mostramos la inicial */
   const [photoLoadFailed, setPhotoLoadFailed] = useState(false);
 
   const loadUsuario = useCallback(async (uid: string) => {
@@ -53,15 +54,29 @@ export default function Navbar() {
 
   return (
     <View
-      className={`${isWeb ? "web-navbar" : "mobile-navbar"} flex-row items-center justify-between bg-gray-100 px-4 py-3 dark:bg-neutral-800 ${isWeb ? "" : "pt-18"}`}
+      className="flex-row items-center justify-between px-4"
+      style={{
+        height: 56,
+        backgroundColor: isWeb ? "var(--bg-surface)" : undefined,
+        borderBottomWidth: 1,
+        borderBottomColor: isWeb ? "var(--border-default)" : undefined,
+        ...(isWeb
+          ? {
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+            }
+          : {}),
+        ...(Platform.OS === "ios" ? { paddingTop: 48 } : {}),
+        ...(Platform.OS === "android" ? { paddingTop: 36 } : {}),
+      }}
     >
       <Link
         href="/ventas"
-        className={`${isWeb ? "rounded-lg px-2 py-2 transition-colors hover:bg-gray-200 dark:hover:bg-neutral-700" : ""}`}
+        className={isWeb ? "rounded-lg px-2 py-2 transition-all hover:opacity-80" : ""}
       >
         <Image
           source={require("@/assets/images/pape.webp")}
-          style={{ width: 110, height: 30 }}
+          style={{ width: 100, height: 28 }}
           accessibilityLabel="Logo La Pape"
           accessibilityRole="image"
         />
@@ -69,12 +84,15 @@ export default function Navbar() {
 
       {user && (
         <>
-          {/* Avatar (abre mini menú de usuario) */}
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
             activeOpacity={0.8}
-            className="overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-600"
-            style={{ width: 60, height: 60 }}
+            className="overflow-hidden rounded-full"
+            style={{
+              width: 36,
+              height: 36,
+              backgroundColor: isWeb ? "var(--bg-surface-elevated)" : undefined,
+            }}
             accessibilityRole="button"
             accessibilityLabel="Abrir menú de usuario"
             accessibilityHint="Muestra opciones de perfil y cierre de sesión"
@@ -82,18 +100,26 @@ export default function Navbar() {
             {user.photoURL && !photoLoadFailed ? (
               <Image
                 source={{ uri: user.photoURL }}
-                style={{ width: 60, height: 60, borderRadius: 30 }}
+                style={{ width: 36, height: 36, borderRadius: 18 }}
                 contentFit="cover"
                 onError={() => setPhotoLoadFailed(true)}
               />
             ) : (
               <View
-                className="flex-1 items-center justify-center bg-gray-300 dark:bg-neutral-600"
-                style={{ width: 60, height: 60 }}
+                className="flex-1 items-center justify-center rounded-full"
+                style={{
+                  width: 36,
+                  height: 36,
+                  backgroundColor: AppColors.primaryGhost,
+                }}
               >
                 <Text
-                  className="font-bold text-gray-700 dark:text-gray-200"
-                  style={{ fontSize: 18, fontFamily: AppFonts.heading }}
+                  className="font-bold"
+                  style={{
+                    fontSize: 14,
+                    fontFamily: AppFonts.heading,
+                    color: AppColors.primary,
+                  }}
                 >
                   {inicial}
                 </Text>
@@ -101,7 +127,7 @@ export default function Navbar() {
             )}
           </TouchableOpacity>
 
-          {/* Mini menú de usuario */}
+          {/* ── User Menu Modal ───────────────────────── */}
           <Modal
             visible={menuVisible}
             transparent
@@ -111,31 +137,59 @@ export default function Navbar() {
             <Pressable
               style={{
                 flex: 1,
-                backgroundColor: "rgba(0,0,0,0.5)",
+                backgroundColor: "rgba(0,0,0,0.4)",
                 justifyContent: "flex-end",
               }}
               onPress={() => setMenuVisible(false)}
             >
               <Pressable
                 onPress={(e) => e.stopPropagation()}
-                className="rounded-t-2xl bg-gray-100 p-6 dark:bg-neutral-800"
+                style={{
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  padding: 24,
+                  paddingBottom: 40,
+                  backgroundColor: isWeb ? "var(--bg-surface)" : undefined,
+                }}
+                className="bg-white dark:bg-[#141820]"
               >
-                <View className="mb-4 flex-row items-center gap-3">
+                {/* Handle indicator */}
+                <View
+                  style={{
+                    width: 36,
+                    height: 4,
+                    borderRadius: 2,
+                    alignSelf: "center",
+                    marginBottom: 20,
+                    opacity: 0.2,
+                  }}
+                  className="bg-gray-900 dark:bg-white"
+                />
+
+                {/* User info */}
+                <View className="mb-5 flex-row items-center gap-3">
                   {user.photoURL && !photoLoadFailed ? (
                     <Image
                       source={{ uri: user.photoURL }}
-                      style={{ width: 56, height: 56, borderRadius: 28 }}
+                      style={{ width: 48, height: 48, borderRadius: 24 }}
                       contentFit="cover"
                       onError={() => setPhotoLoadFailed(true)}
                     />
                   ) : (
                     <View
-                      className="items-center justify-center rounded-full bg-gray-300 dark:bg-neutral-600"
-                      style={{ width: 56, height: 56 }}
+                      className="items-center justify-center rounded-full"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        backgroundColor: AppColors.primaryGhost,
+                      }}
                     >
                       <Text
-                        className="text-2xl font-bold text-gray-700 dark:text-gray-200"
-                        style={{ fontFamily: AppFonts.heading }}
+                        className="text-xl font-bold"
+                        style={{
+                          fontFamily: AppFonts.heading,
+                          color: AppColors.primary,
+                        }}
                       >
                         {inicial}
                       </Text>
@@ -143,45 +197,36 @@ export default function Navbar() {
                   )}
                   <View className="flex-1">
                     <Text
-                      className="text-lg font-semibold text-gray-900 dark:text-white"
+                      className="text-lg font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
                       style={{ fontFamily: AppFonts.heading }}
                     >
                       {nombre ?? "Usuario"}
                     </Text>
+                    {email ? (
+                      <Text
+                        className="text-sm text-[#6B7280] dark:text-[#8B95A5]"
+                        style={{ fontFamily: AppFonts.body }}
+                      >
+                        {email}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
-                <View className="mb-4 gap-1">
-                  {email ? (
-                    <Text
-                      className="text-sm text-gray-500 dark:text-gray-500"
-                      style={{ fontFamily: AppFonts.body }}
-                    >
-                      {email}
-                    </Text>
-                  ) : null}
-                  {usuarioData?.telefono ? (
-                    <Text
-                      className="text-sm text-gray-500 dark:text-gray-500"
-                      style={{ fontFamily: AppFonts.body }}
-                    >
-                      {usuarioData.telefono}
-                    </Text>
-                  ) : null}
-                </View>
 
-                {/* Ir a Configuración */}
+                {/* Settings */}
                 <TouchableOpacity
                   onPress={() => {
                     setMenuVisible(false);
                     router.push("/configuracion");
                   }}
-                  className="mb-3 flex-row items-center gap-3 rounded-xl bg-gray-200 px-4 py-3 active:opacity-80 dark:bg-neutral-700"
+                  className="mb-3 flex-row items-center gap-3 rounded-xl px-4 py-3.5 active:opacity-80"
+                  style={{ backgroundColor: isWeb ? "var(--bg-surface-hover)" : undefined }}
                   accessibilityRole="button"
                   accessibilityLabel="Configuración"
                 >
-                  <IconSymbol name="gearshape.fill" size={18} color="#6b7280" />
+                  <IconSymbol name="gearshape.fill" size={18} color="#6B7280" />
                   <Text
-                    className="text-sm font-semibold text-gray-700 dark:text-gray-200"
+                    className="text-sm font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Configuración
@@ -190,15 +235,22 @@ export default function Navbar() {
                   <IconSymbol name="chevron.right" size={14} color="#9ca3af" />
                 </TouchableOpacity>
 
+                {/* Sign out */}
                 <TouchableOpacity
                   onPress={handleSignOut}
-                  className="rounded-xl bg-red-100 py-3 dark:bg-red-900/30"
+                  className="rounded-xl py-3.5"
+                  style={{
+                    backgroundColor: "rgba(220, 38, 38, 0.08)",
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Cerrar sesión"
                 >
                   <Text
-                    className="text-center font-semibold text-red-600 dark:text-red-400"
-                    style={{ fontFamily: AppFonts.bodyStrong }}
+                    className="text-center font-semibold"
+                    style={{
+                      fontFamily: AppFonts.bodyStrong,
+                      color: AppColors.error,
+                    }}
                   >
                     Cerrar sesión
                   </Text>

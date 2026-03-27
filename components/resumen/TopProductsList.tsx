@@ -33,19 +33,18 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
     <Pressable onPress={handlePress} className="active:opacity-60">
       <View
         className={`flex-row items-center gap-3 py-2.5 ${
-          showDivider ? "border-b border-gray-100 dark:border-neutral-700/60" : ""
+          showDivider ? "border-b" : ""
         }`}
+        style={showDivider ? { borderBottomColor: "rgba(0,0,0,0.04)" } : undefined}
       >
-        {/* Número de posición: monospace, acento solo en el #1 */}
         <Text
           className="w-4 text-center text-[12px] font-bold tabular-nums"
-          style={{ color: rank === 1 ? "#ea580c" : "#d1d5db" }}
+          style={{ color: rank === 1 ? "#ea580c" : "#9CA3AF" }}
         >
           {rank}
         </Text>
 
-        {/* Imagen miniatura cuadrada */}
-        <View className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-700">
+        <View className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-[#F5F5F4] dark:bg-[#1A1F2B]">
           {hasImg ? (
             <Image
               source={{ uri: item.producto.imagen }}
@@ -55,32 +54,30 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <View className="h-4 w-4 rounded bg-gray-200 dark:bg-neutral-600" />
+              <View className="h-4 w-4 rounded bg-[#E5E7EB] dark:bg-[#2A3040]" />
             </View>
           )}
         </View>
 
-        {/* Nombre + marca */}
         <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] leading-5 font-semibold text-gray-800 dark:text-gray-200"
+            className="text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
             numberOfLines={1}
           >
             {item.producto.nombre}
           </Text>
           {item.producto.marca ? (
-            <Text className="text-[10px] text-gray-400 dark:text-gray-500" numberOfLines={1}>
+            <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]" numberOfLines={1}>
               {item.producto.marca}
             </Text>
           ) : null}
         </View>
 
-        {/* Unidades + total */}
         <View className="shrink-0 items-end">
-          <Text className="text-[13px] font-bold text-gray-900 tabular-nums dark:text-white">
+          <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
+          <Text className="text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
             {item.cantidad} {pluralize(item.cantidad, "ud.", "uds.")}
           </Text>
         </View>

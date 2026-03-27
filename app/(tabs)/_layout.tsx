@@ -9,7 +9,6 @@ import { ActivityIndicator, View } from 'react-native';
 
 export default function TabLayout() {
   const router = useRouter();
-
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
@@ -19,15 +18,14 @@ export default function TabLayout() {
       }
       setCheckingAuth(false);
     });
-
     return unsubscribe;
   }, [router]);
 
   if (checkingAuth) {
     return (
-        <View className="flex-1 justify-center items-center bg-white dark:bg-neutral-900">
-          <ActivityIndicator size="large" color="#ea580c" />
-        </View>
+      <View className="flex-1 justify-center items-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
+        <ActivityIndicator size="large" color="#ea580c" />
+      </View>
     );
   }
 
@@ -39,54 +37,47 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: '#c2410c',
-          tabBarInactiveTintColor: '#78716c',
+          tabBarActiveTintColor: '#ea580c',
+          tabBarInactiveTintColor: '#9CA3AF',
         }}
       >
-      {/* Ventas */}
-      <Tabs.Screen
-        name="ventas"
-        options={{
-          title: 'Ventas',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={32} name="cart.fill" color={color} />
-          ),
-        }}
-      />
-
-      {/* Productos */}
-      <Tabs.Screen
-        name="productos"
-        options={{
-          title: 'Productos',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={32} name="bag.fill" color={color} />
-          ),
-        }}
-      />
-
-      {/* Historial */}
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'Historial',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={32} name="clock.fill" color={color} />
-          ),
-        }}
-      />
-
-      {/* Resumen */}
-      <Tabs.Screen
-        name="resumen"
-        options={{
-          title: 'Resumen',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={32} name="doc.text" color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="ventas"
+          options={{
+            title: 'Ventas',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={32} name="cart.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="productos"
+          options={{
+            title: 'Productos',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={32} name="bag.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="history"
+          options={{
+            title: 'Historial',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={32} name="clock.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="resumen"
+          options={{
+            title: 'Resumen',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={32} name="doc.text" color={color} />
+            ),
+          }}
+        />
+      </Tabs>
     </View>
   );
 }

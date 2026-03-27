@@ -33,9 +33,9 @@ interface KpiGridProps {
 const AnimatedKpiWrapper = Animated.createAnimatedComponent(View);
 
 /**
- * KPI card con diseño editorial: sin ícono en círculo.
- * La identidad visual viene de la franja de acento superior (2px) y
- * la jerarquía tipográfica — el número es el protagonista.
+ * KPI card — Digital Atelier style.
+ * NO card border, NO card shadow. Just accent line + typography.
+ * Lives directly on the background canvas for a flat, integrated look.
  */
 const KpiCard = memo(function KpiCard({
   label,
@@ -45,12 +45,12 @@ const KpiCard = memo(function KpiCard({
   index,
 }: KpiCardProps) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(8);
+  const translateY = useSharedValue(12);
 
   useEffect(() => {
-    const delay = index * 60;
-    opacity.value = withDelay(delay, withTiming(1, { duration: 280 }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 280 }));
+    const delay = index * 80;
+    opacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
+    translateY.value = withDelay(delay, withTiming(0, { duration: 350 }));
   }, [index, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -60,40 +60,36 @@ const KpiCard = memo(function KpiCard({
 
   return (
     <AnimatedKpiWrapper style={animatedStyle} className="min-w-[100px] flex-1">
-      <View className="overflow-hidden rounded-xl border border-gray-100/60 bg-white dark:border-neutral-700/50 dark:bg-neutral-800">
-        {/* Franja de acento: identidad cromática sin ícono */}
-        <View style={{ height: 2, backgroundColor: accentColor }} />
+      {/* Accent line at top — the only visual chrome */}
+      <View style={{ height: 3, backgroundColor: accentColor, borderRadius: 2, marginBottom: 16 }} />
 
-        <View className="p-4">
-          {/* Etiqueta en small-caps — referencia editorial, no de software */}
-          <Text
-            className="mb-2 text-[9px] font-semibold text-gray-400 uppercase dark:text-gray-500"
-            style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.4 }}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
+      {/* Label */}
+      <Text
+        className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+        style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.6 }}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
 
-          {/* Valor: protagonista visual de la card */}
-          <Text
-            className="leading-none font-bold tracking-tight text-gray-900 dark:text-white"
-            style={{ fontSize: 22, fontFamily: AppFonts.display }}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.65}
-          >
-            {value}
-          </Text>
+      {/* Value — protagonist */}
+      <Text
+        className="leading-none font-bold tracking-tight text-[#1A1A1A] dark:text-[#F0F0F0]"
+        style={{ fontSize: 28, fontFamily: AppFonts.display }}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+      >
+        {value}
+      </Text>
 
-          {/* Subtítulo: refuerzo contextual */}
-          <Text
-            className="mt-1.5 text-[10px] text-gray-400 dark:text-gray-500"
-            style={{ fontFamily: AppFonts.body }}
-          >
-            {subtitle}
-          </Text>
-        </View>
-      </View>
+      {/* Subtitle */}
+      <Text
+        className="mt-2 text-[11px] text-[#9CA3AF] dark:text-[#5A6478]"
+        style={{ fontFamily: AppFonts.body }}
+      >
+        {subtitle}
+      </Text>
     </AnimatedKpiWrapper>
   );
 });
@@ -128,7 +124,7 @@ export default function KpiGrid({ metricas, isMobile }: KpiGridProps) {
   ];
 
   return (
-    <View className={`mb-4 gap-3 ${isMobile ? "flex-row flex-wrap" : "flex-row"}`}>
+    <View className={`mb-6 gap-6 ${isMobile ? "flex-row flex-wrap" : "flex-row"}`}>
       {kpis.map((kpi, i) => (
         <KpiCard key={kpi.label} index={i} {...kpi} />
       ))}

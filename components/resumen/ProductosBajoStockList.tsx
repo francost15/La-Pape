@@ -34,11 +34,12 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
     <Pressable onPress={handlePress} className="active:opacity-60">
       <View
         className={`flex-row items-center gap-3 py-2.5 ${
-          showDivider ? "border-b border-gray-100 dark:border-neutral-700/60" : ""
+          showDivider ? "border-b" : ""
         }`}
+        style={showDivider ? { borderBottomColor: "rgba(0,0,0,0.04)" } : undefined}
       >
         {/* Imagen miniatura */}
-        <View className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-700">
+        <View className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-[#F5F5F4] dark:bg-[#1A1F2B]">
           {hasImg ? (
             <Image
               source={{ uri: product.imagen }}
@@ -48,7 +49,7 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <View className="h-4 w-4 rounded bg-gray-200 dark:bg-neutral-600" />
+              <View className="h-4 w-4 rounded bg-[#E5E7EB] dark:bg-[#2A3040]" />
             </View>
           )}
         </View>
@@ -56,13 +57,13 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
         {/* Nombre + marca */}
         <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] leading-5 font-semibold text-gray-800 dark:text-gray-200"
+            className="text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
             numberOfLines={1}
           >
             {product.nombre}
           </Text>
           {product.marca ? (
-            <Text className="text-[10px] text-gray-400 dark:text-gray-500" numberOfLines={1}>
+            <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]" numberOfLines={1}>
               {product.marca}
             </Text>
           ) : null}

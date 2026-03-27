@@ -22,19 +22,13 @@ import {
 import { useSessionStore } from "@/store/session-store";
 import React, { useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
-
-// ─── Pantalla principal ───────────────────────────────────────────────────────
+import { AppFonts } from "@/constants/typography";
 
 /**
- * Orquestador de la pantalla de resumen.
+ * Resumen Screen — Digital Atelier style.
  *
- * Responsabilidades de este componente:
- * - Leer el estado de sesión, filtros y datos desde los stores de Zustand
- * - Suscribirse al listener en tiempo real cuando la sesión esté lista
- * - Computar los datos derivados (metricas, ranking, categorias…) con useMemo
- * - Delegar todo el render a sub-componentes especializados
- *
- * NO contiene lógica de UI de los sub-componentes ni formateo ad-hoc.
+ * Flat background canvas, no card wrappers on sections.
+ * KPIs render directly on canvas. Sections separated by title + spacing.
  */
 export default function ResumenScreen() {
   const negocioId = useSessionStore((s) => s.negocioId);
@@ -43,21 +37,18 @@ export default function ResumenScreen() {
   const userId = useSessionStore((s) => s.userId);
   const userEmail = useSessionStore((s) => s.userEmail);
 
-  // ── Filtros y layout ───────────────────────────────────────────────────────
   const periodo = useFiltrosStore((s) => s.periodo);
   const rangoPersonalizado = useFiltrosStore((s) => s.rangoPersonalizado);
   const setPeriodo = useFiltrosStore((s) => s.setPeriodo);
   const setRangoPersonalizado = useFiltrosStore((s) => s.setRangoPersonalizado);
   const isMobile = useLayoutStore((s) => s.isMobile);
 
-  // ── Productos ──────────────────────────────────────────────────────────────
   const products = useProductosStore((s) => s.products);
   const categories = useProductosStore((s) => s.categories);
   const setProducts = useProductosStore((s) => s.setProducts);
   const setCategories = useProductosStore((s) => s.setCategories);
   const resetProductos = useProductosStore((s) => s.reset);
 
-  // ── Ventas en tiempo real ──────────────────────────────────────────────────
   const ventas = useResumenStore((s) => s.ventas);
   const detallesMap = useResumenStore((s) => s.detallesMap);
   const loading = useResumenStore((s) => s.loading);
@@ -65,19 +56,13 @@ export default function ResumenScreen() {
   const subscribe = useResumenStore((s) => s.subscribe);
   const resetResumen = useResumenStore((s) => s.reset);
 
-  // Filtramos las ventas según el período seleccionado antes de pasarlas a los selectores
   const ventasFiltradas = useMemo(
     () => filterVentasByPeriodo(ventas, periodo, rangoPersonalizado),
     [ventas, periodo, rangoPersonalizado]
   );
 
-  // ── Usuarios ───────────────────────────────────────────────────────────────
-  // Hook externo que resuelve nombres y fotos de vendedores de forma asíncrona
   const usuariosMap = useUsuariosMap(negocioId, ventasFiltradas);
 
-  // ── Efectos de carga ───────────────────────────────────────────────────────
-
-  // Suscribirse al listener real-time de ventas cuando la sesión esté lista
   useEffect(() => {
     if (!sessionReady) return;
     if (!negocioId) {
@@ -88,7 +73,6 @@ export default function ResumenScreen() {
     return subscribe(negocioId);
   }, [sessionReady, negocioId, subscribe, resetResumen, resetProductos]);
 
-  // Cargar catálogo de productos (se necesita para métricas y ranking)
   useEffect(() => {
     if (!sessionReady || !negocioId || !userId || products.length > 0) return;
     getProductosScreenData(userId, userEmail ?? "")
@@ -99,7 +83,6 @@ export default function ResumenScreen() {
       .catch((err) => console.error("Error cargando productos:", err));
   }, [sessionReady, negocioId, userId, userEmail, products.length, setProducts, setCategories]);
 
-  // ── Datos derivados (memoizados para evitar recálculo innecesario) ──────────
   const metricas = useMemo(
     () => selectMetricas(ventasFiltradas, detallesMap, products),
     [ventasFiltradas, detallesMap, products]
@@ -122,12 +105,10 @@ export default function ResumenScreen() {
 
   const productosBajoStock = useMemo(() => selectProductosBajoStock(products), [products]);
 
-  // ── Estados especiales ─────────────────────────────────────────────────────
-
   if (sessionReady && !negocioId) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
           <EmptyState
             icon="error"
             title={sessionError ?? "No tienes un negocio asignado"}
@@ -142,9 +123,9 @@ export default function ResumenScreen() {
   if (loading) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center gap-4 bg-gray-50 dark:bg-neutral-900">
+        <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
           <ActivityIndicator size="large" color="#ea580c" />
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Cargando resumen...</Text>
+          <Text className="text-sm text-[#9CA3AF] dark:text-[#5A6478]">Cargando resumen...</Text>
         </View>
       </AnimatedScreen>
     );
@@ -153,7 +134,7 @@ export default function ResumenScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-gray-50 px-8 dark:bg-neutral-900">
+        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
           <EmptyState
             icon="error"
             title={error}
@@ -165,23 +146,18 @@ export default function ResumenScreen() {
     );
   }
 
-  // ── Render principal ────────────────────────────────────────────────────────
   return (
     <AnimatedScreen>
       <ScrollView
-        className="flex-1 bg-gray-50 dark:bg-neutral-900"
+        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
         contentContainerStyle={{
-          paddingHorizontal: isMobile ? 14 : 32,
-          paddingVertical: isMobile ? 14 : 20,
+          paddingHorizontal: isMobile ? 16 : 32,
+          paddingVertical: isMobile ? 16 : 24,
           paddingBottom: 120,
         }}
       >
-        {/*
-         * Contenedor principal: sin max-width para aprovechar todo el ancho
-         * disponible en pantallas grandes.
-         */}
-        <View className="gap-4">
-          {/* Selector de período */}
+        <View className="gap-6">
+          {/* Period filter */}
           <PeriodFilter
             periodo={periodo}
             onPeriodoChange={setPeriodo}
@@ -189,48 +165,46 @@ export default function ResumenScreen() {
             onRangoPersonalizadoChange={setRangoPersonalizado}
           />
 
-          {/* KPIs principales — siempre en fila horizontal */}
+          {/* KPIs — directly on canvas, no card wrapper */}
           <KpiGrid metricas={metricas} isMobile={isMobile} />
 
-          {/*
-           * Fila 1 (desktop): Ventas por Usuario [40%] | Categorías [60%]
-           * La ratio asimétrica da más espacio al donut + leyenda, que necesita más lugar.
-           * En mobile: apiladas verticalmente.
-           */}
+          {/* ── Section: Sales by User + Categories ─────── */}
           {isMobile ? (
             <>
+              <SectionTitle title="Ventas por Usuario" />
               <VentasPorUsuario data={ventasPorUsuario} />
+              <SectionTitle title="Categorías" />
               <CategoryBreakdown data={categorias} isMobile={isMobile} />
             </>
           ) : (
-            <View className="flex-row items-start gap-4">
-              {/* 40% — lista de vendedores */}
+            <View className="flex-row items-start gap-6">
               <View style={{ flex: 2 }}>
+                <SectionTitle title="Ventas por Usuario" />
                 <VentasPorUsuario data={ventasPorUsuario} />
               </View>
-              {/* 60% — gráfico de categorías */}
               <View style={{ flex: 3 }}>
+                <SectionTitle title="Categorías" />
                 <CategoryBreakdown data={categorias} isMobile={isMobile} />
               </View>
             </View>
           )}
 
-          {/*
-           * Fila 2 (desktop): Top Vendidos [60%] | Bajo Stock [40%]
-           * Los productos top tienen más items, necesitan más ancho.
-           * En mobile: apiladas verticalmente.
-           */}
+          {/* ── Section: Top Products + Low Stock ─────── */}
           {isMobile ? (
             <>
+              <SectionTitle title="Productos Más Vendidos" />
               <TopProductsList title="Productos Más Vendidos" items={ranking.top} />
+              <SectionTitle title="Bajo Stock" />
               <ProductosBajoStockList items={productosBajoStock} />
             </>
           ) : (
-            <View className="flex-row items-start gap-4">
+            <View className="flex-row items-start gap-6">
               <View style={{ flex: 3 }}>
+                <SectionTitle title="Productos Más Vendidos" />
                 <TopProductsList title="Productos Más Vendidos" items={ranking.top} />
               </View>
               <View style={{ flex: 2 }}>
+                <SectionTitle title="Bajo Stock" />
                 <ProductosBajoStockList items={productosBajoStock} />
               </View>
             </View>
@@ -238,5 +212,19 @@ export default function ResumenScreen() {
         </View>
       </ScrollView>
     </AnimatedScreen>
+  );
+}
+
+/**
+ * Section title component — separates sections by typography, not borders.
+ */
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <Text
+      className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+      style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.6 }}
+    >
+      {title}
+    </Text>
   );
 }

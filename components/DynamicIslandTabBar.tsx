@@ -26,30 +26,31 @@ import Animated, {
 
 const PC_ONLY_ROUTES = ["resumen"] as const;
 
+/* ─── Digital Atelier — Tab Bar Colors ─────────────────────────── */
 const ACTIVE_BG = "#ea580c";
 const ACTIVE_ICON_COLOR = "#ffffff";
 
 const THEME = {
   light: {
-    barBg: "rgba(255,255,255,0.82)",
-    border: "rgba(0,0,0,0.08)",
-    shadow: "#78716c",
-    shadowOpacity: 0.14,
-    webShadow: "0 4px 24px 0 rgba(0,0,0,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.06)",
-    inactiveIcon: "#78716c",
-    inactiveLabel: "#78716c",
-    pcBadgeBg: "rgba(234,88,12,0.12)",
+    barBg: "rgba(255,255,255,0.88)",
+    border: "rgba(0,0,0,0.06)",
+    shadow: "#1A1A1A",
+    shadowOpacity: 0.08,
+    webShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+    inactiveIcon: "#9CA3AF",
+    inactiveLabel: "#9CA3AF",
+    pcBadgeBg: "rgba(234,88,12,0.08)",
     pcBadgeText: "#c2410c",
   },
   dark: {
-    barBg: "rgba(38,38,38,0.82)",
-    border: "rgba(255,255,255,0.10)",
+    barBg: "rgba(20,24,32,0.88)",
+    border: "rgba(255,255,255,0.06)",
     shadow: "#000000",
-    shadowOpacity: 0.45,
-    webShadow: "0 4px 24px 0 rgba(0,0,0,0.45), 0 1.5px 6px 0 rgba(0,0,0,0.30)",
-    inactiveIcon: "#a8a29e",
-    inactiveLabel: "#a8a29e",
-    pcBadgeBg: "rgba(234,88,12,0.22)",
+    shadowOpacity: 0.4,
+    webShadow: "0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2)",
+    inactiveIcon: "#5A6478",
+    inactiveLabel: "#5A6478",
+    pcBadgeBg: "rgba(249,115,22,0.12)",
     pcBadgeText: "#f97316",
   },
 } as const;
@@ -71,7 +72,7 @@ interface TabConfig {
   pcOnly?: boolean;
 }
 
-const ESTIMATED_ISLAND_HEIGHT = 80;
+const ESTIMATED_ISLAND_HEIGHT = 72;
 const PILL_H = 40;
 const PILL_BORDER_RADIUS = 20;
 const isWeb = Platform.OS === "web";
@@ -90,7 +91,7 @@ export function DynamicIslandTabBar({
   const isCompact = width < 640;
   const onHeightChange = React.useContext(BottomTabBarHeightCallbackContext);
 
-  const totalHeight = ESTIMATED_ISLAND_HEIGHT + insets.bottom + 24;
+  const totalHeight = ESTIMATED_ISLAND_HEIGHT + insets.bottom + 20;
   useEffect(() => {
     onHeightChange?.(totalHeight);
   }, [onHeightChange, totalHeight]);
@@ -115,15 +116,15 @@ export function DynamicIslandTabBar({
   );
 
   const activeIndex = state.index;
-  const islandWidth = Math.min(width - 32, isWeb ? 520 : 400);
+  const islandWidth = Math.min(width - 32, isWeb ? 480 : 380);
 
   return (
     <Animated.View
-      entering={FadeInDown.springify().damping(20).stiffness(260).mass(0.9)}
+      entering={FadeInDown.springify().damping(22).stiffness(280).mass(0.8)}
       style={[
         styles.wrapper,
         {
-          paddingBottom: isWeb ? insets.bottom + 28 : insets.bottom,
+          paddingBottom: isWeb ? insets.bottom + 24 : insets.bottom,
         },
       ]}
       pointerEvents="box-none"
@@ -138,15 +139,15 @@ export function DynamicIslandTabBar({
             ...(isWeb
               ? {
                   boxShadow: theme.webShadow,
-                  backdropFilter: "blur(20px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                  backdropFilter: "blur(24px) saturate(180%)",
+                  WebkitBackdropFilter: "blur(24px) saturate(180%)",
                 }
               : {
                   shadowColor: theme.shadow,
-                  shadowOffset: { width: 0, height: 8 },
+                  shadowOffset: { width: 0, height: 6 },
                   shadowOpacity: theme.shadowOpacity,
-                  shadowRadius: 24,
-                  elevation: 20,
+                  shadowRadius: 20,
+                  elevation: 16,
                 }),
           },
         ]}
@@ -211,7 +212,7 @@ function SlidingIndicator({
 
   useEffect(() => {
     progress.value = withTiming(activeIndex, {
-      duration: 300,
+      duration: 280,
       easing: COLOR_EASING,
     });
   }, [activeIndex, progress]);
@@ -236,12 +237,12 @@ function SlidingIndicator({
           backgroundColor: ACTIVE_BG,
           ...(isWeb
             ? {
-                boxShadow: "0 2px 12px 0 rgba(234,88,12,0.35)",
+                boxShadow: "0 2px 12px rgba(234,88,12,0.3)",
               }
             : {
                 shadowColor: ACTIVE_BG,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.4,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.35,
                 shadowRadius: 8,
                 elevation: 6,
               }),
@@ -297,7 +298,7 @@ const TabItem = React.memo(function TabItem({
     >
       <Animated.View style={[styles.tabItemInner, animatedStyle]}>
         <IconSymbol
-          size={isCompact ? 21 : 23}
+          size={isCompact ? 20 : 22}
           name={tab.icon}
           color={iconColor}
         />
@@ -353,10 +354,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   island: {
-    borderRadius: 28,
+    borderRadius: 24,
     borderCurve: "continuous",
     borderWidth: 1,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 10,
   },
   tabsRowWrapper: {

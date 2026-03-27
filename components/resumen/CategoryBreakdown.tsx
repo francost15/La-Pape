@@ -88,19 +88,19 @@ function LegendItem({ color, label, value, percentage }: LegendItemProps) {
     <View className="gap-1 py-1.5">
       <View className="flex-row items-center gap-2">
         <View className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-        <Text className="flex-1 text-[12px] text-gray-700 dark:text-gray-300" numberOfLines={1}>
+        <Text className="flex-1 text-[12px] text-[#1A1A1A] dark:text-[#F0F0F0]" numberOfLines={1}>
           {label}
         </Text>
-        <Text className="mr-1.5 text-[10px] text-gray-400 tabular-nums dark:text-gray-500">
+        <Text className="mr-1.5 text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
           {percentage.toFixed(0)}%
         </Text>
-        <Text className="min-w-[58px] text-right text-[12px] font-semibold text-gray-800 tabular-nums dark:text-gray-200">
+        <Text className="min-w-[58px] text-right text-[12px] font-semibold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
           {formatCurrency(value)}
         </Text>
       </View>
 
       {/* Barra de 1px: presencia mínima, máxima legibilidad */}
-      <View className="ml-4 h-px overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-700">
+      <View className="ml-4 h-px overflow-hidden rounded-full bg-[#F5F5F4] dark:bg-[#1A1F2B]">
         <View
           className="h-full rounded-full"
           style={{ backgroundColor: color, width: `${percentage}%` }}

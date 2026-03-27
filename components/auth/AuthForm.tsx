@@ -1,5 +1,6 @@
 import type { LoginFormData } from "@/lib/validations/auth-schema";
 import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { Image } from "expo-image";
 import * as React from "react";
 import {
@@ -52,12 +53,15 @@ export default function AuthForm({
     }
   };
 
-  const textColor = isDark ? "#d4d4d4" : "#000000";
-  const placeholderColor = isDark ? "#a3a3a3" : "#6b7280";
+  const inputBg = isDark ? AppColors.dark.surface : "#FFFFFF";
+  const inputBorder = isDark ? AppColors.dark.border : "rgba(0,0,0,0.08)";
+  const textColor = isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary;
+  const placeholderColor = isDark ? AppColors.dark.textMuted : AppColors.light.textSecondary;
 
   return (
-    <View style={isWeb ? { width: "100%", maxWidth: 448, alignSelf: "center" } : { width: "100%", padding: 16, marginTop: 20 }}>
-      <View style={{ marginBottom: 16 }}>
+    <View style={isWeb ? { width: "100%", maxWidth: 420, alignSelf: "center" } : { width: "100%" }}>
+      {/* Email */}
+      <View style={{ marginBottom: 12 }}>
         <Controller
           control={control}
           name="email"
@@ -68,14 +72,13 @@ export default function AuthForm({
               onChangeText={onChange}
               onBlur={onBlur}
               style={{
-                backgroundColor: isDark ? "#262626" : "#fff",
+                backgroundColor: inputBg,
                 padding: 16,
-                marginBottom: 16,
-                borderRadius: 8,
-                borderWidth: errors.email ? 1 : 0,
-                borderColor: errors.email ? "#ef4444" : "transparent",
+                borderRadius: 14,
+                borderWidth: 1.5,
+                borderColor: errors.email ? AppColors.error : inputBorder,
                 color: textColor,
-                fontSize: 16,
+                fontSize: 15,
                 fontFamily: AppFonts.body,
               }}
               placeholderTextColor={placeholderColor}
@@ -88,9 +91,9 @@ export default function AuthForm({
         {errors.email && (
           <Text
             style={{
-              color: "#ef4444",
-              fontSize: 14,
-              marginTop: 4,
+              color: AppColors.error,
+              fontSize: 13,
+              marginTop: 6,
               paddingHorizontal: 4,
               fontFamily: AppFonts.body,
             }}
@@ -100,7 +103,8 @@ export default function AuthForm({
         )}
       </View>
 
-      <View style={{ marginBottom: 16 }}>
+      {/* Password */}
+      <View style={{ marginBottom: 20 }}>
         <Controller
           control={control}
           name="password"
@@ -112,14 +116,13 @@ export default function AuthForm({
               onBlur={onBlur}
               secureTextEntry
               style={{
-                backgroundColor: isDark ? "#262626" : "#fff",
+                backgroundColor: inputBg,
                 padding: 16,
-                marginBottom: 16,
-                borderRadius: 8,
-                borderWidth: errors.password ? 1 : 0,
-                borderColor: errors.password ? "#ef4444" : "transparent",
+                borderRadius: 14,
+                borderWidth: 1.5,
+                borderColor: errors.password ? AppColors.error : inputBorder,
                 color: textColor,
-                fontSize: 16,
+                fontSize: 15,
                 fontFamily: AppFonts.body,
               }}
               placeholderTextColor={placeholderColor}
@@ -129,9 +132,9 @@ export default function AuthForm({
         {errors.password && (
           <Text
             style={{
-              color: "#ef4444",
-              fontSize: 14,
-              marginTop: 4,
+              color: AppColors.error,
+              fontSize: 13,
+              marginTop: 6,
               paddingHorizontal: 4,
               fontFamily: AppFonts.body,
             }}
@@ -141,15 +144,16 @@ export default function AuthForm({
         )}
       </View>
 
+      {/* Primary submit */}
       <TouchableOpacity
         onPress={handleSubmit(onSubmit)}
         disabled={loading}
         style={{
-          backgroundColor: "#ea580c",
+          backgroundColor: AppColors.primary,
           paddingHorizontal: 16,
-          paddingVertical: 14,
-          borderRadius: 8,
-          marginBottom: 8,
+          paddingVertical: 16,
+          borderRadius: 14,
+          marginBottom: 10,
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -162,41 +166,43 @@ export default function AuthForm({
           <Text
             style={{
               color: "#fff",
-              fontWeight: "600",
-              fontSize: 16,
+              fontWeight: "700",
+              fontSize: 15,
               fontFamily: AppFonts.bodyStrong,
+              letterSpacing: -0.2,
             }}
           >
-            {isSignUp ? "Registrarse" : "Iniciar sesión"}
+            {isSignUp ? "Registrarse" : "Iniciar Sesión"}
           </Text>
         )}
       </TouchableOpacity>
 
+      {/* Google sign in */}
       <TouchableOpacity
         onPress={handleGooglePress}
         disabled={loading || googleLoading}
         style={{
-          backgroundColor: isDark ? "#262626" : "#fff",
+          backgroundColor: inputBg,
           paddingHorizontal: 16,
-          paddingVertical: 14,
-          borderRadius: 8,
+          paddingVertical: 16,
+          borderRadius: 14,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          gap: 8,
-          marginBottom: 8,
-          borderWidth: 1,
-          borderColor: isDark ? "#404040" : "#e5e7eb",
+          gap: 10,
+          marginBottom: 10,
+          borderWidth: 1.5,
+          borderColor: inputBorder,
         }}
         accessibilityRole="button"
         accessibilityLabel={isSignUp ? "Registrarse con Google" : "Iniciar sesión con Google"}
       >
         {googleLoading ? (
-          <ActivityIndicator size="small" color={isDark ? "#a3a3a3" : "#4b5563"} />
+          <ActivityIndicator size="small" color={placeholderColor} />
         ) : (
           <Image
             source={require("@/assets/images/google.webp")}
-            style={{ width: 20, height: 20 }}
+            style={{ width: 18, height: 18 }}
             contentFit="contain"
             accessibilityLabel="Logo de Google"
             accessibilityRole="image"
@@ -204,25 +210,26 @@ export default function AuthForm({
         )}
         <Text
           style={{
-            color: isDark ? "#d4d4d4" : "#374151",
+            color: textColor,
             fontWeight: "600",
-            fontSize: 16,
+            fontSize: 15,
             fontFamily: AppFonts.bodyStrong,
           }}
         >
-          {isSignUp ? "Registrarme con Google" : "Iniciar sesión con Google"}
+          {isSignUp ? "Registrarme con Google" : "Iniciar con Google"}
         </Text>
       </TouchableOpacity>
 
+      {/* Toggle signup */}
       <TouchableOpacity
         onPress={onToggleSignUp}
-        style={{ marginTop: 8 }}
+        style={{ marginTop: 12, paddingVertical: 8 }}
         accessibilityRole="button"
         accessibilityLabel={isSignUp ? "Cambiar a iniciar sesión" : "Cambiar a registro"}
       >
         <Text
           style={{
-            color: "#ea580c",
+            color: AppColors.primary,
             fontSize: 14,
             textAlign: "center",
             fontFamily: AppFonts.body,
