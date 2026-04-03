@@ -3,7 +3,6 @@ import { AppFonts } from "@/constants/typography";
 import CartPanel from "@/components/ventas/CartPanel";
 import FooterProducts from "@/components/ventas/FooterProducts";
 import ProductListContent from "@/components/ventas/ProductListContent";
-import SidebarProducts from "@/components/ventas/SidebarProducts";
 import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
 import { Tour } from "@/components/onboarding/Tour";
 import { VENTAS_TOUR } from "@/constants/tours";
@@ -11,6 +10,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTour } from "@/hooks/useTour";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, useWindowDimensions, View } from "react-native";
 
@@ -22,6 +22,8 @@ export default function VentasScreen() {
   const itemCount = useVentasStore((s) => s.getItemCount());
   const openConfirm = useCheckoutStore((s) => s.openConfirm);
   const searchInputRef = useRef<TextInput>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const { isOpen, startTour, completeTour } = useTour("ventas", VENTAS_TOUR);
 
   useOnboardingAfterLogin();
@@ -84,54 +86,103 @@ export default function VentasScreen() {
 
   return (
     <AnimatedScreen className="flex-1 flex-row bg-[#FAFAF9] dark:bg-[#0C0F14]">
-      {isDesktop && <SidebarProducts />}
-
+      {/* ─── ÁREA PRINCIPAL: CATÁLOGO (Desktop) o CARRITO (Mobile) ────────── */}
       <View
-        className={`flex-1 ${isDesktop ? "" : "pb-36"}`}
-        style={
-          isDesktop
-            ? {
-                borderLeftWidth: 1,
-                borderLeftColor: "rgba(0,0,0,0.06)",
-              }
-            : undefined
-        }
+        className="flex-1"
+        style={!isDesktop ? { paddingBottom: 144 } : undefined}
       >
-        <View
-          className="flex-row items-center justify-between px-5 py-4"
-          style={{
-            borderBottomWidth: 1,
-            borderBottomColor: "rgba(0,0,0,0.04)",
-          }}
-        >
-          <View className="flex-row items-baseline gap-2">
-            <Text
-              className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
-              style={{ fontFamily: AppFonts.heading }}
-            >
-              Carrito
-            </Text>
-            {itemCount > 0 && (
-              <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
-                <Text className="text-[11px] font-bold text-white">
-                  {itemCount}
-                </Text>
-              </View>
-            )}
-          </View>
-          {shortcutsHint}
-        </View>
-
         {isDesktop ? (
-          <ProductListContent
-            searchContextId="ventas"
-            listKey="desktop"
-            searchInputRef={searchInputRef}
-          />
+          /* Catálogo para escritorio */
+          <View className="flex-1">
+            <View
+              className="flex-row items-center justify-between px-6 py-4"
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: "rgba(0,0,0,0.04)",
+              }}
+            >
+              <Text
+                className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                style={{ fontFamily: AppFonts.heading }}
+              >
+                Catálogo
+              </Text>
+              {shortcutsHint}
+            </View>
+            <ProductListContent
+              searchContextId="ventas"
+              listKey="desktop-catalog"
+              searchInputRef={searchInputRef}
+              searchSize="large"
+            />
+          </View>
         ) : (
-          <CartPanel />
+          /* Carrito para móvil */
+          <View className="flex-1">
+            <View
+              className="flex-row items-center justify-between px-5 py-4"
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: "rgba(0,0,0,0.04)",
+              }}
+            >
+              <View className="flex-row items-baseline gap-2">
+                <Text
+                  className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                  style={{ fontFamily: AppFonts.heading }}
+                >
+                  Carrito
+                </Text>
+                {itemCount > 0 && (
+                  <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
+                    <Text className="text-[11px] font-bold text-white">
+                      {itemCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+            <CartPanel />
+          </View>
         )}
       </View>
+
+      {/* ─── SIDEBAR DERECHO: CARRITO (Sólo Desktop) ─────────────────────── */}
+      {isDesktop && (
+        <View
+          style={{
+            width: 420,
+            borderLeftWidth: 1,
+            borderLeftColor: "rgba(0,0,0,0.06)",
+            backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.01)",
+          }}
+        >
+          <View
+            className="flex-row items-center justify-between px-6 py-4"
+            style={{
+              borderBottomWidth: 1,
+              borderBottomColor: "rgba(0,0,0,0.04)",
+            }}
+          >
+            <View className="flex-row items-baseline gap-2">
+              <Text
+                className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                style={{ fontFamily: AppFonts.heading }}
+              >
+                Carrito
+              </Text>
+              {itemCount > 0 && (
+                <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
+                  <Text className="text-[11px] font-bold text-white">
+                    {itemCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+          <CartPanel />
+        </View>
+      )}
 
       {!isDesktop && <FooterProducts />}
 

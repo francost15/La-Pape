@@ -25,7 +25,7 @@ interface ProductItemVentaProps {
  * ProductItemVenta — Digital Atelier style.
  *
  * Immersive list item for sales catalog.
- * Supports compact (sidebar) and full grid layouts.
+ * Ultra-flat design (row-based) with subtle dividers.
  */
 export default React.memo(function ProductItemVenta({
   product,
@@ -98,10 +98,10 @@ export default React.memo(function ProductItemVenta({
   const hasImage = product.imagen?.trim();
   const placeholderBg = isDark ? "#1A1F2B" : "#F5F5F4";
 
-  const imgSize = isDesktop ? 64 : 52;
+  const imgSize = isDesktop ? 60 : 52;
   const cardGap = isDesktop ? 16 : 14;
-  const imgRadius = 14;
-  const btnSize = isDesktop ? 44 : 38;
+  const imgRadius = 12;
+  const btnSize = isDesktop ? 40 : 38;
 
   const PriceText = () => (
     <Text
@@ -117,117 +117,32 @@ export default React.memo(function ProductItemVenta({
     </Text>
   );
 
-  if (compact) {
-    return (
-      <Pressable
-        onPress={handleAdd}
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: pressed && !inCart ? colors.surfaceHover : colors.surfaceElevated,
-          borderRadius: 20,
-          padding: 12,
-          gap: cardGap,
-          borderWidth: 1.5,
-          borderColor: colors.border,
-          ...(Platform.OS === "web"
-            ? { boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }
-            : { elevation: 1 }),
-        })}
-        accessibilityRole="button"
-        accessibilityLabel={product.nombre}
-        accessibilityHint="Agregar al carrito"
-      >
-        <View
-          style={{
-            width: imgSize,
-            height: imgSize,
-            borderRadius: imgRadius,
-            backgroundColor: placeholderBg,
-            overflow: "hidden",
-            borderWidth: 1,
-            borderColor: colors.border,
-          }}
-        >
-          {hasImage && !imageError ? (
-            <Image
-              source={{ uri: product.imagen }}
-              style={{ width: "100%", height: "100%" }}
-              contentFit="cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <IconSymbol name="photo.fill" size={isDesktop ? 22 : 20} color={isDark ? "#48484A" : "#D1D1D6"} />
-            </View>
-          )}
-        </View>
-
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-          <Text
-            style={{
-              fontSize: isDesktop ? 15 : 14,
-              fontWeight: "600",
-              color: colors.textPrimary,
-              fontFamily: AppFonts.bodyStrong,
-              letterSpacing: -0.2,
-            }}
-            numberOfLines={1}
-          >
-            {product.nombre}
-          </Text>
-          <PriceText />
-        </View>
-
-        <View style={{ paddingLeft: 4 }}>
-          {inCart ? (
-            <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
-              <QuantityStepper
-                quantity={quantity}
-                onMinus={handleMinus}
-                onPlus={handlePlus}
-                size={34}
-              />
-            </Animated.View>
-          ) : (
-            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-              <CircleIconButton
-                icon={justAdded ? "checkmark" : "plus"}
-                variant={justAdded ? "success" : "primary"}
-                onPress={handleAdd}
-                size={btnSize}
-                interactive={true}
-              />
-            </Animated.View>
-          )}
-        </View>
-      </Pressable>
-    );
-  }
-
-  // Full variant (grid)
   return (
     <Pressable
       onPress={handleAdd}
       style={({ pressed }) => ({
-        borderRadius: 20,
-        overflow: "hidden",
-        backgroundColor: pressed && !inCart ? colors.surfaceHover : colors.surface,
-        borderWidth: 1.5,
-        borderColor: colors.border,
-        ...(Platform.OS === "web"
-          ? { boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }
-          : { elevation: 3 }),
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: pressed && !inCart ? (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)") : "transparent",
+        paddingVertical: 14,
+        paddingHorizontal: 8,
+        gap: cardGap,
+        borderBottomWidth: 1,
+        borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
       })}
       accessibilityRole="button"
       accessibilityLabel={product.nombre}
+      accessibilityHint="Agregar al carrito"
     >
       <View
         style={{
-          width: "100%",
-          height: 120,
+          width: imgSize,
+          height: imgSize,
+          borderRadius: imgRadius,
           backgroundColor: placeholderBg,
           overflow: "hidden",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
         }}
       >
         {hasImage && !imageError ? (
@@ -239,52 +154,48 @@ export default React.memo(function ProductItemVenta({
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <IconSymbol name="photo.fill" size={32} color={isDark ? "#48484A" : "#D1D1D6"} />
+            <IconSymbol name="photo.fill" size={isDesktop ? 22 : 20} color={isDark ? "#48484A" : "#D1D1D6"} />
           </View>
         )}
       </View>
-      <View style={{ padding: 14, gap: 10 }}>
+
+      <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text
           style={{
-            fontSize: 15,
+            fontSize: isDesktop ? 16 : 14,
             fontWeight: "600",
             color: colors.textPrimary,
             fontFamily: AppFonts.bodyStrong,
             letterSpacing: -0.2,
           }}
-          numberOfLines={2}
+          numberOfLines={1}
         >
           {product.nombre}
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <PriceText />
-          {inCart ? (
-            <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
-              <QuantityStepper
-                quantity={quantity}
-                onMinus={handleMinus}
-                onPlus={handlePlus}
-                size={36}
-              />
-            </Animated.View>
-          ) : (
-            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-              <CircleIconButton
-                icon={justAdded ? "checkmark" : "plus"}
-                variant={justAdded ? "success" : "primary"}
-                onPress={handleAdd}
-                size={btnSize}
-                interactive={true}
-              />
-            </Animated.View>
-          )}
-        </View>
+        <PriceText />
+      </View>
+
+      <View style={{ paddingLeft: 4 }}>
+        {inCart ? (
+          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
+            <QuantityStepper
+              quantity={quantity}
+              onMinus={handleMinus}
+              onPlus={handlePlus}
+              size={32}
+            />
+          </Animated.View>
+        ) : (
+          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+            <CircleIconButton
+              icon={justAdded ? "checkmark" : "plus"}
+              variant={justAdded ? "success" : "primary"}
+              onPress={handleAdd}
+              size={btnSize}
+              interactive={true}
+            />
+          </Animated.View>
+        )}
       </View>
     </Pressable>
   );

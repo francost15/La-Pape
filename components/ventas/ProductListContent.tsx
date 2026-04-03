@@ -126,7 +126,7 @@ export default function ProductListContent({
           key={listKey}
           style={{ flex: 1 }}
           contentContainerStyle={[
-            { paddingHorizontal: isDesktop ? 12 : 0, paddingBottom: 32, flexGrow: 1 },
+            { paddingHorizontal: isDesktop ? 24 : 0, paddingBottom: 48, flexGrow: 1 },
             contentContainerStyle,
           ]}
           refreshControl={
