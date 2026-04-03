@@ -1,5 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
+import { AppFonts } from '@/constants/typography';
+import { AppColors } from '@/constants/colors';
 
 interface ProductStockCardProps {
   cantidad: number;
@@ -12,34 +14,60 @@ interface ProductStockCardProps {
  * isCritical = cantidad <= stockMinimo → colores rojo/naranja de alerta.
  */
 export default function ProductStockCard({ cantidad, stockMinimo, isCritical }: ProductStockCardProps) {
+  const statusColor = isCritical ? AppColors.error : AppColors.success;
+  
   return (
-    <View className="bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700">
-      <View className="flex-row items-center justify-between px-4 py-3.5 border-b border-gray-100 dark:border-neutral-700">
-        <Text className="text-sm text-gray-600 dark:text-gray-400">Stock disponible</Text>
-        <View className={`flex-row items-center gap-1.5 px-3 py-1 rounded-full ${
-          isCritical ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20'
-        }`}>
-          {isCritical ? (
-            <IconSymbol name="exclamationmark.triangle.fill" size={11} color="#dc2626" />
-          ) : null}
-          <Text className={`text-sm font-bold tabular-nums ${
-            isCritical ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-          }`}>
-            {cantidad} ud.
+    <View 
+      className="bg-white dark:bg-[#1A1F2B] rounded-3xl overflow-hidden p-6"
+      style={{ 
+        boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(0,0,0,0.04)' : undefined,
+        elevation: Platform.OS !== 'web' ? 4 : undefined
+      }}
+    >
+      <View className="flex-row items-end justify-between">
+        <View>
+          <Text 
+            className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-[0.2em] mb-1"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
+            EXISTENCIAS
+          </Text>
+          <Text 
+            className="text-4xl tracking-tighter"
+            style={{ 
+              fontFamily: AppFonts.display, 
+              lineHeight: 48,
+              color: statusColor
+            }}
+          >
+            {cantidad} <Text className="text-xl" style={{ fontFamily: AppFonts.heading }}>UNIDADES</Text>
           </Text>
         </View>
+
+        {isCritical && (
+          <View className="bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-full flex-row items-center gap-1.5 mb-1.5">
+            <IconSymbol name="exclamationmark.triangle.fill" size={12} color={AppColors.error} />
+            <Text className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">CRÍTICO</Text>
+          </View>
+        )}
       </View>
 
-      {stockMinimo != null ? (
-        <View className="flex-row items-center justify-between px-4 py-3.5">
-          <Text className="text-sm text-gray-600 dark:text-gray-400">Stock mínimo</Text>
-          <Text className={`text-sm font-semibold tabular-nums ${
-            isCritical ? 'text-orange-600 dark:text-orange-400' : 'text-gray-700 dark:text-gray-300'
-          }`}>
-            {stockMinimo} ud.
-          </Text>
+      <View className="h-2 bg-[#F3F4F6] dark:bg-[#374151] rounded-full mt-6 overflow-hidden">
+        <View 
+          className="h-full rounded-full" 
+          style={{ 
+            width: `${Math.min(100, (cantidad / (stockMinimo || 1)) * 50)}%`,
+            backgroundColor: statusColor 
+          }} 
+        />
+      </View>
+
+      {stockMinimo != null && (
+        <View className="flex-row items-center justify-between mt-3">
+          <Text className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">STOCK MÍNIMO REQUERIDO</Text>
+          <Text className="text-[11px] font-bold text-gray-700 dark:text-gray-300 tabular-nums">{stockMinimo} UD.</Text>
         </View>
-      ) : null}
+      )}
     </View>
   );
 }

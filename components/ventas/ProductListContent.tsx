@@ -20,7 +20,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
 
-const STAGGER_LIMIT = 10;
+const STAGGER_LIMIT = 12;
 
 interface ProductListContentProps {
   searchContextId: SearchContextId;
@@ -37,6 +37,9 @@ interface ProductListContentProps {
 
 /**
  * ProductListContent — Digital Atelier style.
+ *
+ * Renders search bar + product list. Desktop uses ProductItemVenta rows,
+ * mobile uses ProductCardMobile rows.
  */
 export default function ProductListContent({
   searchContextId,
@@ -65,9 +68,18 @@ export default function ProductListContent({
     setRefreshing(false);
   }, [refresh]);
 
+  const productCount = filteredProducts.length;
+
   return (
     <View style={{ flex: 1, minHeight: 0 }}>
-      <View style={{ paddingHorizontal: 12, marginBottom: 12 }}>
+      {/* ── Search + Count ──────────────────────────────── */}
+      <View
+        style={{
+          paddingHorizontal: isDesktop ? 24 : 16,
+          paddingTop: isDesktop ? 20 : 12,
+          paddingBottom: 4,
+        }}
+      >
         <SearchProducts
           ref={searchInputRef}
           searchText={searchText}
@@ -76,7 +88,25 @@ export default function ProductListContent({
           showQrButton={showQrButton}
           onQrPress={onQrPress}
         />
+        {/* Product count hint */}
+        {!error && productCount > 0 && (
+          <Text
+            style={{
+              fontSize: 12,
+              color: isDark ? "#5A6478" : "#9CA3AF",
+              fontFamily: AppFonts.body,
+              marginTop: 10,
+              letterSpacing: 0.3,
+              textTransform: "uppercase",
+            }}
+          >
+            {productCount} {productCount === 1 ? "producto" : "productos"}
+            {searchText.trim() ? ` para "${searchText.trim()}"` : ""}
+          </Text>
+        )}
       </View>
+
+      {/* ── Content ─────────────────────────────────────── */}
       {error ? (
         <View
           style={{
@@ -126,7 +156,11 @@ export default function ProductListContent({
           key={listKey}
           style={{ flex: 1 }}
           contentContainerStyle={[
-            { paddingHorizontal: isDesktop ? 24 : 0, paddingBottom: 48, flexGrow: 1 },
+            {
+              paddingHorizontal: 0,
+              paddingBottom: 48,
+              flexGrow: 1,
+            },
             contentContainerStyle,
           ]}
           refreshControl={
@@ -151,24 +185,19 @@ export default function ProductListContent({
           }
           keyboardDismissMode={keyboardDismissMode}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-          renderItem={({ item, index }) => (
-            <Animated.View
-              entering={index < STAGGER_LIMIT ? FadeIn.delay(index * 40).duration(240) : undefined}
-              style={{ marginBottom: isDesktop ? 12 : 0 }}
-            >
-              {isDesktop ? (
-                <ProductItemVenta
-                  product={item}
-                  compact
-                  onProductAdded={() => onProductAdded?.(item.nombre)}
-                />
-              ) : (
-                <ProductCardMobile
-                  product={item}
-                  onProductAdded={() => onProductAdded?.(item.nombre)}
-                />
-              )}
-            </Animated.View>
+          renderItem={({ item }) => (
+            isDesktop ? (
+              <ProductItemVenta
+                product={item}
+                compact
+                onProductAdded={() => onProductAdded?.(item.nombre)}
+              />
+            ) : (
+              <ProductCardMobile
+                product={item}
+                onProductAdded={() => onProductAdded?.(item.nombre)}
+              />
+            )
           )}
         />
       )}

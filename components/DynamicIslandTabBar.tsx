@@ -15,11 +15,15 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import Animated, {
   Easing,
   FadeInDown,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
+  withDelay,
+  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -32,22 +36,22 @@ const ACTIVE_ICON_COLOR = "#ffffff";
 
 const THEME = {
   light: {
-    barBg: "rgba(255,255,255,0.88)",
+    barBg: "rgba(255,255,255,0.72)",
     border: "rgba(0,0,0,0.06)",
     shadow: "#1A1A1A",
-    shadowOpacity: 0.08,
-    webShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+    shadowOpacity: 0.12,
+    webShadow: "0 8px 32px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.04)",
     inactiveIcon: "#9CA3AF",
     inactiveLabel: "#9CA3AF",
     pcBadgeBg: "rgba(234,88,12,0.08)",
     pcBadgeText: "#c2410c",
   },
   dark: {
-    barBg: "rgba(20,24,32,0.88)",
-    border: "rgba(255,255,255,0.06)",
+    barBg: "rgba(20,24,32,0.72)",
+    border: "rgba(255,255,255,0.08)",
     shadow: "#000000",
-    shadowOpacity: 0.4,
-    webShadow: "0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2)",
+    shadowOpacity: 0.5,
+    webShadow: "0 12px 48px rgba(0,0,0,0.4), 0 1px 6px rgba(0,0,0,0.2)",
     inactiveIcon: "#5A6478",
     inactiveLabel: "#5A6478",
     pcBadgeBg: "rgba(249,115,22,0.12)",
@@ -129,13 +133,15 @@ export function DynamicIslandTabBar({
       ]}
       pointerEvents="box-none"
     >
-      <View
+      <BlurView
+        intensity={isDark ? 50 : 65}
+        tint={isDark ? "dark" : "light"}
         style={[
           styles.island,
           {
-            backgroundColor: theme.barBg,
             width: islandWidth,
             borderColor: theme.border,
+            backgroundColor: isWeb ? theme.barBg : "transparent",
             ...(isWeb
               ? {
                   boxShadow: theme.webShadow,
@@ -144,9 +150,9 @@ export function DynamicIslandTabBar({
                 }
               : {
                   shadowColor: theme.shadow,
-                  shadowOffset: { width: 0, height: 6 },
+                  shadowOffset: { width: 0, height: 8 },
                   shadowOpacity: theme.shadowOpacity,
-                  shadowRadius: 20,
+                  shadowRadius: 24,
                   elevation: 16,
                 }),
           },
@@ -187,7 +193,7 @@ export function DynamicIslandTabBar({
             ))}
           </View>
         </View>
-      </View>
+      </BlurView>
       {!isWeb && tabs[activeIndex] ? (
         <PcOnlyBadge
           tab={tabs[activeIndex]}
@@ -208,24 +214,30 @@ function SlidingIndicator({
   tabCount: number;
   islandWidth: number;
 }) {
-  const progress = useSharedValue(activeIndex);
+  const prevIndex = useSharedValue(activeIndex);
+  const activeTranslation = useSharedValue(activeIndex);
 
   useEffect(() => {
-    progress.value = withTiming(activeIndex, {
-      duration: 280,
-      easing: COLOR_EASING,
+    prevIndex.value = activeTranslation.value;
+    activeTranslation.value = withSpring(activeIndex, {
+      damping: 18,
+      stiffness: 140,
+      mass: 0.8,
     });
-  }, [activeIndex, progress]);
+  }, [activeIndex, activeTranslation, prevIndex]);
 
   const contentWidth = islandWidth - 20;
   const tabWidth = contentWidth / tabCount;
 
   const animatedStyle = useAnimatedStyle(() => {
     "worklet";
-    const centerX = (progress.value + 0.5) * tabWidth;
+    const centerX = (activeTranslation.value + 0.5) * tabWidth;
     const x = centerX - PILL_H / 2 - 2;
+
     return {
-      transform: [{ translateX: x }],
+      transform: [
+        { translateX: x },
+      ],
     };
   });
 
@@ -237,14 +249,14 @@ function SlidingIndicator({
           backgroundColor: ACTIVE_BG,
           ...(isWeb
             ? {
-                boxShadow: "0 2px 12px rgba(234,88,12,0.3)",
+                boxShadow: "0 4px 16px rgba(234,88,12,0.35)",
               }
             : {
                 shadowColor: ACTIVE_BG,
-                shadowOffset: { width: 0, height: 3 },
-                shadowOpacity: 0.35,
-                shadowRadius: 8,
-                elevation: 6,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 10,
+                elevation: 8,
               }),
         },
         animatedStyle,
@@ -274,11 +286,14 @@ const TabItem = React.memo(function TabItem({
   onLongPress,
 }: TabItemProps) {
   const scale = useSharedValue(1);
+  const iconScale = useDerivedValue(() => {
+    return withSpring(isFocused ? 1.15 : 1, { damping: 12, stiffness: 200 });
+  });
 
   const iconColor = isFocused ? ACTIVE_ICON_COLOR : theme.inactiveIcon;
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.value * iconScale.value }],
   }));
 
   return (

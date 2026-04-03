@@ -2,6 +2,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useHaptic } from "@/hooks/use-haptic";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency, formatTime } from "@/lib/utils/format";
+import { AppFonts } from "@/constants/typography";
 import React, { useEffect } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import Animated, {
@@ -55,11 +56,10 @@ export default React.memo(function VentaCard({
   return (
     <Animated.View
       entering={FadeInDown.duration(280).springify().damping(18)}
-      className="overflow-hidden rounded-xl"
+      className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1F2B]"
       style={{
-        backgroundColor: Platform.OS === "web" ? "var(--bg-surface)" : undefined,
-        borderWidth: 1,
-        borderColor: Platform.OS === "web" ? "var(--border-default)" : "rgba(0,0,0,0.04)",
+        boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.02)" : undefined,
+        elevation: Platform.OS !== "web" ? 2 : undefined,
       }}
     >
       {/* Left accent bar */}
@@ -72,23 +72,31 @@ export default React.memo(function VentaCard({
             haptic();
             onToggle();
           }}
-          className="flex-row items-center justify-between px-4 py-4"
+          className="flex-row items-center justify-between px-5 py-5"
           style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
           accessibilityRole="button"
           accessibilityLabel={`Venta ${formatCurrency(venta.total)}, ${detalles.length} productos`}
         >
           <View className="min-w-0 flex-1">
-            <Text className="text-sm font-medium text-[#1A1A1A] dark:text-[#F0F0F0]">
+            <Text 
+              className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-[0.15em] mb-0.5"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
               {formatTime(fecha)}
             </Text>
-            <Text className="mt-0.5 text-xs text-[#9CA3AF] dark:text-[#5A6478]" numberOfLines={1}>
+            <Text 
+              className="text-[13px] text-[#4B5563] dark:text-[#9CA3AF]" 
+              style={{ fontFamily: AppFonts.body }}
+              numberOfLines={1}
+            >
               {detalles.length} producto{detalles.length !== 1 ? "s" : ""}
             </Text>
           </View>
           <Text
-            className={`mr-2 text-lg font-bold ${
-              isReembolso ? "text-red-500" : "text-[#1A1A1A] dark:text-[#F0F0F0]"
+            className={`mr-4 text-xl tracking-tight ${
+              isReembolso ? "text-red-500" : "text-[#111827] dark:text-[#F9FAFB]"
             }`}
+            style={{ fontFamily: AppFonts.heading }}
           >
             {formatCurrency(venta.total)}
           </Text>
@@ -96,10 +104,8 @@ export default React.memo(function VentaCard({
             className="h-8 w-8 items-center justify-center rounded-full"
             style={{
               backgroundColor: expandido
-                ? "rgba(234,88,12,0.08)"
-                : Platform.OS === "web"
-                  ? "var(--bg-surface-hover)"
-                  : "rgba(0,0,0,0.04)",
+                ? "rgba(234,88,12,0.1)"
+                : "rgba(0,0,0,0.03)",
             }}
           >
             <IconSymbol
@@ -115,27 +121,34 @@ export default React.memo(function VentaCard({
       {expandido ? (
         <Animated.View style={animatedStyle}>
           <View
-            className="px-4 pt-3 pb-4"
+            className="px-5 pt-4 pb-5"
             style={{
               borderTopWidth: 1,
-              borderTopColor: Platform.OS === "web" ? "var(--border-default)" : "rgba(0,0,0,0.04)",
+              borderTopColor: "rgba(0,0,0,0.04)",
             }}
           >
-            <Text className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]">
-              Productos ({detalles.length})
+            <Text 
+              className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] dark:text-[#5A6478]"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
+              DETALLE DE PRODUCTOS
             </Text>
-            <View className="mb-4 gap-1">
+            <View className="mb-6 gap-2">
               {detalles.map((d) => {
                 const nombre = productNames[d.producto_id] ?? "Producto";
                 return (
-                  <View key={d.id} className="flex-row items-center justify-between py-1.5">
+                  <View key={d.id} className="flex-row items-baseline justify-between py-1">
                     <Text
-                      className="mr-2 flex-1 text-[13px] text-[#6B7280] dark:text-[#8B95A5]"
+                      className="mr-2 flex-1 text-[13px] text-[#6B7280] dark:text-[#9CA3AF]"
+                      style={{ fontFamily: AppFonts.body }}
                       numberOfLines={1}
                     >
-                      {d.cantidad}× {nombre}
+                      {d.cantidad} × {nombre}
                     </Text>
-                    <Text className="text-[13px] font-medium tabular-nums text-[#1A1A1A] dark:text-[#F0F0F0]">
+                    <Text 
+                      className="text-[13px] font-bold tabular-nums text-[#111827] dark:text-[#F9FAFB]"
+                      style={{ fontFamily: AppFonts.bodyStrong }}
+                    >
                       {formatCurrency(d.total_linea)}
                     </Text>
                   </View>
@@ -149,7 +162,7 @@ export default React.memo(function VentaCard({
                   haptic();
                   onVerRecibo(venta);
                 }}
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3"
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
                 style={{
                   backgroundColor: "#ea580c",
                 }}
@@ -157,7 +170,12 @@ export default React.memo(function VentaCard({
                 accessibilityLabel="Ver recibo"
               >
                 <IconSymbol name="eye.fill" size={16} color="white" />
-                <Text className="text-[14px] font-semibold text-white">Ver Recibo</Text>
+                <Text 
+                  className="text-[14px] font-bold text-white uppercase tracking-wider"
+                  style={{ fontFamily: AppFonts.bodyStrong }}
+                >
+                  Ver Recibo
+                </Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -166,25 +184,27 @@ export default React.memo(function VentaCard({
                 }}
                 disabled={isReembolso}
                 style={({ pressed }) => ({
-                  opacity: isReembolso ? 0.4 : pressed ? 0.85 : 1,
+                  opacity: isReembolso ? 0.3 : pressed ? 0.8 : 1,
+                  borderWidth: 1.5,
+                  borderColor: isReembolso ? "rgba(0,0,0,0.05)" : "rgba(220, 38, 38, 0.2)",
+                  backgroundColor: "transparent",
                 })}
-                className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3 ${
-                  isReembolso ? "" : ""
-                }`}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
                 accessibilityRole="button"
                 accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
               >
                 <IconSymbol
                   name="arrow.uturn.backward"
-                  size={16}
+                  size={14}
                   color={isReembolso ? "#9ca3af" : "#dc2626"}
                 />
                 <Text
-                  className={`text-[14px] font-semibold ${
+                  className={`text-[13px] font-bold uppercase tracking-wider ${
                     isReembolso
                       ? "text-[#9CA3AF]"
                       : "text-red-600 dark:text-red-400"
                   }`}
+                  style={{ fontFamily: AppFonts.bodyStrong }}
                 >
                   Reembolso
                 </Text>

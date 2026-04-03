@@ -6,10 +6,9 @@ import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useEffect, useState, useCallback } from "react";
-import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Platform, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Image } from "expo-image";
-import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
 
@@ -24,8 +23,9 @@ interface ProductItemVentaProps {
 /**
  * ProductItemVenta — Digital Atelier style.
  *
- * Immersive list item for sales catalog.
- * Ultra-flat design (row-based) with subtle dividers.
+ * Row-based list item. Uses View as the outer container to avoid nested
+ * <button> hydration errors on web. Only the explicit add button or
+ * quantity stepper is interactive.
  */
 export default React.memo(function ProductItemVenta({
   product,
@@ -57,93 +57,68 @@ export default React.memo(function ProductItemVenta({
     }
   }, [justAdded]);
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     if (!inCart) {
       hapticMedium();
-      buttonScale.value = withSpring(0.85, { damping: 6, stiffness: 500 }, () => {
-        buttonScale.value = withSpring(1.1, { damping: 4, stiffness: 400 }, () => {
-          buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
-        });
-      });
       addItem(product, 1);
-      setJustAdded(true);
       onProductAdded?.();
     }
-  };
+  }, [inCart, hapticMedium, addItem, product, onProductAdded]);
 
   const handlePlus = useCallback(() => {
     hapticMedium();
-    quantityScale.value = withSpring(1.2, { damping: 4, stiffness: 300 }, () => {
-      quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
-    });
     updateQuantity(product.id, quantity + 1);
-  }, [hapticMedium, product.id, quantity, quantityScale, updateQuantity]);
+  }, [hapticMedium, product.id, quantity, updateQuantity]);
 
   const handleMinus = useCallback(() => {
     hapticMedium();
     if (quantity === 1) {
-      buttonScale.value = withSpring(0.95, { damping: 6, stiffness: 400 });
-      setTimeout(() => {
-        removeItem(product.id);
-        buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
-      }, 150);
+      removeItem(product.id);
     } else {
-      quantityScale.value = withSpring(0.85, { damping: 4, stiffness: 300 }, () => {
-        quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
-      });
       updateQuantity(product.id, quantity - 1);
     }
-  }, [hapticMedium, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
+  }, [hapticMedium, product.id, quantity, removeItem, updateQuantity]);
 
   const hasImage = product.imagen?.trim();
   const placeholderBg = isDark ? "#1A1F2B" : "#F5F5F4";
 
-  const imgSize = isDesktop ? 60 : 52;
-  const cardGap = isDesktop ? 16 : 14;
-  const imgRadius = 12;
-  const btnSize = isDesktop ? 40 : 38;
+  const imgSize = isDesktop ? 56 : 48;
+  const imgRadius = 10;
+  const btnSize = isDesktop ? 38 : 36;
 
-  const PriceText = () => (
-    <Text
-      style={{
-        fontSize: isDesktop ? 17 : 16,
-        fontWeight: "800",
-        color: isDark ? "#F97316" : "#ea580c",
-        fontFamily: AppFonts.display,
-        letterSpacing: -0.5,
-      }}
-    >
-      ${product.precio_venta.toLocaleString()}
-    </Text>
-  );
-
+  // ── Desktop row (compact) ────────────────────────────────────────────
+  // Uses View as outer container → no nested <button> issue.
+  // The whole row has a hover effect via web cursor, but interaction
+  // is limited to the dedicated CTA on the right side.
   return (
-    <Pressable
-      onPress={handleAdd}
-      style={({ pressed }) => ({
+    <View
+      // @ts-ignore cursor is web-only
+      style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: pressed && !inCart ? (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)") : "transparent",
-        paddingVertical: 14,
-        paddingHorizontal: 8,
-        gap: cardGap,
-        borderBottomWidth: 1,
-        borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-      })}
-      accessibilityRole="button"
+        paddingVertical: isDesktop ? 16 : 12,
+        paddingHorizontal: isDesktop ? 40 : 16,
+        gap: isDesktop ? 20 : 12,
+        backgroundColor: "transparent",
+        ...(Platform.OS === "web"
+          ? { cursor: inCart ? "default" : "pointer" }
+          : {}),
+      }}
+      // @ts-ignore web only onClick
+      onClick={Platform.OS === "web" && !inCart ? handleAdd : undefined}
       accessibilityLabel={product.nombre}
-      accessibilityHint="Agregar al carrito"
     >
+      {/* ── Image ─────────────────────────────────────────────── */}
       <View
         style={{
           width: imgSize,
           height: imgSize,
-          borderRadius: imgRadius,
+          borderRadius: 14,
           backgroundColor: placeholderBg,
           overflow: "hidden",
-          borderWidth: 1,
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+          flexShrink: 0,
         }}
+        className="dark:bg-[#1A1F2B]"
       >
         {hasImage && !imageError ? (
           <Image
@@ -154,49 +129,74 @@ export default React.memo(function ProductItemVenta({
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <IconSymbol name="photo.fill" size={isDesktop ? 22 : 20} color={isDark ? "#48484A" : "#D1D1D6"} />
+            <IconSymbol
+              name="photo.fill"
+              size={isDesktop ? 20 : 18}
+              color={isDark ? "#48484A" : "#D1D1D6"}
+            />
           </View>
         )}
       </View>
 
+      {/* ── Text ──────────────────────────────────────────────── */}
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text
           style={{
-            fontSize: isDesktop ? 16 : 14,
-            fontWeight: "600",
+            fontSize: isDesktop ? 15 : 14,
+            fontWeight: "700",
             color: colors.textPrimary,
             fontFamily: AppFonts.bodyStrong,
-            letterSpacing: -0.2,
           }}
+          className="dark:text-[#F9FAFB] tracking-tight"
           numberOfLines={1}
         >
           {product.nombre}
         </Text>
-        <PriceText />
+        <Text
+          style={{
+            fontSize: isDesktop ? 18 : 16,
+            color: "#ea580c",
+            fontFamily: AppFonts.display,
+            letterSpacing: -0.5,
+          }}
+          className="dark:text-[#FB923C]"
+        >
+          ${product.precio_venta.toLocaleString()}
+        </Text>
       </View>
 
-      <View style={{ paddingLeft: 4 }}>
+      {/* ── Action ────────────────────────────────────────────── */}
+      <View style={{ flexShrink: 0 }}>
         {inCart ? (
-          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
             <QuantityStepper
               quantity={quantity}
               onMinus={handleMinus}
               onPlus={handlePlus}
-              size={32}
+              size={btnSize - 4}
             />
-          </Animated.View>
         ) : (
-          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-            <CircleIconButton
-              icon={justAdded ? "checkmark" : "plus"}
-              variant={justAdded ? "success" : "primary"}
+            <TouchableOpacity
               onPress={handleAdd}
-              size={btnSize}
-              interactive={true}
-            />
-          </Animated.View>
+              activeOpacity={0.8}
+              style={{
+                width: btnSize,
+                height: btnSize,
+                borderRadius: btnSize / 2,
+                backgroundColor: "#ea580c",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`Agregar ${product.nombre}`}
+            >
+              <IconSymbol
+                name="plus"
+                size={btnSize * 0.5}
+                color="#ffffff"
+              />
+            </TouchableOpacity>
         )}
       </View>
-    </Pressable>
+    </View>
   );
 });

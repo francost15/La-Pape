@@ -10,7 +10,7 @@ import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useUndoRedo } from "@/hooks/useUndoRedo";
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Platform, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import Animated, {
   useSharedValue,
   withSpring,
@@ -31,7 +31,7 @@ const DESKTOP_MIN_WIDTH = 768;
 export default function CartPanel() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
-  const storeItems = useVentasStore((s) => s.items);
+  const items = useVentasStore((s) => s.items);
   const removeItem = useVentasStore((s) => s.removeItem);
   const updateQuantity = useVentasStore((s) => s.updateQuantity);
   const getTotal = useVentasStore((s) => s.getTotal);
@@ -51,14 +51,6 @@ export default function CartPanel() {
   const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const haptic = useHaptic();
-  const {
-    present: items,
-    set: setCart,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-  } = useUndoRedo<typeof storeItems>(storeItems);
   const total = getTotal();
 
   const successScale = useSharedValue(0);
@@ -89,7 +81,6 @@ export default function CartPanel() {
     listOpacity.value = withTiming(0, { duration: DesignSystem.animations.normal });
 
     setTimeout(() => {
-      setCart([]);
       clearCart();
       setIsClearing(false);
       listOpacity.value = 1;
@@ -97,7 +88,7 @@ export default function CartPanel() {
     }, DesignSystem.animations.normal + 100);
 
     setClearCartConfirmVisible(false);
-  }, [clearCart, setCart, listOpacity]);
+  }, [clearCart, listOpacity]);
 
   const handleCancelClearCart = useCallback(() => {
     listOpacity.value = withSpring(1, { damping: 10, stiffness: 200 });
@@ -107,7 +98,6 @@ export default function CartPanel() {
 
   const handleMinus = useCallback(
     (item: (typeof items)[0]) => {
-      setCart([...items]);
       if (item.quantity === 1) {
         openDeleteConfirm({
           productId: item.productId,
@@ -117,12 +107,11 @@ export default function CartPanel() {
         updateQuantity(item.productId, item.quantity - 1);
       }
     },
-    [openDeleteConfirm, updateQuantity, items, setCart]
+    [openDeleteConfirm, updateQuantity]
   );
 
   const handleConfirmRemove = () => {
     if (deleteConfirmItem) {
-      setCart(items.filter((i) => i.productId !== deleteConfirmItem.productId));
       removeItem(deleteConfirmItem.productId);
       notify.warning({
         title: `${deleteConfirmItem.nombre} eliminado del carrito`,
@@ -208,14 +197,15 @@ export default function CartPanel() {
   const renderItem = useCallback(
     ({ item }: { item: CartItem }) => (
       <View
-        className="flex-row items-center gap-3 px-5 py-3.5"
-        style={{
-          borderBottomWidth: 1,
-          borderBottomColor: "rgba(0,0,0,0.04)",
-        }}
+        className="flex-row items-center gap-4 px-6 py-4"
         accessibilityLabel={`${item.product.nombre}, cantidad ${item.quantity}, precio ${item.unitPrice}`}
       >
-        <View className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#F5F5F4] dark:bg-[#1A1F2B]">
+        <View 
+          className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#F5F5F4] dark:bg-[#1A1F2B]"
+          style={{
+            boxShadow: Platform.OS === 'web' ? '0 4px 12px rgba(0,0,0,0.03)' : undefined,
+          }}
+        >
           {item.product.imagen?.trim() ? (
             <Image
               source={{ uri: item.product.imagen }}
@@ -228,27 +218,35 @@ export default function CartPanel() {
             </View>
           )}
         </View>
-        <View className="min-w-0 flex-1 shrink justify-center gap-0.5 pr-2">
+        <View className="min-w-0 flex-1 shrink justify-center gap-0.5">
           <Text
-            className="text-sm font-medium text-[#1A1A1A] dark:text-[#F0F0F0]"
+            className="text-[14px] font-bold text-[#111827] dark:text-[#F9FAFB] leading-tight"
             style={{ fontFamily: AppFonts.bodyStrong }}
             numberOfLines={2}
           >
             {item.product.nombre}
           </Text>
           <Text
-            className="text-sm font-semibold text-[#ea580c] dark:text-[#F97316]"
-            style={{ fontFamily: AppFonts.heading }}
+            className="text-[13px] text-[#6B7280] dark:text-[#9CA3AF] tabular-nums"
+            style={{ fontFamily: AppFonts.body }}
             numberOfLines={1}
           >
-            ${item.unitPrice.toLocaleString()} × {item.quantity}
+            ${item.unitPrice.toLocaleString()} cada uno
           </Text>
         </View>
-        <QuantityStepper
-          quantity={item.quantity}
-          onMinus={() => handleMinus(item)}
-          onPlus={() => updateQuantity(item.productId, item.quantity + 1)}
-        />
+        <View className="items-end gap-2">
+          <Text 
+            className="text-[14px] font-bold text-[#111827] dark:text-[#F9FAFB] tabular-nums"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
+            ${(item.unitPrice * item.quantity).toLocaleString()}
+          </Text>
+          <QuantityStepper
+            quantity={item.quantity}
+            onMinus={() => handleMinus(item)}
+            onPlus={() => updateQuantity(item.productId, item.quantity + 1)}
+          />
+        </View>
       </View>
     ),
     [handleMinus, updateQuantity]
@@ -314,141 +312,99 @@ export default function CartPanel() {
         danger
       />
 
-      {/* ── Footer: Total + Action Buttons ─────────────────── */}
+      {/* ── Footer: Total + Action Buttons ── */}
       <View
-        className="bg-white px-5 pt-4 pb-3 dark:bg-[#141820]"
+        className="bg-white px-6 pt-6 pb-8 dark:bg-[#111820]"
         style={{
-          borderTopWidth: 1,
-          borderTopColor: "rgba(0,0,0,0.06)",
+          borderTopWidth: 1.5,
+          borderTopColor: "rgba(0,0,0,0.03)",
         }}
       >
         <Animated.View
           style={[
             {
               position: "absolute",
-              top: 4,
-              right: 4,
+              top: -24,
+              right: 24,
               zIndex: 10,
               opacity: successOpacity,
               transform: [{ scale: successScale }],
             },
           ]}
         >
-          <View className="items-center justify-center rounded-full bg-green-500 p-2">
-            <IconSymbol name="checkmark" size={24} color="#ffffff" />
+          <View 
+            className="items-center justify-center rounded-full bg-green-500 p-4"
+            style={{
+              boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(34, 197, 94, 0.3)' : undefined,
+            }}
+          >
+            <IconSymbol name="checkmark" size={32} color="#ffffff" />
           </View>
         </Animated.View>
 
-        <View className="mb-3 flex-row items-baseline justify-between px-1">
-          <Text
-            className="text-xs font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
-            style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.4 }}
-          >
-            Total
-          </Text>
-          <Text
-            className="text-2xl font-bold text-[#ea580c] dark:text-[#F97316]"
-            style={{ fontFamily: AppFonts.display, letterSpacing: -0.5 }}
-          >
-            ${total.toLocaleString()}
-          </Text>
+        <View className="mb-6 flex-row items-end justify-between">
+          <View>
+            <Text
+              className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] dark:text-[#5A6478] mb-1"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
+              TOTAL A PAGAR
+            </Text>
+            <Text
+              className="text-5xl text-[#ea580c] dark:text-[#FB923C] tracking-tighter"
+              style={{ fontFamily: AppFonts.display, lineHeight: 54 }}
+            >
+              ${total.toLocaleString()}
+            </Text>
+          </View>
         </View>
 
-        {isDesktop && (canUndo || canRedo) && (
-          <View className="mb-2.5 flex-row items-center justify-center gap-2">
-            <TouchableOpacity
-              onPress={undo}
-              disabled={!canUndo}
-              className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${canUndo ? "bg-[#F5F5F4] dark:bg-[#1A1F2B]" : "opacity-30"}`}
-              accessibilityRole="button"
-              accessibilityLabel="Deshacer"
-              accessibilityHint="Revertir el último cambio en el carrito"
-              accessibilityState={{ disabled: !canUndo }}
-            >
-              <IconSymbol
-                name="arrow.uturn.backward"
-                size={14}
-                color={canUndo ? "#ea580c" : "#9ca3af"}
-              />
-              <Text
-                className={`text-xs font-medium ${canUndo ? "text-[#ea580c] dark:text-[#F97316]" : "text-[#9CA3AF]"}`}
-                style={{ fontFamily: AppFonts.bodyStrong }}
-              >
-                Deshacer
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={redo}
-              disabled={!canRedo}
-              className={`flex-row items-center gap-1.5 rounded-xl px-3 py-2 ${canRedo ? "bg-[#F5F5F4] dark:bg-[#1A1F2B]" : "opacity-30"}`}
-              accessibilityRole="button"
-              accessibilityLabel="Rehacer"
-              accessibilityHint="Restaurar el cambio revertido"
-              accessibilityState={{ disabled: !canRedo }}
-            >
-              <IconSymbol
-                name="arrow.uturn.backward"
-                size={14}
-                color={canRedo ? "#ea580c" : "#9ca3af"}
-              />
-              <Text
-                className={`text-xs font-medium ${canRedo ? "text-[#ea580c] dark:text-[#F97316]" : "text-[#9CA3AF]"}`}
-                style={{ fontFamily: AppFonts.bodyStrong }}
-              >
-                Rehacer
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <TouchableOpacity
-          className="items-center justify-center rounded-2xl py-4 active:opacity-90"
-          activeOpacity={0.9}
-          onPress={openConfirm}
-          disabled={processing || isClearing}
-          style={{
-            backgroundColor: "#ea580c",
-            opacity: processing || isClearing ? 0.6 : 1,
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="Completar venta"
-          accessibilityHint="Confirma y registra la venta actual"
-          accessibilityState={{ disabled: processing || isClearing }}
-        >
-          {processing ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text
-              className="text-[15px] font-bold tracking-tight text-white"
-              style={{ fontFamily: AppFonts.bodyStrong }}
-            >
-              {Strings.ventas.completeSale}
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        {isDesktop && (
+        <View className="gap-3">
           <TouchableOpacity
-            className="mt-2 flex-row items-center justify-center gap-1.5 rounded-2xl py-3.5 active:opacity-90"
-            activeOpacity={0.85}
-            onPress={handleClearCartPress}
+            className="items-center justify-center rounded-[24px] py-5 active:opacity-90"
+            activeOpacity={0.9}
+            onPress={openConfirm}
             disabled={processing || isClearing}
             style={{
-              borderWidth: 1.5,
-              borderColor: "rgba(234,88,12,0.25)",
+              backgroundColor: "#ea580c",
+              opacity: processing || isClearing ? 0.6 : 1,
+              boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(234, 88, 12, 0.2)' : undefined,
             }}
             accessibilityRole="button"
-            accessibilityLabel="Limpiar carrito"
-            accessibilityHint="Vacía todos los productos del carrito"
+            accessibilityLabel="Completar venta"
           >
-            <Text
-              className="text-sm font-semibold text-[#ea580c] dark:text-[#F97316]"
-              style={{ fontFamily: AppFonts.bodyStrong }}
-            >
-              {Strings.ventas.clearCart}
-            </Text>
+            {processing ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text
+                className="text-[16px] font-bold tracking-wider text-white uppercase"
+                style={{ fontFamily: AppFonts.bodyStrong }}
+              >
+                {Strings.ventas.completeSale}
+              </Text>
+            )}
           </TouchableOpacity>
-        )}
+
+          {isDesktop && (
+            <TouchableOpacity
+              className="items-center justify-center rounded-[24px] py-4 active:opacity-90 mt-2"
+              activeOpacity={0.85}
+              onPress={handleClearCartPress}
+              disabled={processing || isClearing}
+              style={{
+                borderWidth: 1.5,
+                borderColor: "rgba(234,88,12,0.15)",
+              }}
+            >
+              <Text
+                className="text-sm font-bold text-[#ea580c] dark:text-[#FB923C] uppercase tracking-widest"
+                style={{ fontFamily: AppFonts.bodyStrong }}
+              >
+                {Strings.ventas.clearCart}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );

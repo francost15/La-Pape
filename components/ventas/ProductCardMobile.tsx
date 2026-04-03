@@ -6,14 +6,13 @@ import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import { Image } from "expo-image";
-import CircleIconButton from "../ui/CircleIconButton";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
 
-const IMG_SIZE = 52;
+const IMG_SIZE = 48;
 
 interface ProductCardMobileProps {
   product: Product;
@@ -22,7 +21,10 @@ interface ProductCardMobileProps {
 
 /**
  * ProductCardMobile — Digital Atelier style.
- * Clean row with subtle separator. No card chrome.
+ * Clean row with subtle separator. No nested buttons.
+ *
+ * Uses View as the outer container to avoid the
+ * <button> inside <button> hydration error on web.
  */
 export default React.memo(function ProductCardMobile({
   product,
@@ -53,64 +55,49 @@ export default React.memo(function ProductCardMobile({
     }
   }, [justAdded]);
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     if (!inCart) {
       hapticMedium();
-      buttonScale.value = withSpring(0.85, { damping: 6, stiffness: 500 }, () => {
-        buttonScale.value = withSpring(1.1, { damping: 4, stiffness: 400 }, () => {
-          buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
-        });
-      });
       addItem(product, 1);
-      setJustAdded(true);
       onProductAdded?.();
     }
-  };
+  }, [inCart, hapticMedium, addItem, product, onProductAdded]);
 
   const handlePlus = useCallback(() => {
     haptic();
-    quantityScale.value = withSpring(1.2, { damping: 4, stiffness: 300 }, () => {
-      quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
-    });
     updateQuantity(product.id, quantity + 1);
-  }, [haptic, product.id, quantity, quantityScale, updateQuantity]);
+  }, [haptic, product.id, quantity, updateQuantity]);
 
   const handleMinus = useCallback(() => {
     haptic();
     if (quantity === 1) {
-      buttonScale.value = withSpring(0.95, { damping: 6, stiffness: 400 });
-      setTimeout(() => {
-        removeItem(product.id);
-        buttonScale.value = withSpring(1, { damping: 6, stiffness: 400 });
-      }, 150);
+      removeItem(product.id);
     } else {
-      quantityScale.value = withSpring(0.85, { damping: 4, stiffness: 300 }, () => {
-        quantityScale.value = withSpring(1, { damping: 4, stiffness: 300 });
-      });
       updateQuantity(product.id, quantity - 1);
     }
-  }, [haptic, product.id, quantity, quantityScale, removeItem, updateQuantity, buttonScale]);
+  }, [haptic, product.id, quantity, removeItem, updateQuantity]);
 
   const hasImage = product.imagen?.trim();
   const colors = isDark ? AppColors.dark : AppColors.light;
-  const borderColor = colors.border;
 
   return (
-    <Pressable
-      onPress={inCart ? undefined : handleAdd}
-      style={({ pressed }) => ({
+    <View
+      // @ts-ignore cursor is web-only
+      style={{
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 16,
-        paddingVertical: 14,
-        backgroundColor: pressed && !inCart ? colors.surfaceHover : "transparent",
+        paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: borderColor,
-        gap: 14,
-      })}
-      accessibilityRole={inCart ? undefined : "button"}
+        borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+        gap: 12,
+        ...(Platform.OS === "web"
+          ? { cursor: inCart ? "default" : "pointer" }
+          : {}),
+      }}
+      // @ts-ignore web only onClick
+      onClick={Platform.OS === "web" && !inCart ? handleAdd : undefined}
       accessibilityLabel={product.nombre}
-      accessibilityHint={inCart ? "Producto en el carrito" : "Agregar al carrito"}
     >
       {/* Image */}
       <View
@@ -132,7 +119,7 @@ export default React.memo(function ProductCardMobile({
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <IconSymbol name="photo.fill" size={22} color={isDark ? "#5A6478" : "#C7C7CC"} />
+            <IconSymbol name="photo.fill" size={20} color={isDark ? "#5A6478" : "#C7C7CC"} />
           </View>
         )}
       </View>
@@ -174,7 +161,7 @@ export default React.memo(function ProductCardMobile({
             color: isDark ? "#F97316" : "#ea580c",
             letterSpacing: -0.3,
             fontFamily: AppFonts.display,
-            marginTop: 4,
+            marginTop: 3,
           }}
         >
           ${product.precio_venta.toLocaleString()}
@@ -182,28 +169,37 @@ export default React.memo(function ProductCardMobile({
       </View>
 
       {/* Action button */}
-      <View style={{ alignItems: "center", justifyContent: "center", paddingLeft: 4 }}>
+      <View style={{ alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
         {inCart ? (
-          <Animated.View style={{ transform: [{ scale: quantityScale }] }}>
             <QuantityStepper
               quantity={quantity}
               onMinus={handleMinus}
               onPlus={handlePlus}
               size={32}
             />
-          </Animated.View>
         ) : (
-          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-            <CircleIconButton
-              icon={justAdded ? "checkmark" : "plus"}
-              variant={justAdded ? "success" : "primary"}
+            <TouchableOpacity
               onPress={handleAdd}
-              size={38}
-              interactive={true}
-            />
-          </Animated.View>
+              activeOpacity={0.8}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                backgroundColor: "#ea580c",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`Agregar ${product.nombre}`}
+            >
+              <IconSymbol
+                name="plus"
+                size={18}
+                color="#ffffff"
+              />
+            </TouchableOpacity>
         )}
       </View>
-    </Pressable>
+    </View>
   );
 });

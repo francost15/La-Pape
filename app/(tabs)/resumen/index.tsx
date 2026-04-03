@@ -151,9 +151,9 @@ export default function ResumenScreen() {
       <ScrollView
         className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
         contentContainerStyle={{
-          paddingHorizontal: isMobile ? 16 : 32,
-          paddingVertical: isMobile ? 16 : 24,
-          paddingBottom: 120,
+          paddingHorizontal: isMobile ? 20 : 48,
+          paddingVertical: isMobile ? 16 : 40,
+          paddingBottom: 140,
         }}
       >
         <View className="gap-6">
@@ -220,11 +220,14 @@ export default function ResumenScreen() {
  */
 function SectionTitle({ title }: { title: string }) {
   return (
-    <Text
-      className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
-      style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.6 }}
-    >
-      {title}
-    </Text>
+    <View className="mb-4 mt-4 flex-row items-center gap-3">
+      <View className="h-4 w-[2px] bg-[#E5E7EB] dark:bg-[#374151]" />
+      <Text
+        className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9CA3AF] dark:text-[#5A6478]"
+        style={{ fontFamily: AppFonts.bodyStrong }}
+      >
+        {title}
+      </Text>
+    </View>
   );
 }

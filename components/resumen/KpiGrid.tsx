@@ -45,12 +45,12 @@ const KpiCard = memo(function KpiCard({
   index,
 }: KpiCardProps) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(12);
+  const translateY = useSharedValue(15);
 
   useEffect(() => {
-    const delay = index * 80;
-    opacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 350 }));
+    const delay = index * 100;
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+    translateY.value = withDelay(delay, withTiming(0, { duration: 450 }));
   }, [index, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -59,37 +59,46 @@ const KpiCard = memo(function KpiCard({
   }));
 
   return (
-    <AnimatedKpiWrapper style={animatedStyle} className="min-w-[100px] flex-1">
-      {/* Accent line at top — the only visual chrome */}
-      <View style={{ height: 3, backgroundColor: accentColor, borderRadius: 2, marginBottom: 16 }} />
+    <AnimatedKpiWrapper 
+      style={animatedStyle} 
+      className="min-w-[140px] flex-1 bg-white dark:bg-[#1A1F2B] rounded-[24px] p-6"
+    >
+      <View className="flex-row items-start gap-4">
+        {/* Accent bar - refined vertical marker */}
+        <View 
+          style={{ width: 3, height: 32, backgroundColor: accentColor, borderRadius: 2 }} 
+          className="mt-1"
+        />
 
-      {/* Label */}
-      <Text
-        className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
-        style={{ fontFamily: AppFonts.bodyStrong, letterSpacing: 1.6 }}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
+        <View className="flex-1">
+          <Text
+            className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] dark:text-[#5A6478]"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
 
-      {/* Value — protagonist */}
-      <Text
-        className="leading-none font-bold tracking-tight text-[#1A1A1A] dark:text-[#F0F0F0]"
-        style={{ fontSize: 28, fontFamily: AppFonts.display }}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
-      >
-        {value}
-      </Text>
+          <Text
+            className="leading-tight text-[#111827] dark:text-[#F9FAFB] tracking-tighter"
+            style={{ fontSize: 32, fontFamily: AppFonts.display }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {value}
+          </Text>
 
-      {/* Subtitle */}
-      <Text
-        className="mt-2 text-[11px] text-[#9CA3AF] dark:text-[#5A6478]"
-        style={{ fontFamily: AppFonts.body }}
-      >
-        {subtitle}
-      </Text>
+          {subtitle ? (
+            <Text
+              className="mt-2 text-[11px] font-medium text-[#6B7280] dark:text-[#9CA3AF] uppercase tracking-wider"
+              style={{ fontFamily: AppFonts.body }}
+            >
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+      </View>
     </AnimatedKpiWrapper>
   );
 });

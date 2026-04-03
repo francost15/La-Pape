@@ -1,5 +1,7 @@
 import { formatCurrency } from '@/lib/utils/format';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
+import { AppFonts } from '@/constants/typography';
+import { AppColors } from '@/constants/colors';
 
 interface ProductPriceCardProps {
   precioVenta: number;
@@ -17,32 +19,57 @@ export default function ProductPriceCard({
   costoPromedio,
 }: ProductPriceCardProps) {
   return (
-    <View className="bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700">
-      {/* Precio de venta — el dato más relevante para el vendedor */}
-      <View className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-neutral-700">
-        <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
-          Precio de Venta
+    <View 
+      className="bg-white dark:bg-[#1A1F2B] rounded-3xl overflow-hidden p-6"
+      style={{ 
+        boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(0,0,0,0.04)' : undefined,
+        elevation: Platform.OS !== 'web' ? 4 : undefined
+      }}
+    >
+      <View>
+        <Text 
+          className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-[0.2em] mb-1"
+          style={{ fontFamily: AppFonts.bodyStrong }}
+        >
+          PRECIO PÚBLICO
         </Text>
-        <Text className="text-3xl font-bold text-orange-600 dark:text-orange-400 tracking-tight">
+        <Text 
+          className="text-4xl text-[#EA580C] dark:text-[#FB923C] tracking-tighter"
+          style={{ fontFamily: AppFonts.display, lineHeight: 48 }}
+        >
           {formatCurrency(precioVenta)}
         </Text>
       </View>
 
-      {/* Mayoreo y costo en fila dividida */}
-      <View className="flex-row">
-        <View className="flex-1 px-4 py-3 border-r border-gray-100 dark:border-neutral-700">
-          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
-            Mayoreo
+      <View className="flex-row items-center gap-8 mt-6">
+        <View>
+          <Text 
+            className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-widest mb-1"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
+            MAYOREO
           </Text>
-          <Text className="text-base font-bold text-gray-700 dark:text-gray-300">
+          <Text 
+            className="text-lg text-[#111827] dark:text-[#F9FAFB] tracking-tight"
+            style={{ fontFamily: AppFonts.heading }}
+          >
             {formatCurrency(precioMayoreo)}
           </Text>
         </View>
-        <View className="flex-1 px-4 py-3">
-          <Text className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
-            Costo
+        
+        <View className="w-px h-8 bg-[#F3F4F6] dark:bg-[#374151]" />
+
+        <View>
+          <Text 
+            className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-widest mb-1"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
+            COSTO ADQ.
           </Text>
-          <Text className="text-base font-bold text-gray-700 dark:text-gray-300">
+          <Text 
+            className="text-lg text-[#6B7280] dark:text-[#9CA3AF] tracking-tight"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
             {formatCurrency(costoPromedio)}
           </Text>
         </View>

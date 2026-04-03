@@ -1,16 +1,16 @@
+import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
+import { Tour } from "@/components/onboarding/Tour";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
-import { AppFonts } from "@/constants/typography";
 import CartPanel from "@/components/ventas/CartPanel";
 import FooterProducts from "@/components/ventas/FooterProducts";
 import ProductListContent from "@/components/ventas/ProductListContent";
-import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
-import { Tour } from "@/components/onboarding/Tour";
 import { VENTAS_TOUR } from "@/constants/tours";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { useVentasStore } from "@/store/ventas-store";
+import { AppFonts } from "@/constants/typography";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTour } from "@/hooks/useTour";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useCheckoutStore } from "@/store/checkout-store";
+import { useVentasStore } from "@/store/ventas-store";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, useWindowDimensions, View } from "react-native";
 
@@ -66,116 +66,76 @@ export default function VentasScreen() {
 
   const shortcutsHint = React.useMemo(() => {
     if (!isDesktop) return null;
-    return (
-      <View className="flex-row items-center gap-3">
-        <View className="flex-row items-center gap-1.5">
-          <View className="rounded-md bg-[#F5F5F4] dark:bg-[#1A1F2B] px-1.5 py-0.5">
-            <Text className="text-[10px] font-medium text-[#9CA3AF] dark:text-[#5A6478]">⌘N</Text>
-          </View>
-          <Text className="text-[11px] text-[#9CA3AF] dark:text-[#5A6478]">buscar</Text>
-        </View>
-        <View className="flex-row items-center gap-1.5">
-          <View className="rounded-md bg-[#F5F5F4] dark:bg-[#1A1F2B] px-1.5 py-0.5">
-            <Text className="text-[10px] font-medium text-[#9CA3AF] dark:text-[#5A6478]">↵</Text>
-          </View>
-          <Text className="text-[11px] text-[#9CA3AF] dark:text-[#5A6478]">completar</Text>
-        </View>
-      </View>
-    );
   }, [isDesktop]);
 
   return (
     <AnimatedScreen className="flex-1 flex-row bg-[#FAFAF9] dark:bg-[#0C0F14]">
-      {/* ─── ÁREA PRINCIPAL: CATÁLOGO (Desktop) o CARRITO (Mobile) ────────── */}
-      <View
-        className="flex-1"
-        style={!isDesktop ? { paddingBottom: 144 } : undefined}
-      >
-        {isDesktop ? (
-          /* Catálogo para escritorio */
-          <View className="flex-1">
-            <View
-              className="flex-row items-center justify-between px-6 py-4"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: "rgba(0,0,0,0.04)",
-              }}
-            >
-              <Text
-                className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
-                style={{ fontFamily: AppFonts.heading }}
-              >
-                Catálogo
-              </Text>
-              {shortcutsHint}
-            </View>
+      {/* ─── ÁREA PRINCIPAL: ATELIER (CATÁLOGO) / CARRITO (MÓVIL) ────────── */}
+      <View className="flex-1" style={!isDesktop ? { paddingBottom: 144 } : { flex: 0.7 }}>
+        <View className="flex-1">
+          {isDesktop ? (
             <ProductListContent
               searchContextId="ventas"
               listKey="desktop-catalog"
               searchInputRef={searchInputRef}
               searchSize="large"
             />
-          </View>
-        ) : (
-          /* Carrito para móvil */
-          <View className="flex-1">
-            <View
-              className="flex-row items-center justify-between px-5 py-4"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: "rgba(0,0,0,0.04)",
-              }}
-            >
-              <View className="flex-row items-baseline gap-2">
-                <Text
-                  className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
-                  style={{ fontFamily: AppFonts.heading }}
+          ) : (
+            <View className="flex-1">
+              <View className="px-5 pt-12 pb-6">
+                 <Text
+                  className="mb-2 text-[9px] font-bold tracking-[0.3em] text-[#9CA3AF] uppercase dark:text-[#5A6478]"
+                  style={{ fontFamily: AppFonts.bodyStrong }}
                 >
-                  Carrito
+                  ORDEN ACTUAL
                 </Text>
-                {itemCount > 0 && (
-                  <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
-                    <Text className="text-[11px] font-bold text-white">
-                      {itemCount}
-                    </Text>
-                  </View>
-                )}
+                <View className="flex-row items-center gap-2.5">
+                  <Text
+                    className="text-3xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
+                    style={{ fontFamily: AppFonts.display }}
+                  >
+                    Carrito
+                  </Text>
+                  {itemCount > 0 && (
+                    <View className="rounded-full bg-[#ea580c] px-2.5 py-0.5">
+                      <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
+                    </View>
+                  )}
+                </View>
               </View>
+              <CartPanel />
             </View>
-            <CartPanel />
-          </View>
-        )}
+          )}
+        </View>
       </View>
 
-      {/* ─── SIDEBAR DERECHO: CARRITO (Sólo Desktop) ─────────────────────── */}
+      {/* ─── SIDEBAR DERECHO: CARRITO (Desktop Split) ─────────────────────── */}
       {isDesktop && (
         <View
           style={{
-            width: 420,
-            borderLeftWidth: 1,
-            borderLeftColor: "rgba(0,0,0,0.06)",
-            backgroundColor: isDark ? "rgba(255,255,255,0.01)" : "rgba(0,0,0,0.01)",
+            flex: 0.3,
+            borderLeftWidth: 1.5,
+            borderLeftColor: "rgba(0,0,0,0.03)",
           }}
+          className="bg-white dark:bg-[#111820]"
         >
-          <View
-            className="flex-row items-center justify-between px-6 py-4"
-            style={{
-              borderBottomWidth: 1,
-              borderBottomColor: "rgba(0,0,0,0.04)",
-            }}
-          >
-            <View className="flex-row items-baseline gap-2">
+          <View className="px-6 pt-12 pb-6">
+            <Text
+              className="mb-2 text-[9px] font-bold tracking-[0.3em] text-[#9CA3AF] uppercase dark:text-[#5A6478]"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
+              ORDEN ACTUAL
+            </Text>
+            <View className="flex-row items-center gap-2.5">
               <Text
-                className="text-xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
-                style={{ fontFamily: AppFonts.heading }}
+                className="text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
+                style={{ fontFamily: AppFonts.display }}
               >
                 Carrito
               </Text>
               {itemCount > 0 && (
-                <View className="rounded-full bg-[#ea580c] px-2 py-0.5">
-                  <Text className="text-[11px] font-bold text-white">
-                    {itemCount}
-                  </Text>
+                <View className="rounded-full bg-[#ea580c] px-2.5 py-0.5">
+                  <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
                 </View>
               )}
             </View>

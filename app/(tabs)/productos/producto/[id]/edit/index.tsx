@@ -27,6 +27,8 @@ import {
 } from 'react-native';
 import { useHaptic } from "@/hooks/use-haptic";
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppFonts } from '@/constants/typography';
+import { AppColors } from '@/constants/colors';
 
 export default function EditProduct() {
   const haptic = useHaptic();
@@ -208,31 +210,43 @@ export default function EditProduct() {
 
   if (loadingData) {
     return (
-      <View className="flex-1 bg-gray-50 dark:bg-neutral-900 justify-center items-center">
-        <ActivityIndicator size="large" color="#ea580c" />
-        <Text className="text-gray-500 dark:text-gray-400 mt-4">Cargando...</Text>
+      <View className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14] justify-center items-center">
+        <ActivityIndicator size="large" color={AppColors.primary} />
+        <Text className="text-[#6B7280] dark:text-[#9CA3AF] mt-4">Cargando datos...</Text>
       </View>
     );
   }
 
   const actionButtons = (
-    <View className="flex-row gap-2">
+    <View className="flex-row gap-3">
       <TouchableOpacity
-        className="h-11 px-4 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 flex-row items-center justify-center active:opacity-80"
+        className="h-12 px-6 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-800 flex-row items-center justify-center active:opacity-80"
         onPress={() => router.back()}
         disabled={loading}
       >
-        <Text className="text-gray-700 dark:text-gray-300 text-sm font-medium">Cancelar</Text>
+        <Text className="text-gray-500 dark:text-gray-400 text-sm font-bold tracking-wide uppercase" style={{ fontFamily: AppFonts.bodyStrong }}>Cancelar</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="flex-1 h-11 bg-orange-600 rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
+        className="flex-1 h-12 bg-[#EA580C] rounded-full flex-row items-center justify-center gap-2 active:opacity-90"
+        style={{ 
+          boxShadow: Platform.OS === 'web' ? '0 8px 24px rgba(234, 88, 12, 0.3)' : undefined,
+          elevation: Platform.OS !== 'web' ? 6 : undefined,
+        }}
         onPress={handleSubmit(onSubmit)}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="white" size="small" />
         ) : (
-          <Text className="text-white font-semibold text-[15px]">Guardar Cambios</Text>
+          <>
+            <IconSymbol name="checkmark" size={16} color="white" />
+            <Text 
+              className="text-white font-bold text-[14px] tracking-widest"
+              style={{ fontFamily: AppFonts.bodyStrong }}
+            >
+              GUARDAR CAMBIOS
+            </Text>
+          </>
         )}
       </TouchableOpacity>
     </View>
@@ -244,10 +258,15 @@ export default function EditProduct() {
         haptic();
         router.back();
       }}
-      className="flex-row items-center gap-2 mb-4 active:opacity-70"
+      className="flex-row items-center gap-2 mb-6 active:opacity-70"
     >
-      <IconSymbol name="chevron.left" size={20} color="#6b7280" />
-      <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">Volver</Text>
+      <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
+      <Text 
+        className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+        style={{ fontFamily: AppFonts.bodyStrong }}
+      >
+        VOLVER
+      </Text>
     </Pressable>
   );
 
@@ -255,41 +274,50 @@ export default function EditProduct() {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-gray-50 dark:bg-neutral-900"
+        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ alignItems: 'center', padding: 40 }}
+          contentContainerStyle={{ alignItems: 'center', padding: 48 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ width: '100%', maxWidth: 1100 }}>
+          <View style={{ width: '100%', maxWidth: 1200 }}>
             <BackButton />
-            <View className="flex-row gap-10 items-start">
-            {/* Columna izquierda: imagen — mismo estilo que vista detalle */}
-            <View
-              className="rounded-3xl overflow-hidden bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 shrink-0"
-              style={{ width: 420 }}
-            >
-              <CampoImagen
-                control={control}
-                errors={errors}
-                isWeb={isWeb}
-                previewSize={{ width: 420, height: 420 }}
-              />
-            </View>
+            <View className="flex-row gap-16 items-start">
+              {/* Columna izquierda: Imagen hero */}
+              <View className="flex-1 gap-6">
+                 <View className="bg-white dark:bg-neutral-800 rounded-[32px] overflow-hidden" style={{ boxShadow: Platform.OS === 'web' ? '0 24px 48px rgba(0,0,0,0.06)' : undefined }}>
+                   <CampoImagen
+                      control={control}
+                      errors={errors}
+                      isWeb={isWeb}
+                      previewSize={{ width: 480, height: 480 }}
+                    />
+                 </View>
+                 <View className="px-2">
+                    <Text className="text-[10px] font-bold tracking-[0.2em] text-[#9CA3AF] uppercase mb-1">Guas de Edición</Text>
+                    <Text className="text-xs text-gray-400 leading-4">Actualiza la imagen del producto cargando un archivo o ingresando una URL directa.</Text>
+                 </View>
+              </View>
 
-            {/* Columna derecha: formulario */}
-            <View className="flex-1 gap-4">
-              <FormProductos
-                control={control}
-                errors={errors}
-                categories={categories}
-                isWeb={isWeb}
-                hideImage
-              />
-              {actionButtons}
-            </View>
+              {/* Columna derecha: Formulario */}
+              <View style={{ width: 480 }} className="gap-8">
+                <View>
+                  <Text className="text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB] mb-1" style={{ fontFamily: AppFonts.display }}>Editor de Producto</Text>
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">Actualiza los detalles técnicos y comerciales.</Text>
+                </View>
+
+                <FormProductos
+                  control={control}
+                  errors={errors}
+                  categories={categories}
+                  isWeb={isWeb}
+                  hideImage
+                />
+                
+                <View className="mt-4">{actionButtons}</View>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -300,15 +328,20 @@ export default function EditProduct() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-gray-50 dark:bg-neutral-900"
+      className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
     >
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}
+        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <BackButton />
+        <View className="mb-6">
+          <Text className="text-3xl tracking-tighter text-[#111827] dark:text-[#F9FAFB]" style={{ fontFamily: AppFonts.display }}>Editar</Text>
+          <Text className="text-sm text-gray-500 dark:text-gray-400">Modifica los campos necesarios para reflejar los cambios.</Text>
+        </View>
+
         <FormProductos
           control={control}
           errors={errors}
@@ -318,8 +351,8 @@ export default function EditProduct() {
       </ScrollView>
 
       <View
-        className="px-4 py-3 bg-gray-50 dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-800"
-        style={{ paddingBottom: 12 + tabBarHeight }}
+        className="px-6 py-4 bg-[#FAFAF9] dark:bg-[#0C0F14] border-t border-gray-100 dark:border-neutral-800"
+        style={{ paddingBottom: 16 + tabBarHeight }}
       >
         {actionButtons}
       </View>

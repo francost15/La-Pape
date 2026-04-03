@@ -12,6 +12,7 @@ import { onVentasByNegocio } from "@/lib/services/ventas";
 import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
 import { refundVentaFlow } from "@/lib/services/ventas/refund-venta";
 import { formatCurrency } from "@/lib/utils/format";
+import { AppFonts } from "@/constants/typography";
 import { groupVentasByDate } from "@/lib/utils/ventas-helpers";
 import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
@@ -239,26 +240,30 @@ export default function HistoryScreen() {
       return (
         <Animated.View
           entering={FadeIn.duration(320)}
-          className="mt-4 mb-3 flex-row items-center justify-between py-2"
+          className="mt-8 mb-4 flex-row items-baseline justify-between py-2"
         >
           <View className="flex-row items-center gap-3">
             <View
-              className="h-6 w-[3px] rounded-full"
+              className="h-4 w-[2.5px] rounded-full"
               style={{
-                backgroundColor: isTodayOrYesterday ? "#ea580c" : "rgba(0,0,0,0.1)",
+                backgroundColor: isTodayOrYesterday ? "#ea580c" : "#D4D4D4",
               }}
             />
             <Text
-              className={`text-[15px] font-bold capitalize ${
+              className={`text-[12px] font-bold uppercase tracking-[0.2em] ${
                 isTodayOrYesterday
-                  ? "text-[#ea580c] dark:text-[#F97316]"
-                  : "text-[#1A1A1A] dark:text-[#F0F0F0]"
+                  ? "text-[#ea580c] dark:text-[#FB923C]"
+                  : "text-[#9CA3AF] dark:text-[#5A6478]"
               }`}
+              style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {section.label}
             </Text>
           </View>
-          <Text className="text-[15px] font-bold tabular-nums text-[#1A1A1A] dark:text-[#F0F0F0]">
+          <Text 
+            className="text-[14px] font-bold tabular-nums text-[#111827] dark:text-[#F9FAFB]"
+            style={{ fontFamily: AppFonts.bodyStrong }}
+          >
             {formatCurrency(section.total)}
           </Text>
         </Animated.View>
@@ -350,9 +355,9 @@ export default function HistoryScreen() {
         ListEmptyComponent={ventasFiltradas.length === 0 ? ListEmptyComponent : undefined}
         className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
         contentContainerStyle={{
-          paddingHorizontal: isTablet ? 24 : 16,
-          paddingTop: 12,
-          paddingBottom: 120,
+          paddingHorizontal: isTablet ? 32 : 16,
+          paddingTop: 16,
+          paddingBottom: 140,
         }}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}

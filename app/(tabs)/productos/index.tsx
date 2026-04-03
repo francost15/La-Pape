@@ -20,11 +20,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
 export default function ProductosScreen() {
-  const isMobile = useLayoutStore((s) => s.isMobile);
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 768;
   const { products, categories, error, retry, refresh } = useProductosScreen();
   const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } =
     useProductSearch("productos");
@@ -33,6 +35,14 @@ export default function ProductosScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
   const searchInputRef = useRef<TextInput>(null);
+
+  const numColumns = useMemo(() => {
+    if (!isDesktop) return 1;
+    if (width >= 1600) return 5;
+    if (width >= 1200) return 4;
+    if (width >= 992) return 3;
+    return 2;
+  }, [width, isDesktop]);
 
   const hasMore = filteredProducts.length > page * PAGE_SIZE;
   const visibleProducts = useMemo(
@@ -91,36 +101,40 @@ export default function ProductosScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Product }) => (
-      <View className={isMobile ? "w-full" : "m-2 w-80"}>
+      <View style={{ flex: 1, padding: isDesktop ? 10 : 0 }}>
         <CardProducts product={item} />
       </View>
     ),
-    [isMobile]
+    [isDesktop]
   );
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
 
   const ListHeader = useMemo(
     () => (
-      <>
-        <View className={`flex-row items-stretch gap-3 ${isMobile ? "mb-4 px-3" : "mb-4"}`}>
+      <View style={{ width: "100%", paddingHorizontal: isDesktop ? 10 : 0 }}>
+        <View 
+          className="flex-row items-stretch gap-3" 
+          style={{ marginBottom: 16, marginTop: isDesktop ? 8 : 4 }}
+        >
           <View className="min-w-0 flex-1">
             <SearchProducts
               ref={searchInputRef}
               searchText={searchText}
               onSearchChange={setSearchText}
+              size={isDesktop ? "large" : "default"}
             />
           </View>
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={goToCreateProduct}
-            className="shrink-0 flex-row items-center gap-2"
+            className="shrink-0 flex-row items-center"
           >
             <CircleIconButton
               icon="plus"
               variant="primary"
               onPress={goToCreateProduct}
-              size={isMobile ? 40 : 44}
+              size={isDesktop ? 48 : 40}
             />
           </TouchableOpacity>
         </View>
@@ -132,16 +146,27 @@ export default function ProductosScreen() {
             onCategoryPress={setSelectedCategoryId}
           />
         )}
-      </>
+
+        {/* Dynamic products count */}
+        {filteredProducts.length > 0 && (
+           <Text 
+            className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+            style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
+           >
+            {filteredProducts.length} {filteredProducts.length === 1 ? 'producto' : 'productos'}
+           </Text>
+        )}
+      </View>
     ),
     [
-      isMobile,
+      isDesktop,
       searchText,
       setSearchText,
       categories,
       selectedCategoryId,
       setSelectedCategoryId,
       goToCreateProduct,
+      filteredProducts.length
     ]
   );
 
@@ -216,9 +241,11 @@ export default function ProductosScreen() {
   return (
     <AnimatedScreen>
       <FlashList
+        key={`products-grid-${numColumns}`}
         data={visibleProducts}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        numColumns={numColumns}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={ListEmpty}
         ListFooterComponent={ListFooter}
@@ -227,9 +254,9 @@ export default function ProductosScreen() {
         }}
         onEndReachedThreshold={0.5}
         contentContainerStyle={
-          isMobile
-            ? { paddingTop: 8, paddingBottom: 120, paddingHorizontal: 0 }
-            : { padding: 21, paddingBottom: 21, alignItems: "center" }
+          isDesktop
+            ? { paddingHorizontal: 16, paddingBottom: 40, paddingTop: 12 }
+            : { paddingTop: 8, paddingBottom: 120, paddingHorizontal: 0 }
         }
         showsVerticalScrollIndicator={false}
         refreshControl={
