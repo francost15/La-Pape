@@ -1,9 +1,9 @@
 import LayoutSync from "@/components/LayoutSync";
-import AddProductsSheet from "@/components/ventas/AddProductsSheet";
-import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import NativeToaster from "@/components/NativeToaster";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SkipLink } from "@/components/ui/SkipLink";
+import AddProductsSheet from "@/components/ventas/AddProductsSheet";
+import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import { useTheme } from "@/hooks/useTheme";
 import { logger } from "@/lib/utils/logger";
 import { initSessionListener } from "@/store/session-store";
@@ -44,7 +44,7 @@ export default function RootLayout() {
       const meta = document.createElement("meta");
       meta.name = "description";
       meta.content =
-        "Sistema punto de venta multi-sucursal para negocios en Chile. Gestión de productos, ventas, inventario y reportes en tiempo real.";
+        "Sistema punto de venta. Gestión de productos, ventas, inventario y reportes en tiempo real.";
       document.head.appendChild(meta);
     }
   }, []);

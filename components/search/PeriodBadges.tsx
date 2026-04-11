@@ -85,7 +85,7 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   );
 
   return (
-    <View className="relative flex-row rounded-xl bg-gray-100 p-1 dark:bg-neutral-800">
+    <View className="relative flex-row rounded-xl bg-[#FAFAF9] p-1 dark:bg-[#0C0F14]">
       <Animated.View
         style={[
           indicatorStyle,

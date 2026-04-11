@@ -6,24 +6,15 @@ import {
   BottomTabBarHeightCallbackContext,
   type BottomTabBarProps,
 } from "@react-navigation/bottom-tabs";
-import React, { useEffect, useMemo } from "react";
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
 import { BlurView } from "expo-blur";
+import React, { useEffect, useMemo } from "react";
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Animated, {
   Easing,
   FadeInDown,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-  withDelay,
-  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -78,15 +69,10 @@ interface TabConfig {
 
 const ESTIMATED_ISLAND_HEIGHT = 72;
 const PILL_H = 40;
-const PILL_BORDER_RADIUS = 20;
+const PILL_W = 48; // Forma de lozenge en lugar de círculo perfecto para un look más "Digital Atelier"
 const isWeb = Platform.OS === "web";
 
-export function DynamicIslandTabBar({
-  state,
-  descriptors,
-  navigation,
-  insets,
-}: BottomTabBarProps) {
+export function DynamicIslandTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const { width } = useWindowDimensions();
   const haptic = useHaptic();
   const colorScheme = useColorScheme() ?? "light";
@@ -105,9 +91,7 @@ export function DynamicIslandTabBar({
       state.routes.map((route) => {
         const opts = descriptors[route.key].options;
         const title = opts.title ?? route.name;
-        const pcOnly = PC_ONLY_ROUTES.includes(
-          route.name as (typeof PC_ONLY_ROUTES)[number],
-        );
+        const pcOnly = PC_ONLY_ROUTES.includes(route.name as (typeof PC_ONLY_ROUTES)[number]);
         return {
           routeName: route.name,
           routeKey: route.key,
@@ -116,7 +100,7 @@ export function DynamicIslandTabBar({
           pcOnly,
         };
       }),
-    [state.routes, descriptors],
+    [state.routes, descriptors]
   );
 
   const activeIndex = state.index;
@@ -128,13 +112,13 @@ export function DynamicIslandTabBar({
       style={[
         styles.wrapper,
         {
-          paddingBottom: isWeb ? insets.bottom + 24 : insets.bottom,
+          paddingBottom: isWeb ? insets.bottom + 24 : insets.bottom + 12,
         },
       ]}
       pointerEvents="box-none"
     >
       <BlurView
-        intensity={isDark ? 50 : 65}
+        intensity={isDark ? 55 : 75}
         tint={isDark ? "dark" : "light"}
         style={[
           styles.island,
@@ -145,15 +129,15 @@ export function DynamicIslandTabBar({
             ...(isWeb
               ? {
                   boxShadow: theme.webShadow,
-                  backdropFilter: "blur(24px) saturate(180%)",
-                  WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                  backdropFilter: "blur(32px) saturate(200%)",
+                  WebkitBackdropFilter: "blur(32px) saturate(200%)",
                 }
               : {
                   shadowColor: theme.shadow,
-                  shadowOffset: { width: 0, height: 8 },
+                  shadowOffset: { width: 0, height: 16 },
                   shadowOpacity: theme.shadowOpacity,
-                  shadowRadius: 24,
-                  elevation: 16,
+                  shadowRadius: 32,
+                  elevation: 20,
                 }),
           },
         ]}
@@ -214,30 +198,27 @@ function SlidingIndicator({
   tabCount: number;
   islandWidth: number;
 }) {
-  const prevIndex = useSharedValue(activeIndex);
   const activeTranslation = useSharedValue(activeIndex);
 
   useEffect(() => {
-    prevIndex.value = activeTranslation.value;
     activeTranslation.value = withSpring(activeIndex, {
-      damping: 18,
-      stiffness: 140,
+      damping: 24,
+      stiffness: 260,
       mass: 0.8,
     });
-  }, [activeIndex, activeTranslation, prevIndex]);
+  }, [activeIndex, activeTranslation]);
 
-  const contentWidth = islandWidth - 20;
+  // La isla tiene un padding horizontal total de 24 (12 por lado)
+  const contentWidth = islandWidth - 24;
   const tabWidth = contentWidth / tabCount;
 
   const animatedStyle = useAnimatedStyle(() => {
     "worklet";
     const centerX = (activeTranslation.value + 0.5) * tabWidth;
-    const x = centerX - PILL_H / 2 - 2;
+    const x = centerX - PILL_W / 2;
 
     return {
-      transform: [
-        { translateX: x },
-      ],
+      transform: [{ translateX: x }],
     };
   });
 
@@ -253,10 +234,10 @@ function SlidingIndicator({
               }
             : {
                 shadowColor: ACTIVE_BG,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.4,
-                shadowRadius: 10,
-                elevation: 8,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.45,
+                shadowRadius: 12,
+                elevation: 10,
               }),
         },
         animatedStyle,
@@ -285,39 +266,20 @@ const TabItem = React.memo(function TabItem({
   onPress,
   onLongPress,
 }: TabItemProps) {
-  const scale = useSharedValue(1);
-  const iconScale = useDerivedValue(() => {
-    return withSpring(isFocused ? 1.15 : 1, { damping: 12, stiffness: 200 });
-  });
-
   const iconColor = isFocused ? ACTIVE_ICON_COLOR : theme.inactiveIcon;
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value * iconScale.value }],
-  }));
 
   return (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.88, { damping: 15, stiffness: 400 });
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1, { damping: 15, stiffness: 400 });
-      }}
       style={styles.tabItem}
       accessibilityRole="tab"
       accessibilityState={{ selected: isFocused }}
       accessibilityLabel={tab.label}
     >
-      <Animated.View style={[styles.tabItemInner, animatedStyle]}>
-        <IconSymbol
-          size={isCompact ? 20 : 22}
-          name={tab.icon}
-          color={iconColor}
-        />
-      </Animated.View>
+      <View style={styles.tabItemInner}>
+        <IconSymbol size={isCompact ? 20 : 22} name={tab.icon} color={iconColor} />
+      </View>
     </Pressable>
   );
 });
@@ -334,26 +296,19 @@ const PcOnlyBadge = React.memo(function PcOnlyBadge({
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withTiming(visible ? 1 : 0, { duration: 200 });
+    opacity.value = withTiming(visible ? 1 : 0, { duration: 250, easing: COLOR_EASING });
   }, [visible, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
+    transform: [{ translateY: withTiming(visible ? 0 : 4, { duration: 250 }) }],
   }));
 
   if (!tab?.pcOnly) return null;
 
   return (
-    <Animated.View
-      style={[
-        styles.pcBadge,
-        animatedStyle,
-        { backgroundColor: theme.pcBadgeBg },
-      ]}
-    >
-      <Text style={[styles.pcBadgeText, { color: theme.pcBadgeText }]}>
-        Solo en PC
-      </Text>
+    <Animated.View style={[styles.pcBadge, animatedStyle, { backgroundColor: theme.pcBadgeBg }]}>
+      <Text style={[styles.pcBadgeText, { color: theme.pcBadgeText }]}>Solo en PC</Text>
     </Animated.View>
   );
 });
@@ -369,24 +324,25 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   island: {
-    borderRadius: 24,
+    borderRadius: 28,
     borderCurve: "continuous",
     borderWidth: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   tabsRowWrapper: {
     flex: 1,
     position: "relative",
     flexDirection: "row",
+    height: PILL_H, // Constraint to exactly contain the pill
   },
   slidingPill: {
     position: "absolute",
     left: 0,
     top: 0,
-    width: PILL_H,
+    width: PILL_W,
     height: PILL_H,
-    borderRadius: PILL_BORDER_RADIUS,
+    borderRadius: PILL_H / 2, // Perfect pill curve
   },
   tabsRow: {
     flex: 1,
@@ -398,20 +354,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 2,
+    height: PILL_H, // Exactly spans the wrapper height
   },
   tabItemInner: {
     alignItems: "center",
     justifyContent: "center",
   },
   pcBadge: {
-    marginTop: 6,
-    paddingHorizontal: 10,
+    marginTop: 8,
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
+    borderCurve: "continuous",
   },
   pcBadgeText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
   },
 });

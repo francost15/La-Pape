@@ -54,18 +54,9 @@ export default function Navbar() {
 
   return (
     <View
-      className="flex-row items-center justify-between px-4"
+      className="flex-row items-center justify-between px-4 bg-[#FAFAF9] dark:bg-[#0C0F14]"
       style={{
         height: 56,
-        backgroundColor: isWeb ? "var(--bg-surface)" : undefined,
-        borderBottomWidth: 1,
-        borderBottomColor: isWeb ? "var(--border-default)" : undefined,
-        ...(isWeb
-          ? {
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-            }
-          : {}),
         ...(Platform.OS === "ios" ? { paddingTop: 48 } : {}),
         ...(Platform.OS === "android" ? { paddingTop: 36 } : {}),
       }}
