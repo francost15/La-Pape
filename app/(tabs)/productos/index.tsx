@@ -113,8 +113,8 @@ export default function ProductosScreen() {
   const ListHeader = useMemo(
     () => (
       <View style={{ width: "100%", paddingHorizontal: isDesktop ? 10 : 0 }}>
-        <View 
-          className="flex-row items-stretch gap-3" 
+        <View
+          className="flex-row items-stretch gap-3"
           style={{ marginBottom: 16, marginTop: isDesktop ? 8 : 4 }}
         >
           <View className="min-w-0 flex-1">
@@ -149,12 +149,12 @@ export default function ProductosScreen() {
 
         {/* Dynamic products count */}
         {filteredProducts.length > 0 && (
-           <Text 
-            className="text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+          <Text
+            className="text-[11px] font-bold tracking-widest text-[#9CA3AF] uppercase dark:text-[#5A6478]"
             style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
-           >
-            {filteredProducts.length} {filteredProducts.length === 1 ? 'producto' : 'productos'}
-           </Text>
+          >
+            {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
+          </Text>
         )}
       </View>
     ),
@@ -166,7 +166,7 @@ export default function ProductosScreen() {
       selectedCategoryId,
       setSelectedCategoryId,
       goToCreateProduct,
-      filteredProducts.length
+      filteredProducts.length,
     ]
   );
 
@@ -239,7 +239,7 @@ export default function ProductosScreen() {
   }
 
   return (
-    <AnimatedScreen>
+    <AnimatedScreen className="bg-[#FAFAF9] dark:bg-[#0C0F14]">
       <FlashList
         key={`products-grid-${numColumns}`}
         data={visibleProducts}

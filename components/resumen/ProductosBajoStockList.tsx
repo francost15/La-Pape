@@ -1,4 +1,4 @@
-import EmptyState from "@/components/resumen/shared/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import type { Product } from "@/interface";
 import { Image } from "expo-image";
@@ -33,9 +33,7 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
   return (
     <Pressable onPress={handlePress} className="active:opacity-60">
       <View
-        className={`flex-row items-center gap-3 py-2.5 ${
-          showDivider ? "border-b" : ""
-        }`}
+        className={`flex-row items-center gap-3 py-2.5 ${showDivider ? "border-b" : ""}`}
         style={showDivider ? { borderBottomColor: "rgba(0,0,0,0.04)" } : undefined}
       >
         {/* Imagen miniatura */}
@@ -104,7 +102,7 @@ export default function ProductosBajoStockList({ items }: ProductosBajoStockList
     <SectionCard title="Necesitan stock" className="min-w-0 flex-1">
       {items.length === 0 ? (
         <EmptyState
-          message="Ningún producto requiere reabastecimiento"
+          title="Ningún producto requiere reabastecimiento"
           iconName="checkmark.circle.fill"
         />
       ) : (

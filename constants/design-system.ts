@@ -88,7 +88,15 @@ export const DesignSystem = {
     height: 56,
     heightCompact: 48,
   },
+
+  /** Breakpoints */
+  breakpoints: {
+    desktop: 768,
+  },
 } as const;
+
+/** Ancho mínimo para considerar layout de escritorio */
+export const DESKTOP_MIN_WIDTH = 768;
 
 /**
  * Component-level style tokens.

@@ -1,4 +1,4 @@
-import EmptyState from "@/components/resumen/shared/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { ProductoRanking } from "@/store/resumen-store";
@@ -32,9 +32,7 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
   return (
     <Pressable onPress={handlePress} className="active:opacity-60">
       <View
-        className={`flex-row items-center gap-3 py-2.5 ${
-          showDivider ? "border-b" : ""
-        }`}
+        className={`flex-row items-center gap-3 py-2.5 ${showDivider ? "border-b" : ""}`}
         style={showDivider ? { borderBottomColor: "rgba(0,0,0,0.04)" } : undefined}
       >
         <Text
@@ -97,7 +95,7 @@ export default function TopProductsList({ title, items }: TopProductsListProps) 
   return (
     <SectionCard title={title} className="min-w-0 flex-1">
       {items.length === 0 ? (
-        <EmptyState message="Sin datos disponibles" iconName="chart.bar.fill" />
+        <EmptyState title="Sin datos disponibles" iconName="chart.bar.fill" />
       ) : (
         <View>
           {items.map((item, index) => (

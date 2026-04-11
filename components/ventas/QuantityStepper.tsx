@@ -1,7 +1,6 @@
 import CircleIconButton from "@/components/ui/CircleIconButton";
 import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import React from "react";
 import { Text, View } from "react-native";
 
@@ -21,9 +20,7 @@ export default function QuantityStepper({
   onPlus,
   size = 36,
 }: QuantityStepperProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const colors = isDark ? AppColors.dark : AppColors.light;
+  const { colors } = useThemeColors();
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>

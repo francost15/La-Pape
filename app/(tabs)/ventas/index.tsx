@@ -11,10 +11,9 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTour } from "@/hooks/useTour";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useVentasStore } from "@/store/ventas-store";
+import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, useWindowDimensions, View } from "react-native";
-
-const DESKTOP_MIN_WIDTH = 768;
 
 export default function VentasScreen() {
   const { width } = useWindowDimensions();
@@ -83,7 +82,7 @@ export default function VentasScreen() {
           ) : (
             <View className="flex-1">
               <View className="px-5 pt-12 pb-6">
-                 <Text
+                <Text
                   className="mb-2 text-[9px] font-bold tracking-[0.3em] text-[#9CA3AF] uppercase dark:text-[#5A6478]"
                   style={{ fontFamily: AppFonts.bodyStrong }}
                 >
@@ -98,7 +97,9 @@ export default function VentasScreen() {
                   </Text>
                   {itemCount > 0 && (
                     <View className="rounded-full bg-[#ea580c] px-2.5 py-0.5">
-                      <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
+                      <Text className="text-[12px] leading-none font-bold text-white">
+                        {itemCount}
+                      </Text>
                     </View>
                   )}
                 </View>

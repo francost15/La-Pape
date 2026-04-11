@@ -1,4 +1,4 @@
-import EmptyState from "@/components/resumen/shared/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency } from "@/lib/utils/format";
 import type { CategoriaVenta } from "@/store/resumen-store";
@@ -125,7 +125,7 @@ export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownP
   return (
     <SectionCard title="Ventas por Categoría">
       {isEmpty ? (
-        <EmptyState message="Sin datos en este período" iconName="chart.pie.fill" />
+        <EmptyState title="Sin datos en este período" iconName="chart.pie.fill" />
       ) : (
         <View className={isMobile ? "gap-1" : "flex-row items-start gap-4"}>
           <View className={`items-center ${isMobile ? "mb-2" : ""}`}>

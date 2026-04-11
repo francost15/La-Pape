@@ -1,4 +1,4 @@
-import EmptyState from "@/components/resumen/shared/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { VentasPorUsuario as VentasPorUsuarioType } from "@/store/resumen-store";
@@ -67,7 +67,10 @@ function VentasPorUsuarioRow({
       {/* Avatar + nombre + ventas + monto */}
       <View className="flex-row items-center gap-3">
         {/* Avatar circular */}
-        <View className="h-8 w-8 shrink-0 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(234,88,12,0.08)" }}>
+        <View
+          className="h-8 w-8 shrink-0 overflow-hidden rounded-full"
+          style={{ backgroundColor: "rgba(234,88,12,0.08)" }}
+        >
           {showPhoto ? (
             <Image
               source={{ uri: item.foto }}
@@ -143,7 +146,7 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   return (
     <SectionCard title="Ventas por Usuario">
       {data.length === 0 ? (
-        <EmptyState message="Sin datos en este período" iconName="person.2.fill" />
+        <EmptyState title="Sin datos en este período" iconName="person.2.fill" />
       ) : (
         <>
           <View>

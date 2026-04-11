@@ -1,16 +1,24 @@
 import { notify } from "@/lib/notify";
+import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import { DesignSystem, DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import { Strings } from "@/constants/strings";
-import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
+import { useCompleteVenta } from "@/hooks/use-complete-venta";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { useProductosStore } from "@/store/productos-store";
-import { useSessionStore } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useUndoRedo } from "@/hooks/useUndoRedo";
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Platform, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import Animated, {
   useSharedValue,
   withSpring,
@@ -24,35 +32,33 @@ import ConfirmAlert from "../ui/ConfirmAlert";
 import { IconSymbol } from "../ui/icon-symbol";
 import EmptyState from "../ui/EmptyState";
 import QuantityStepper from "./QuantityStepper";
-import { DesignSystem } from "@/constants/design-system";
-
-const DESKTOP_MIN_WIDTH = 768;
 
 export default function CartPanel() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDark, colors } = useThemeColors();
+
   const items = useVentasStore((s) => s.items);
   const removeItem = useVentasStore((s) => s.removeItem);
   const updateQuantity = useVentasStore((s) => s.updateQuantity);
   const getTotal = useVentasStore((s) => s.getTotal);
   const clearCart = useVentasStore((s) => s.clearCart);
+
   const confirmVisible = useCheckoutStore((s) => s.confirmVisible);
   const processing = useCheckoutStore((s) => s.processing);
   const openConfirm = useCheckoutStore((s) => s.openConfirm);
   const closeConfirm = useCheckoutStore((s) => s.closeConfirm);
-  const setProcessing = useCheckoutStore((s) => s.setProcessing);
-  const setSuccessVenta = useCheckoutStore((s) => s.setSuccessVenta);
+
   const deleteConfirmItem = useVentasUIStore((s) => s.deleteConfirmItem);
   const openDeleteConfirm = useVentasUIStore((s) => s.openDeleteConfirm);
   const closeDeleteConfirm = useVentasUIStore((s) => s.closeDeleteConfirm);
-  const negocioId = useSessionStore((s) => s.negocioId);
-  const sucursalId = useSessionStore((s) => s.sucursalId);
-  const userId = useSessionStore((s) => s.userId);
+
+  const haptic = useHaptic();
   const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
-  const haptic = useHaptic();
   const total = getTotal();
 
+  // ── Animación de éxito ────────────────────────────────────────────────
   const successScale = useSharedValue(0);
   const successOpacity = useSharedValue(0);
   const listOpacity = useSharedValue(1);
@@ -71,6 +77,12 @@ export default function CartPanel() {
     successOpacity.value = 0;
   }, [successScale, successOpacity]);
 
+  const { completeVenta } = useCompleteVenta(() => {
+    playSuccessAnimation();
+    setTimeout(resetSuccessAnimation, 800);
+  });
+
+  // ── Limpiar carrito ───────────────────────────────────────────────────
   const handleClearCartPress = useCallback(() => {
     haptic();
     setClearCartConfirmVisible(true);
@@ -79,14 +91,12 @@ export default function CartPanel() {
   const handleConfirmClearCart = useCallback(() => {
     setIsClearing(true);
     listOpacity.value = withTiming(0, { duration: DesignSystem.animations.normal });
-
     setTimeout(() => {
       clearCart();
       setIsClearing(false);
       listOpacity.value = 1;
       notify.info({ title: Strings.ventas.cartEmptied });
     }, DesignSystem.animations.normal + 100);
-
     setClearCartConfirmVisible(false);
   }, [clearCart, listOpacity]);
 
@@ -96,13 +106,11 @@ export default function CartPanel() {
     setClearCartConfirmVisible(false);
   }, [listOpacity]);
 
+  // ── Eliminar ítem ─────────────────────────────────────────────────────
   const handleMinus = useCallback(
-    (item: (typeof items)[0]) => {
+    (item: CartItem) => {
       if (item.quantity === 1) {
-        openDeleteConfirm({
-          productId: item.productId,
-          nombre: item.product.nombre,
-        });
+        openDeleteConfirm({ productId: item.productId, nombre: item.product.nombre });
       } else {
         updateQuantity(item.productId, item.quantity - 1);
       }
@@ -110,134 +118,84 @@ export default function CartPanel() {
     [openDeleteConfirm, updateQuantity]
   );
 
-  const handleConfirmRemove = () => {
+  const handleConfirmRemove = useCallback(() => {
     if (deleteConfirmItem) {
       removeItem(deleteConfirmItem.productId);
-      notify.warning({
-        title: `${deleteConfirmItem.nombre} eliminado del carrito`,
-      });
+      notify.warning({ title: `${deleteConfirmItem.nombre} eliminado del carrito` });
       closeDeleteConfirm();
     }
-  };
+  }, [deleteConfirmItem, removeItem, closeDeleteConfirm]);
 
-  const handleCompleteVenta = async () => {
-    if (useCheckoutStore.getState().processing) return;
-    setProcessing(true);
-    closeConfirm();
-
-    if (!negocioId || !userId) {
-      notify.error({ title: Strings.errors.session });
-      setProcessing(false);
-      return;
-    }
-    try {
-      const subtotal = getTotal();
-      const result = await completeVentaFlow({
-        items,
-        negocioId,
-        sucursalId: sucursalId ?? "",
-        userId,
-        total: subtotal,
-        subtotal,
-      });
-
-      const products = useProductosStore.getState().products;
-      const updated = products.map((p) => {
-        const cartItem = items.find((i) => i.productId === p.id);
-        return cartItem ? { ...p, cantidad: p.cantidad - cartItem.quantity } : p;
-      });
-      useProductosStore.getState().setProducts(updated);
-
-      playSuccessAnimation();
-
-      setTimeout(() => {
-        clearCart();
-
-        const fechaStr = result.fecha.toLocaleString("es", {
-          day: "numeric",
-          month: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
-
-        const ventaItems = items.map((i) => ({
-          nombre: i.product.nombre,
-          cantidad: i.quantity,
-          precioUnitario: i.unitPrice,
-          totalLinea: i.unitPrice * i.quantity,
-        }));
-
-        notify.success({
-          title: "Venta completada",
-          description: `Total: $${result.total.toLocaleString()}`,
-        });
-        setSuccessVenta({
-          id: result.ventaId,
-          fecha: fechaStr,
-          total: result.total,
-          subtotal,
-          descuento: 0,
-          items: ventaItems,
-        });
-
-        resetSuccessAnimation();
-        setProcessing(false);
-      }, 800);
-    } catch (err) {
-      console.error("Error al completar venta:", err);
-      notify.error({ title: Strings.ventas.errorRegisteringSale });
-      setProcessing(false);
-      closeConfirm();
-      resetSuccessAnimation();
-    }
-  };
-
+  // ── Render de ítem ────────────────────────────────────────────────────
   const renderItem = useCallback(
     ({ item }: { item: CartItem }) => (
       <View
-        className="flex-row items-center gap-4 px-6 py-4"
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 16,
+          paddingHorizontal: 24,
+          paddingVertical: 16,
+        }}
         accessibilityLabel={`${item.product.nombre}, cantidad ${item.quantity}, precio ${item.unitPrice}`}
       >
-        <View 
-          className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#F5F5F4] dark:bg-[#1A1F2B]"
+        <View
           style={{
-            boxShadow: Platform.OS === 'web' ? '0 4px 12px rgba(0,0,0,0.03)' : undefined,
+            height: 64,
+            width: 64,
+            borderRadius: 16,
+            overflow: "hidden",
+            backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
+            flexShrink: 0,
+            ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(0,0,0,0.03)" } : {}),
           }}
         >
           {item.product.imagen?.trim() ? (
             <Image
               source={{ uri: item.product.imagen }}
-              className="h-full w-full"
+              style={{ width: "100%", height: "100%" }}
               contentFit="cover"
             />
           ) : (
-            <View className="h-full w-full items-center justify-center">
-              <IconSymbol name="photo.fill" size={24} color="#9ca3af" />
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <IconSymbol name="photo.fill" size={24} color={colors.textMuted} />
             </View>
           )}
         </View>
-        <View className="min-w-0 flex-1 shrink justify-center gap-0.5">
+
+        <View style={{ flex: 1, minWidth: 0, justifyContent: "center", gap: 2 }}>
           <Text
-            className="text-[14px] font-bold text-[#111827] dark:text-[#F9FAFB] leading-tight"
-            style={{ fontFamily: AppFonts.bodyStrong }}
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: colors.textPrimary,
+              fontFamily: AppFonts.bodyStrong,
+              lineHeight: 20,
+            }}
             numberOfLines={2}
           >
             {item.product.nombre}
           </Text>
           <Text
-            className="text-[13px] text-[#6B7280] dark:text-[#9CA3AF] tabular-nums"
-            style={{ fontFamily: AppFonts.body }}
+            style={{
+              fontSize: 13,
+              color: colors.textSecondary,
+              fontFamily: AppFonts.body,
+            }}
             numberOfLines={1}
           >
             ${item.unitPrice.toLocaleString()} cada uno
           </Text>
         </View>
-        <View className="items-end gap-2">
-          <Text 
-            className="text-[14px] font-bold text-[#111827] dark:text-[#F9FAFB] tabular-nums"
-            style={{ fontFamily: AppFonts.bodyStrong }}
+
+        <View style={{ alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: colors.textPrimary,
+              fontFamily: AppFonts.bodyStrong,
+            }}
           >
             ${(item.unitPrice * item.quantity).toLocaleString()}
           </Text>
@@ -249,29 +207,28 @@ export default function CartPanel() {
         </View>
       </View>
     ),
-    [handleMinus, updateQuantity]
+    [isDark, colors, handleMinus, updateQuantity]
   );
 
   if (items.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center px-4 py-16">
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 16 }}>
         <EmptyState
           icon="cart"
           title={Strings.ventas.emptyCart}
           description={Strings.ventas.emptyCartHint}
-          iconColor="#9ca3af"
+          iconColor={colors.textMuted}
         />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 flex-col">
+    <View style={{ flex: 1, flexDirection: "column" }}>
       <Animated.View style={{ flex: 1, opacity: listOpacity }}>
         <FlashList
           data={items}
           keyExtractor={(item: CartItem) => item.productId}
-          className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem}
@@ -279,6 +236,7 @@ export default function CartPanel() {
         />
       </Animated.View>
 
+      {/* ── Diálogos de confirmación ──────────────────────────────────── */}
       <ConfirmAlert
         visible={!!deleteConfirmItem}
         title={Strings.ventas.removeFromCart}
@@ -289,18 +247,16 @@ export default function CartPanel() {
         onCancel={closeDeleteConfirm}
         danger
       />
-
       <ConfirmAlert
         visible={confirmVisible}
         title={Strings.ventas.completeSale}
         message={Strings.ventas.confirmComplete}
         confirmText={Strings.ventas.accept}
         cancelText={Strings.common.cancel}
-        onConfirm={handleCompleteVenta}
+        onConfirm={completeVenta}
         onCancel={closeConfirm}
         danger={false}
       />
-
       <ConfirmAlert
         visible={clearCartConfirmVisible}
         title={Strings.ventas.clearCartTitle}
@@ -312,63 +268,84 @@ export default function CartPanel() {
         danger
       />
 
-      {/* ── Footer: Total + Action Buttons ── */}
+      {/* ── Footer: total + acciones ──────────────────────────────────── */}
       <View
-        className="bg-white px-6 pt-6 pb-8 dark:bg-[#111820]"
         style={{
+          backgroundColor: isDark ? AppColors.dark.surface : AppColors.light.surface,
+          paddingHorizontal: 24,
+          paddingTop: 24,
+          paddingBottom: 32,
           borderTopWidth: 1.5,
-          borderTopColor: "rgba(0,0,0,0.03)",
+          borderTopColor: colors.border,
         }}
       >
+        {/* Checkmark animado de éxito */}
         <Animated.View
-          style={[
-            {
-              position: "absolute",
-              top: -24,
-              right: 24,
-              zIndex: 10,
-              opacity: successOpacity,
-              transform: [{ scale: successScale }],
-            },
-          ]}
+          style={{
+            position: "absolute",
+            top: -24,
+            right: 24,
+            zIndex: 10,
+            opacity: successOpacity,
+            transform: [{ scale: successScale }],
+          }}
         >
-          <View 
-            className="items-center justify-center rounded-full bg-green-500 p-4"
+          <View
             style={{
-              boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(34, 197, 94, 0.3)' : undefined,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 9999,
+              backgroundColor: AppColors.success,
+              padding: 16,
+              ...(Platform.OS === "web" ? { boxShadow: "0 12px 24px rgba(34, 197, 94, 0.3)" } : {}),
             }}
           >
             <IconSymbol name="checkmark" size={32} color="#ffffff" />
           </View>
         </Animated.View>
 
-        <View className="mb-6 flex-row items-end justify-between">
-          <View>
-            <Text
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] dark:text-[#5A6478] mb-1"
-              style={{ fontFamily: AppFonts.bodyStrong }}
-            >
-              TOTAL A PAGAR
-            </Text>
-            <Text
-              className="text-5xl text-[#ea580c] dark:text-[#FB923C] tracking-tighter"
-              style={{ fontFamily: AppFonts.display, lineHeight: 54 }}
-            >
-              ${total.toLocaleString()}
-            </Text>
-          </View>
+        {/* Total */}
+        <View style={{ marginBottom: 24 }}>
+          <Text
+            style={{
+              fontSize: 10,
+              fontWeight: "700",
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              color: colors.textMuted,
+              fontFamily: AppFonts.bodyStrong,
+              marginBottom: 4,
+            }}
+          >
+            TOTAL A PAGAR
+          </Text>
+          <Text
+            style={{
+              fontSize: 48,
+              color: AppColors.primary,
+              fontFamily: AppFonts.display,
+              letterSpacing: -1,
+              lineHeight: 54,
+            }}
+          >
+            ${total.toLocaleString()}
+          </Text>
         </View>
 
-        <View className="gap-3">
+        {/* Botones */}
+        <View style={{ gap: 12 }}>
           <TouchableOpacity
-            className="items-center justify-center rounded-[24px] py-5 active:opacity-90"
-            activeOpacity={0.9}
             onPress={openConfirm}
             disabled={processing || isClearing}
+            activeOpacity={0.9}
             style={{
-              backgroundColor: "#ea580c",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: DesignSystem.radius.xxl,
+              paddingVertical: 20,
+              backgroundColor: AppColors.primary,
               opacity: processing || isClearing ? 0.6 : 1,
-              boxShadow: Platform.OS === 'web' ? '0 12px 24px rgba(234, 88, 12, 0.2)' : undefined,
+              ...(Platform.OS === "web" ? { boxShadow: "0 12px 24px rgba(234, 88, 12, 0.2)" } : {}),
             }}
             accessibilityRole="button"
             accessibilityLabel="Completar venta"
@@ -377,8 +354,14 @@ export default function CartPanel() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text
-                className="text-[16px] font-bold tracking-wider text-white uppercase"
-                style={{ fontFamily: AppFonts.bodyStrong }}
+                style={{
+                  fontSize: 16,
+                  fontWeight: "700",
+                  letterSpacing: 1.5,
+                  color: "#ffffff",
+                  textTransform: "uppercase",
+                  fontFamily: AppFonts.bodyStrong,
+                }}
               >
                 {Strings.ventas.completeSale}
               </Text>
@@ -387,18 +370,28 @@ export default function CartPanel() {
 
           {isDesktop && (
             <TouchableOpacity
-              className="items-center justify-center rounded-[24px] py-4 active:opacity-90 mt-2"
-              activeOpacity={0.85}
               onPress={handleClearCartPress}
               disabled={processing || isClearing}
+              activeOpacity={0.85}
               style={{
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: DesignSystem.radius.xxl,
+                paddingVertical: 16,
+                marginTop: 4,
                 borderWidth: 1.5,
-                borderColor: "rgba(234,88,12,0.15)",
+                borderColor: AppColors.primaryGhost,
               }}
             >
               <Text
-                className="text-sm font-bold text-[#ea580c] dark:text-[#FB923C] uppercase tracking-widest"
-                style={{ fontFamily: AppFonts.bodyStrong }}
+                style={{
+                  fontSize: 13,
+                  fontWeight: "700",
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: AppColors.primary,
+                  fontFamily: AppFonts.bodyStrong,
+                }}
               >
                 {Strings.ventas.clearCart}
               </Text>

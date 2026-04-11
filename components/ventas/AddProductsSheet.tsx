@@ -1,17 +1,15 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import ProductListContent from "@/components/ventas/ProductListContent";
 import QrScannerSheet from "@/components/ventas/QrScannerSheet";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
+import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import { notify } from "@/lib/notify";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Animated,
   Keyboard,
-  PanResponder,
   Platform,
   Pressable,
   StyleSheet,
@@ -21,130 +19,111 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 const SHEET_HEIGHT_PERCENT = 0.72;
 const DISMISS_THRESHOLD = 80;
-const MOBILE_MAX_WIDTH = 768;
+const SPRING_CONFIG = { damping: 20, stiffness: 200, mass: 0.8 };
 
 /**
  * AddProductsSheet — Digital Atelier style.
  *
- * Immersive bottom sheet for mobile.
- * Navy dark mode (#0C0F14), stone light mode (#FAFAF9).
- * Premium handles and borders.
+ * Sheet de búsqueda de productos para mobile.
+ * Usa Reanimated + GestureDetector (cumple la convención del proyecto).
  */
 export default function AddProductsSheet() {
   const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme() ?? "light";
-  const isDark = colorScheme === "dark";
-
+  const { isDark, colors } = useThemeColors();
   const haptic = useHaptic();
-  
-  const colors = isDark ? AppColors.dark : AppColors.light;
-  const sheetBg = colors.surface;
-  const backdropBg = isDark ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.45)";
-  
+
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-  const [qrScannerVisible, setQrScannerVisible] = React.useState(false);
-  const slideAnim = useRef(new Animated.Value(height)).current;
-  const dragOffsetRef = useRef(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [qrScannerVisible, setQrScannerVisible] = useState(false);
 
   const baseSheetHeight = height * SHEET_HEIGHT_PERCENT;
   const spaceAboveKeyboard = height - insets.top - keyboardHeight;
   const sheetHeight =
-    keyboardHeight > 0
-      ? Math.min(baseSheetHeight, spaceAboveKeyboard - 24)
-      : baseSheetHeight;
+    keyboardHeight > 0 ? Math.min(baseSheetHeight, spaceAboveKeyboard - 24) : baseSheetHeight;
 
-  const showProductAddedToast = useCallback(
-    (productName: string) =>
-      notify.success({ title: `${productName} agregado` }),
-    [],
-  );
+  // ── Animación ─────────────────────────────────────────────────────────
+  const translateY = useSharedValue(height);
+  const dragOffset = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   const closeSheet = useCallback(() => {
     haptic();
-    Animated.timing(slideAnim, {
-      toValue: height,
-      duration: 250,
-      useNativeDriver: Platform.OS !== "web",
-    }).start(() => closeSheetStore());
-  }, [haptic, height, slideAnim, closeSheetStore]);
+    translateY.value = withTiming(height, { duration: 250 }, () => {
+      runOnJS(closeSheetStore)();
+    });
+  }, [haptic, height, translateY, closeSheetStore]);
 
   const closeSheetRef = useRef(closeSheet);
   closeSheetRef.current = closeSheet;
 
   useEffect(() => {
     if (sheetVisible) {
-      slideAnim.setValue(height);
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        tension: 65,
-        friction: 12,
-        useNativeDriver: Platform.OS !== "web",
-      }).start();
+      translateY.value = height;
+      translateY.value = withSpring(0, SPRING_CONFIG);
     }
-  }, [sheetVisible, slideAnim, height]);
+  }, [sheetVisible, height, translateY]);
 
+  // ── Teclado ───────────────────────────────────────────────────────────
   useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => setKeyboardHeight(e.endCoordinates.height),
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvent, (e) =>
+      setKeyboardHeight(e.endCoordinates.height)
     );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardHeight(0),
-    );
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
     return () => {
       showSub.remove();
       hideSub.remove();
     };
   }, []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
-      onPanResponderGrant: () => {
-        slideAnim.stopAnimation((v) => {
-          dragOffsetRef.current = v;
-        });
-      },
-      onPanResponderMove: (_, gestureState) => {
-        const newY = Math.max(0, dragOffsetRef.current + gestureState.dy);
-        slideAnim.setValue(newY);
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy > DISMISS_THRESHOLD || gestureState.vy > 0.5) {
-          closeSheetRef.current();
-        } else {
-          Animated.spring(slideAnim, {
-            toValue: 0,
-            tension: 65,
-            friction: 12,
-            useNativeDriver: Platform.OS !== "web",
-          }).start();
-        }
-      },
-    }),
-  ).current;
+  // ── Gesto de arrastre para cerrar ─────────────────────────────────────
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      dragOffset.value = translateY.value;
+    })
+    .onUpdate((e) => {
+      translateY.value = Math.max(0, dragOffset.value + e.translationY);
+    })
+    .onEnd((e) => {
+      if (e.translationY > DISMISS_THRESHOLD || e.velocityY > 500) {
+        runOnJS(closeSheetRef.current)();
+      } else {
+        translateY.value = withSpring(0, SPRING_CONFIG);
+      }
+    });
 
-  if (!sheetVisible || width >= MOBILE_MAX_WIDTH) return null;
+  const showProductAddedToast = useCallback(
+    (productName: string) => notify.success({ title: `${productName} agregado` }),
+    []
+  );
+
+  if (!sheetVisible || width >= DESKTOP_MIN_WIDTH) return null;
+
+  const backdropBg = isDark ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.45)";
 
   return (
     <View
       style={[StyleSheet.absoluteFill, { paddingTop: insets.top, zIndex: 9000 }]}
       pointerEvents="box-none"
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: backdropBg,
-        }}
-      >
+      <View style={{ flex: 1, backgroundColor: backdropBg }}>
         <Pressable
           style={{ flex: 1 }}
           onPress={() => {
@@ -152,116 +131,115 @@ export default function AddProductsSheet() {
             closeSheet();
           }}
         />
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: sheetHeight,
-            backgroundColor: sheetBg,
-            borderTopLeftRadius: 28,
-            borderTopRightRadius: 28,
-            overflow: "hidden",
-            transform: [{ translateY: slideAnim }],
-            ...(Platform.OS === "web"
-              ? {
-                  boxShadow: isDark
-                    ? "0px -4px 32px 0px rgba(0,0,0,0.6)"
-                    : "0px -4px 32px 0px rgba(0,0,0,0.14)",
-                }
-              : {
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: -6 },
-                  shadowOpacity: isDark ? 0.6 : 0.14,
-                  shadowRadius: 24,
-                  elevation: 20,
-                }),
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <View
-              style={{
-                paddingTop: 12,
-                paddingBottom: 12,
-                paddingHorizontal: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: colors.border,
-              }}
-            >
+
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: sheetHeight,
+                backgroundColor: colors.surface,
+                borderTopLeftRadius: 28,
+                borderTopRightRadius: 28,
+                overflow: "hidden",
+                ...(Platform.OS === "web"
+                  ? {
+                      boxShadow: isDark
+                        ? "0px -4px 32px 0px rgba(0,0,0,0.6)"
+                        : "0px -4px 32px 0px rgba(0,0,0,0.14)",
+                    }
+                  : {
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: -6 },
+                      shadowOpacity: isDark ? 0.6 : 0.14,
+                      shadowRadius: 24,
+                      elevation: 20,
+                    }),
+              },
+              animatedStyle,
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              {/* ── Header ────────────────────────────────────────── */}
               <View
                 style={{
-                  width: 40,
-                  height: 5,
-                  borderRadius: 2.5,
-                  backgroundColor: isDark ? "#2C3440" : "#E5E5EA",
-                  alignSelf: "center",
-                  marginBottom: 16,
-                }}
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 4,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingHorizontal: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
                 }}
               >
-                <Text
+                {/* Handle */}
+                <View
                   style={{
-                    fontSize: 20,
-                    fontWeight: "800",
-                    color: colors.textPrimary,
-                    letterSpacing: -0.5,
-                    fontFamily: AppFonts.heading,
+                    width: 40,
+                    height: 5,
+                    borderRadius: 2.5,
+                    backgroundColor: isDark ? "#2C3440" : "#E5E5EA",
+                    alignSelf: "center",
+                    marginBottom: 16,
                   }}
-                >
-                  Agregar productos
-                </Text>
-                <TouchableOpacity
-                  onPress={closeSheet}
+                />
+                <View
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: isDark ? "#1A1F2B" : "#F5F5F4",
+                    flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 4,
                   }}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <IconSymbol
-                    name="xmark"
-                    size={14}
-                    color={colors.textSecondary}
-                  />
-                </TouchableOpacity>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "800",
+                      color: colors.textPrimary,
+                      letterSpacing: -0.5,
+                      fontFamily: AppFonts.heading,
+                    }}
+                  >
+                    Agregar productos
+                  </Text>
+                  <TouchableOpacity
+                    onPress={closeSheet}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: isDark ? "#1A1F2B" : "#F5F5F4",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel="Cerrar"
+                  >
+                    <IconSymbol name="xmark" size={14} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* ── Lista de productos ─────────────────────────── */}
+              <View style={{ flex: 1, minHeight: 0 }}>
+                <ProductListContent
+                  searchContextId="ventas"
+                  onProductAdded={showProductAddedToast}
+                  searchSize="large"
+                  showQrButton
+                  onQrPress={Platform.OS !== "web" ? () => setQrScannerVisible(true) : undefined}
+                  listKey="mobile"
+                  contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
+                  keyboardDismissMode="on-drag"
+                  keyboardShouldPersistTaps="handled"
+                />
               </View>
             </View>
-
-            <View style={{ flex: 1, minHeight: 0 }}>
-              <ProductListContent
-                searchContextId="ventas"
-                onProductAdded={showProductAddedToast}
-                searchSize="large"
-                showQrButton
-                onQrPress={
-                  Platform.OS !== "web"
-                    ? () => setQrScannerVisible(true)
-                    : undefined
-                }
-                listKey="mobile"
-                contentContainerStyle={{
-                  paddingBottom: 100 + insets.bottom,
-                }}
-                keyboardDismissMode="on-drag"
-                keyboardShouldPersistTaps="handled"
-              />
-            </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
+        </GestureDetector>
       </View>
+
       <QrScannerSheet
         visible={qrScannerVisible}
         onClose={() => setQrScannerVisible(false)}

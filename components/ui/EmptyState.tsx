@@ -1,18 +1,10 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import React from "react";
 import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Text, View } from "react-native";
 
 type EmptyStateIcon = "cart" | "clock" | "search" | "products" | "error";
-
-interface EmptyStateProps {
-  icon: EmptyStateIcon;
-  title: string;
-  description?: string;
-  iconColor?: string;
-}
 
 const ICON_MAP: Record<EmptyStateIcon, string> = {
   cart: "cart.fill",
@@ -22,34 +14,51 @@ const ICON_MAP: Record<EmptyStateIcon, string> = {
   error: "exclamationmark.triangle.fill",
 };
 
+interface EmptyStateProps {
+  /** Ícono predefinido (uso habitual) */
+  icon?: EmptyStateIcon;
+  /** SF Symbol raw para casos que no están en el mapa predefinido */
+  iconName?: string;
+  title: string;
+  description?: string;
+  iconColor?: string;
+}
+
 /**
  * EmptyState — Digital Atelier style.
+ *
+ * Acepta un ícono predefinido (`icon`) o un SF Symbol arbitrario (`iconName`).
+ * Unifica el componente duplicado que antes existía en resumen/shared/EmptyState.
  */
 export default function EmptyState({
   icon,
+  iconName,
   title,
   description,
-  iconColor = "#ea580c",
+  iconColor,
 }: EmptyStateProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const colors = isDark ? AppColors.dark : AppColors.light;
+  const { colors } = useThemeColors();
+
+  const resolvedIconColor = iconColor ?? colors.textMuted;
+  const resolvedIconName = icon ? ICON_MAP[icon] : iconName;
 
   return (
-    <View style={{ alignItems: "center", paddingVertical: 48 }}>
-      <View
-        style={{
-          height: 64,
-          width: 64,
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 20,
-          backgroundColor: `${iconColor}15`,
-          marginBottom: 16,
-        }}
-      >
-        <IconSymbol name={ICON_MAP[icon] as any} size={32} color={iconColor} />
-      </View>
+    <View style={{ alignItems: "center", paddingVertical: 32 }}>
+      {resolvedIconName && (
+        <View
+          style={{
+            height: 64,
+            width: 64,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 20,
+            backgroundColor: `${resolvedIconColor}15`,
+            marginBottom: 16,
+          }}
+        >
+          <IconSymbol name={resolvedIconName as any} size={32} color={resolvedIconColor} />
+        </View>
+      )}
       <Text
         style={{
           textAlign: "center",

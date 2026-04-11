@@ -1,9 +1,10 @@
-import React from "react";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import React, { useState } from "react";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useHaptic } from "@/hooks/use-haptic";
-import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
+import { AppFonts } from "@/constants/typography";
 import { Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { IconSymbol } from "../ui/icon-symbol";
 
 interface SearchProductsProps {
@@ -17,51 +18,79 @@ interface SearchProductsProps {
 /**
  * SearchProducts — Digital Atelier style.
  *
- * Minimalist search input with premium radius and thematic colors.
- * Uses navy dark mode and stone light mode.
+ * Input de búsqueda minimalista con interacciones premium.
  */
 const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function SearchProducts(
   { searchText, onSearchChange, size = "default", showQrButton = false, onQrPress },
   ref
 ) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, colors } = useThemeColors();
   const haptic = useHaptic();
-  const colors = isDark ? AppColors.dark : AppColors.light;
+  const [isFocused, setIsFocused] = React.useState(false);
 
-  const bg = isDark ? "#1A1F2B" : "#F5F5F4";
-  const textColor = colors.textPrimary;
-  const placeholderColor = isDark ? "#5A6478" : "#9CA3AF";
-  
+  const borderRadius = 14;
   const iconSize = size === "large" ? 20 : 18;
   const inputHeight = size === "large" ? 48 : 42;
-  const borderRadius = 14;
   const hasText = searchText.trim().length > 0;
+
+  // Premium Animated Container Style
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: withTiming(
+        isDark
+          ? isFocused
+            ? AppColors.dark.surfaceElevated // Lighter/focused bg in dark mode
+            : AppColors.dark.canvas // Match with canvas initially
+          : isFocused
+            ? "#FFFFFF" // White when active in light mode
+            : AppColors.light.surfaceHover, // Subtle gray otherwise
+        { duration: 250 }
+      ),
+      borderColor: withTiming(
+        isFocused
+          ? isDark
+            ? colors.border
+            : "#D1D5DB"
+          : isDark
+            ? "transparent"
+            : "transparent",
+        { duration: 250 }
+      ),
+    };
+  });
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: bg,
-          borderRadius: borderRadius,
-          paddingHorizontal: 16,
-          height: inputHeight,
-          gap: 12,
-          borderWidth: 1,
-          borderColor: isDark ? colors.border : "transparent",
-        }}
+      <Animated.View
+        style={[
+          {
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            borderRadius,
+            paddingHorizontal: 16,
+            height: inputHeight,
+            gap: 12,
+            borderWidth: 1,
+            ...(Platform.OS === "web" && isFocused
+              ? { boxShadow: `0 0 0 3px ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)"}` }
+              : {}),
+          },
+          animatedContainerStyle,
+        ]}
       >
-        <IconSymbol name="magnifyingglass" size={iconSize} color={placeholderColor} />
+        <IconSymbol 
+          name="magnifyingglass" 
+          size={iconSize} 
+          color={isFocused ? colors.textPrimary : colors.textMuted} 
+        />
         <TextInput
           ref={ref}
           style={[
             {
               flex: 1,
               fontSize: 16,
-              color: textColor,
+              color: colors.textPrimary,
               fontFamily: AppFonts.body,
               paddingVertical: 0,
               letterSpacing: -0.3,
@@ -70,28 +99,34 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
             Platform.OS === "web" ? { outlineStyle: "none" as const } : undefined,
           ]}
           placeholder="Buscar producto..."
-          placeholderTextColor={placeholderColor}
+          placeholderTextColor={colors.textMuted}
           value={searchText}
           onChangeText={onSearchChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          selectionColor={AppColors.primary}
         />
         {hasText && (
           <Pressable
-            onPress={() => onSearchChange("")}
+            onPress={() => {
+              haptic();
+              onSearchChange("");
+            }}
             style={{
-              width: 22,
-              height: 22,
-              borderRadius: 11,
-              backgroundColor: isDark ? "#2C3440" : "#E5E5EA",
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: isDark ? AppColors.dark.surfaceHover : "#E5E5EA",
               alignItems: "center",
               justifyContent: "center",
             }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityLabel="Limpiar búsqueda"
           >
-            <IconSymbol name="xmark" size={12} color={isDark ? "#F5F5F7" : "#FFFFFF"} />
+            <IconSymbol name="xmark" size={13} color={isDark ? "#F5F5F7" : "#FFFFFF"} />
           </Pressable>
         )}
-      </View>
+      </Animated.View>
 
       {showQrButton && (
         <TouchableOpacity
@@ -102,15 +137,19 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
           style={{
             width: inputHeight,
             height: inputHeight,
-            borderRadius: borderRadius,
-            backgroundColor: "#ea580c",
+            borderRadius,
+            backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
+            borderWidth: 1,
+            borderColor: colors.border,
             alignItems: "center",
             justifyContent: "center",
-            ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(234, 88, 12, 0.2)" } : {}),
+            ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.04)" } : {}),
+            transform: [{ scale: isFocused ? 0.98 : 1 }], // Subtle connection slightly shrinking when search focused
           }}
           activeOpacity={0.85}
+          accessibilityLabel="Escanear QR"
         >
-          <IconSymbol name="qrcode" size={24} color="#FFFFFF" />
+          <IconSymbol name="qrcode" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
       )}
     </View>

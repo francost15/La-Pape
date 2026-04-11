@@ -1,11 +1,13 @@
 import SearchProducts from "@/components/search/SearchProducts";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import type { SearchContextId } from "@/store/product-search-store";
 import EmptyState from "@/components/ui/EmptyState";
-import { AppFonts } from "@/constants/typography";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { AppColors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AppFonts } from "@/constants/typography";
+import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import React from "react";
 import {
   FlatList,
@@ -38,8 +40,8 @@ interface ProductListContentProps {
 /**
  * ProductListContent — Digital Atelier style.
  *
- * Renders search bar + product list. Desktop uses ProductItemVenta rows,
- * mobile uses ProductCardMobile rows.
+ * Renderiza la barra de búsqueda + lista de productos.
+ * Desktop usa ProductItemVenta (filas), mobile usa ProductCardMobile.
  */
 export default function ProductListContent({
   searchContextId,
@@ -54,13 +56,11 @@ export default function ProductListContent({
   searchInputRef,
 }: ProductListContentProps) {
   const { width } = useWindowDimensions();
-  const isDesktop = width >= 768;
+  const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDark, colors } = useThemeColors();
   const { products, error, retry, refresh, loading } = useProductosScreen();
   const { searchText, setSearchText, filteredProducts } = useProductSearch(searchContextId);
   const [refreshing, setRefreshing] = React.useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const colors = isDark ? AppColors.dark : AppColors.light;
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -72,7 +72,7 @@ export default function ProductListContent({
 
   return (
     <View style={{ flex: 1, minHeight: 0 }}>
-      {/* ── Search + Count ──────────────────────────────── */}
+      {/* ── Búsqueda + conteo ───────────────────────────────── */}
       <View
         style={{
           paddingHorizontal: isDesktop ? 24 : 16,
@@ -88,12 +88,11 @@ export default function ProductListContent({
           showQrButton={showQrButton}
           onQrPress={onQrPress}
         />
-        {/* Product count hint */}
         {!error && productCount > 0 && (
           <Text
             style={{
               fontSize: 12,
-              color: isDark ? "#5A6478" : "#9CA3AF",
+              color: colors.textMuted,
               fontFamily: AppFonts.body,
               marginTop: 10,
               letterSpacing: 0.3,
@@ -106,7 +105,7 @@ export default function ProductListContent({
         )}
       </View>
 
-      {/* ── Content ─────────────────────────────────────── */}
+      {/* ── Contenido ───────────────────────────────────────── */}
       {error ? (
         <View
           style={{
@@ -130,7 +129,7 @@ export default function ProductListContent({
           </Text>
           <TouchableOpacity
             style={{
-              backgroundColor: "#ea580c",
+              backgroundColor: AppColors.primary,
               paddingHorizontal: 20,
               paddingVertical: 12,
               borderRadius: 14,
@@ -156,36 +155,65 @@ export default function ProductListContent({
           key={listKey}
           style={{ flex: 1 }}
           contentContainerStyle={[
-            {
-              paddingHorizontal: 0,
-              paddingBottom: 48,
-              flexGrow: 1,
-            },
+            { paddingHorizontal: 0, paddingBottom: 48, flexGrow: 1 },
             contentContainerStyle,
           ]}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ea580c" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={AppColors.primary}
+            />
           }
           ListEmptyComponent={
-            loading ? null : products.length === 0 ? (
+            loading ? (
+              <Animated.View entering={FadeIn} style={{ flex: 1, marginTop: 8 }}>
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <View
+                    key={`skeleton-${i}`}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: isDesktop ? 24 : 16,
+                      paddingVertical: 12,
+                      gap: 16,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors.border,
+                    }}
+                  >
+                    <Skeleton
+                      width={isDesktop ? 64 : 48}
+                      height={isDesktop ? 64 : 48}
+                      borderRadius={10}
+                    />
+                    <View style={{ flex: 1, gap: 8, justifyContent: "center" }}>
+                      <Skeleton width="65%" height={16} />
+                      <Skeleton width="40%" height={14} />
+                      <Skeleton width="25%" height={18} />
+                    </View>
+                    <Skeleton width={38} height={38} borderRadius={19} />
+                  </View>
+                ))}
+              </Animated.View>
+            ) : products.length === 0 ? (
               <EmptyState
                 icon="products"
                 title="No hay productos"
                 description="Crea productos para comenzar a vender"
-                iconColor={isDark ? "#5A6478" : "#9CA3AF"}
+                iconColor={colors.textMuted}
               />
             ) : (
               <EmptyState
                 icon="search"
                 title="Sin resultados"
                 description="No hay productos que coincidan"
-                iconColor={isDark ? "#5A6478" : "#9CA3AF"}
+                iconColor={colors.textMuted}
               />
             )
           }
           keyboardDismissMode={keyboardDismissMode}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-          renderItem={({ item }) => (
+          renderItem={({ item }) =>
             isDesktop ? (
               <ProductItemVenta
                 product={item}
@@ -198,7 +226,7 @@ export default function ProductListContent({
                 onProductAdded={() => onProductAdded?.(item.nombre)}
               />
             )
-          )}
+          }
         />
       )}
     </View>
