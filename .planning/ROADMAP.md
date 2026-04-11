@@ -32,7 +32,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 2. Running `npx jest` produces at least one passing smoke test without manual configuration workarounds
 3. When an unhandled JavaScript error occurs anywhere in the app, the screen shows a recovery message rather than going blank, and the exception appears in the Sentry dashboard
 4. The bottom sheet library (@gorhom/bottom-sheet) renders without errors on both iOS/Android New Architecture and web
-   **Plans**: TBD
+
+**Plans:** 5 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Firestore multi-tenant rules + NegocioRole interface + rol in session store
+- [ ] 01-02-PLAN.md — Migrate test runner from Vitest to jest-expo
+- [ ] 01-03-PLAN.md — Install Sentry + granular ErrorBoundary wrappers on all tabs
+- [ ] 01-04-PLAN.md — SinPermiso component + role guards for restricted tabs and screens
+- [ ] 01-05-PLAN.md — Install @gorhom/bottom-sheet and verify coexistence
 
 ### Phase 2: Checkout Discounts
 
