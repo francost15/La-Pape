@@ -2,7 +2,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency } from "@/lib/utils/format";
-import type { CategoriaVenta } from "@/store/resumen-store";
+import type { CategoriaVenta } from "@/interface/resumen";
 import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
@@ -29,13 +29,10 @@ function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   const cx = size / 2;
   const cy = size / 2;
 
-  let currentAngle = -90;
-
   const slices = data.map((d, i) => {
     const angle = (d.total / total) * 360;
-    const start = currentAngle;
-    const end = currentAngle + angle;
-    currentAngle += angle;
+    const start = -90 + data.slice(0, i).reduce((sum, prev) => sum + (prev.total / total) * 360, 0);
+    const end = start + angle;
 
     const toRad = (deg: number) => (deg * Math.PI) / 180;
     const x1o = cx + outerR * Math.cos(toRad(start));

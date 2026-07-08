@@ -1,18 +1,6 @@
-import { OnboardingStep, ONBOARDING_STEPS } from "@/lib/services/onboarding";
+import type { OnboardingStore } from "@/interface/onboarding";
+import { ONBOARDING_STEPS } from "@/lib/services/onboarding";
 import { create } from "zustand";
-
-interface OnboardingStore {
-  isVisible: boolean;
-  currentStepIndex: number;
-  completedSteps: string[];
-  isLoading: boolean;
-  show: () => void;
-  hide: () => void;
-  nextStep: () => void;
-  skip: () => void;
-  setCompletedSteps: (steps: string[]) => void;
-  getCurrentStep: () => OnboardingStep | null;
-}
 
 export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   isVisible: false,

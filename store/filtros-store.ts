@@ -1,7 +1,6 @@
-import type { Periodo, RangoFechas, Venta } from "@/interface";
+import type { FiltrosStore, Periodo, RangoFechas } from "@/interface/filtros";
+import type { Venta } from "@/interface/ventas";
 import { create } from "zustand";
-
-export type { Periodo, RangoFechas };
 
 export function filterVentasByPeriodo(
   ventas: Venta[],
@@ -45,13 +44,6 @@ export function filterVentasByPeriodo(
     const f = v.fecha instanceof Date ? v.fecha : new Date(v.fecha);
     return f >= inicio && f <= fin;
   });
-}
-
-interface FiltrosStore {
-  periodo: Periodo;
-  rangoPersonalizado: RangoFechas;
-  setPeriodo: (periodo: Periodo) => void;
-  setRangoPersonalizado: (rango: RangoFechas) => void;
 }
 
 export const useFiltrosStore = create<FiltrosStore>((set) => ({

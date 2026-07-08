@@ -1,3 +1,4 @@
+import type { SessionStore } from "@/interface/session";
 import { auth, db } from "@/lib/firebase";
 import { getUsuarioById, getUsuarioByEmail } from "@/lib/services/usuarios";
 import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
@@ -6,20 +7,6 @@ import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { create } from "zustand";
 import { useVentasStore } from "./ventas-store";
-
-interface SessionStore {
-  userId: string | null;
-  userEmail: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  negocioId: string | null;
-  sucursalId: string | null;
-  ready: boolean;
-  error: string | null;
-
-  hydrate: (user: User) => Promise<void>;
-  clear: () => void;
-}
 
 const initialState = {
   userId: null,

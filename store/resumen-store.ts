@@ -1,52 +1,15 @@
 import { Categoria, Product, Venta, VentaDetalle } from "@/interface";
+import type {
+  CategoriaVenta,
+  Metricas,
+  ProductoRanking,
+  ResumenState,
+  ResumenStore,
+  VentasPorUsuario,
+} from "@/interface/resumen";
 import { onVentasByNegocio } from "@/lib/services/ventas";
 import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
 import { create } from "zustand";
-
-// ─── Tipos ───────────────────────────────────────────────────────────
-
-export interface Metricas {
-  ventasTotales: number;
-  gananciaNeta: number;
-  transacciones: number;
-  devoluciones: number;
-  totalDevoluciones: number;
-  porcentajeGanancia: number;
-  promedioTransaccion: number;
-}
-
-export interface ProductoRanking {
-  producto: Product;
-  cantidad: number;
-  total: number;
-}
-
-export interface CategoriaVenta {
-  nombre: string;
-  total: number;
-}
-
-export interface VentasPorUsuario {
-  usuario_id: string;
-  nombre: string;
-  total: number;
-  transacciones: number;
-  foto?: string;
-}
-
-interface ResumenState {
-  ventas: Venta[];
-  detallesMap: Record<string, VentaDetalle[]>;
-  loading: boolean;
-  error: string | null;
-}
-
-interface ResumenActions {
-  subscribe: (negocioId: string) => () => void;
-  reset: () => void;
-}
-
-type ResumenStore = ResumenState & ResumenActions;
 
 const INITIAL_STATE: ResumenState = {
   ventas: [],
@@ -54,8 +17,6 @@ const INITIAL_STATE: ResumenState = {
   loading: true,
   error: null,
 };
-
-// ─── Store ───────────────────────────────────────────────────────────
 
 export const useResumenStore = create<ResumenStore>((set, get) => ({
   ...INITIAL_STATE,
@@ -70,7 +31,7 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
         ids.map(async (id) => ({
           id,
           dets: await getDetallesByVenta(id),
-        })),
+        }))
       );
       const stillEmpty: string[] = [];
       for (const { id, dets } of results) {
@@ -91,9 +52,7 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
           retryTimer = null;
         }
 
-        const idsToFetch = ventasFromDb
-          .map((v) => v.id)
-          .filter((id) => !cache[id]?.length);
+        const idsToFetch = ventasFromDb.map((v) => v.id).filter((id) => !cache[id]?.length);
 
         if (idsToFetch.length > 0) {
           const stillEmpty = await fetchDetalles(idsToFetch);
@@ -115,7 +74,7 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
       (err) => {
         console.error("Error en listener de resumen:", err);
         set({ error: "No se pudieron cargar los datos", loading: false });
-      },
+      }
     );
 
     return () => {
@@ -127,11 +86,9 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
   reset: () => set(INITIAL_STATE),
 }));
 
-// ─── Selectores puros ────────────────────────────────────────────────
-
 function getDetallesForVentas(
   ventaIds: string[],
-  detallesMap: Record<string, VentaDetalle[]>,
+  detallesMap: Record<string, VentaDetalle[]>
 ): VentaDetalle[] {
   const result: VentaDetalle[] = [];
   for (const id of ventaIds) {
@@ -144,7 +101,7 @@ function getDetallesForVentas(
 export function selectMetricas(
   ventasFiltradas: Venta[],
   detallesMap: Record<string, VentaDetalle[]>,
-  products: Product[],
+  products: Product[]
 ): Metricas {
   const pagadas = ventasFiltradas.filter((v) => v.estado === "PAGADA");
   const ventasTotales = pagadas.reduce((s, v) => s + v.total, 0);
@@ -166,10 +123,8 @@ export function selectMetricas(
   }
 
   const gananciaNeta = ventasTotales - costoTotal;
-  const porcentajeGanancia =
-    ventasTotales > 0 ? (gananciaNeta / ventasTotales) * 100 : 0;
-  const promedioTransaccion =
-    transacciones > 0 ? ventasTotales / transacciones : 0;
+  const porcentajeGanancia = ventasTotales > 0 ? (gananciaNeta / ventasTotales) * 100 : 0;
+  const promedioTransaccion = transacciones > 0 ? ventasTotales / transacciones : 0;
 
   return {
     ventasTotales,
@@ -185,11 +140,9 @@ export function selectMetricas(
 export function selectProductosRanking(
   ventasFiltradas: Venta[],
   detallesMap: Record<string, VentaDetalle[]>,
-  products: Product[],
+  products: Product[]
 ): { top: ProductoRanking[]; bottom: ProductoRanking[] } {
-  const pagadasIds = ventasFiltradas
-    .filter((v) => v.estado === "PAGADA")
-    .map((v) => v.id);
+  const pagadasIds = ventasFiltradas.filter((v) => v.estado === "PAGADA").map((v) => v.id);
   const detallesFiltrados = getDetallesForVentas(pagadasIds, detallesMap);
 
   const map = new Map<string, ProductoRanking>();
@@ -211,9 +164,7 @@ export function selectProductosRanking(
     }
   }
 
-  const sorted = Array.from(map.values()).sort(
-    (a, b) => b.cantidad - a.cantidad,
-  );
+  const sorted = Array.from(map.values()).sort((a, b) => b.cantidad - a.cantidad);
 
   return {
     top: sorted.slice(0, 5),
@@ -225,11 +176,9 @@ export function selectCategorias(
   ventasFiltradas: Venta[],
   detallesMap: Record<string, VentaDetalle[]>,
   products: Product[],
-  categories: Categoria[],
+  categories: Categoria[]
 ): CategoriaVenta[] {
-  const pagadasIds = ventasFiltradas
-    .filter((v) => v.estado === "PAGADA")
-    .map((v) => v.id);
+  const pagadasIds = ventasFiltradas.filter((v) => v.estado === "PAGADA").map((v) => v.id);
   const detallesFiltrados = getDetallesForVentas(pagadasIds, detallesMap);
 
   const catMap = new Map<string, number>();
@@ -258,18 +207,14 @@ export function selectProductosBajoStock(products: Product[]): Product[] {
 
 export function selectVentasPorUsuario(
   ventasFiltradas: Venta[],
-  usuariosMap: Record<string, { nombre: string; foto?: string }>,
+  usuariosMap: Record<string, { nombre: string; foto?: string }>
 ): VentasPorUsuario[] {
   const pagadas = ventasFiltradas.filter((v) => v.estado === "PAGADA");
-  const map = new Map<
-    string,
-    { total: number; transacciones: number }
-  >();
+  const map = new Map<string, { total: number; transacciones: number }>();
 
   for (const v of pagadas) {
     const uid = v.usuario_id;
     const existing = map.get(uid);
-    const nombre = usuariosMap[uid]?.nombre ?? "Vendedor";
     if (existing) {
       existing.total += v.total;
       existing.transacciones += 1;

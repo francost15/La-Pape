@@ -1,22 +1,5 @@
-import { Product } from '@/interface/products';
-import { create } from 'zustand';
-
-export interface CartItem {
-  productId: string;
-  product: Product;
-  quantity: number;
-  unitPrice: number;
-}
-
-interface VentasStore {
-  items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  getTotal: () => number;
-  getItemCount: () => number;
-}
+import type { VentasStore } from "@/interface/ventas";
+import { create } from "zustand";
 
 export const useVentasStore = create<VentasStore>((set, get) => ({
   items: [],
@@ -26,9 +9,7 @@ export const useVentasStore = create<VentasStore>((set, get) => ({
       const existing = state.items.find((i) => i.productId === product.id);
       const newItems = existing
         ? state.items.map((i) =>
-            i.productId === product.id
-              ? { ...i, quantity: i.quantity + quantity }
-              : i
+            i.productId === product.id ? { ...i, quantity: i.quantity + quantity } : i
           )
         : [
             ...state.items,
@@ -55,19 +36,14 @@ export const useVentasStore = create<VentasStore>((set, get) => ({
       return;
     }
     set((state) => ({
-      items: state.items.map((i) =>
-        i.productId === productId ? { ...i, quantity } : i
-      ),
+      items: state.items.map((i) => (i.productId === productId ? { ...i, quantity } : i)),
     }));
   },
 
   clearCart: () => set({ items: [] }),
 
   getTotal: () => {
-    return get().items.reduce(
-      (acc, item) => acc + item.unitPrice * item.quantity,
-      0
-    );
+    return get().items.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
   },
 
   getItemCount: () => {

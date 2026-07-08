@@ -1,42 +1,9 @@
-import type { UserRole, UsuarioNegocio } from "@/interface";
+import type { UserRole } from "@/interface";
+import type { AuthUserOverride, EquipoStore, MiembroConUsuario } from "@/interface/equipo";
 import { notify } from "@/lib/notify";
-import {
-  getUsuariosByNegocio,
-  updateUsuarioNegocio,
-} from "@/lib/services/usuarios-negocios";
+import { getUsuariosByNegocio, updateUsuarioNegocio } from "@/lib/services/usuarios-negocios";
 import { getUsuarioByEmail, getUsuarioById, updateUsuario } from "@/lib/services/usuarios";
 import { create } from "zustand";
-
-export interface MiembroConUsuario {
-  relacion: UsuarioNegocio;
-  nombre: string;
-  email: string;
-  rol: UserRole;
-  foto?: string;
-  inicial: string;
-}
-
-export interface AuthUserOverride {
-  userId: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-}
-
-interface EquipoStore {
-  miembros: MiembroConUsuario[];
-  loading: boolean;
-  error: string | null;
-
-  loadMiembros: (
-    negocioId: string | null,
-    authOverride?: AuthUserOverride,
-  ) => Promise<void>;
-  updateRol: (relId: string, userId: string, email: string | undefined, rol: UserRole) => Promise<void>;
-  removeMiembro: (relId: string) => Promise<void>;
-  addMiembro: (miembro: MiembroConUsuario) => void;
-  clear: () => void;
-}
 
 const initialState = {
   miembros: [],
@@ -64,9 +31,7 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
           }
           const nombre =
             u?.nombre?.trim() ||
-            (isCurrentUser && authOverride?.displayName
-              ? authOverride.displayName
-              : null) ||
+            (isCurrentUser && authOverride?.displayName ? authOverride.displayName : null) ||
             u?.email?.split("@")[0] ||
             "Usuario";
           const email = u?.email ?? "";
@@ -83,7 +48,7 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
             foto,
             inicial,
           } satisfies MiembroConUsuario;
-        }),
+        })
       );
       set({
         miembros: result.sort((a, b) => a.nombre.localeCompare(b.nombre)),
@@ -99,9 +64,7 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
   updateRol: async (relId, userId, email, rol) => {
     await updateUsuario(userId, { rol }, email);
     set((state) => ({
-      miembros: state.miembros.map((m) =>
-        m.relacion.id === relId ? { ...m, rol } : m,
-      ),
+      miembros: state.miembros.map((m) => (m.relacion.id === relId ? { ...m, rol } : m)),
     }));
   },
 
@@ -114,9 +77,7 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
 
   addMiembro: (miembro) => {
     set((state) => ({
-      miembros: [...state.miembros, miembro].sort((a, b) =>
-        a.nombre.localeCompare(b.nombre),
-      ),
+      miembros: [...state.miembros, miembro].sort((a, b) => a.nombre.localeCompare(b.nombre)),
     }));
   },
 

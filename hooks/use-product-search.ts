@@ -1,5 +1,5 @@
 import { useDebounce } from "@/hooks/useDebounce";
-import type { SearchContextId } from "@/store/product-search-store";
+import type { SearchContextId } from "@/interface/product-search";
 import { useProductSearchStore } from "@/store/product-search-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useMemo } from "react";

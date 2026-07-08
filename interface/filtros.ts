@@ -9,3 +9,10 @@ export interface RangoFechas {
   inicio: Date | null;
   fin: Date | null;
 }
+
+export interface FiltrosStore {
+  periodo: Periodo;
+  rangoPersonalizado: RangoFechas;
+  setPeriodo: (periodo: Periodo) => void;
+  setRangoPersonalizado: (rango: RangoFechas) => void;
+}

@@ -1,23 +1,8 @@
-import { create } from 'zustand';
-
-export type SearchContextId = 'productos' | 'ventas';
-
-interface SearchState {
-  searchText: string;
-  selectedCategoryId: string | null;
-}
-
-interface ProductSearchStore {
-  /** Estado de búsqueda por contexto (pestaña/ventana) */
-  contexts: Record<SearchContextId, SearchState>;
-  setSearchText: (contextId: SearchContextId, text: string) => void;
-  setSelectedCategoryId: (contextId: SearchContextId, categoryId: string | null) => void;
-  getSearchState: (contextId: SearchContextId) => SearchState;
-  resetContext: (contextId: SearchContextId) => void;
-}
+import type { ProductSearchStore, SearchContextId, SearchState } from "@/interface/product-search";
+import { create } from "zustand";
 
 const defaultState: SearchState = {
-  searchText: '',
+  searchText: "",
   selectedCategoryId: null,
 };
 

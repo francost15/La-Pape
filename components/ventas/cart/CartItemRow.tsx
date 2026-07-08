@@ -2,7 +2,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import type { ThemeColors } from "@/hooks/use-theme-colors";
 import { formatCurrency } from "@/lib/utils/format";
-import type { CartItem } from "@/store/ventas-store";
+import type { CartItem } from "@/interface/ventas";
 import { Image } from "expo-image";
 import { Platform, Text, View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";

@@ -6,7 +6,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { notify } from "@/lib/notify";
 import { useCheckoutStore } from "@/store/checkout-store";
-import type { CartItem } from "@/store/ventas-store";
+import type { CartItem } from "@/interface/ventas";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { FlashList } from "@shopify/flash-list";

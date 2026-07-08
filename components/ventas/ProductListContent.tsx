@@ -2,7 +2,7 @@ import SearchProducts from "@/components/search/SearchProducts";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import type { SearchContextId } from "@/store/product-search-store";
+import type { SearchContextId } from "@/interface/product-search";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AppColors } from "@/constants/colors";

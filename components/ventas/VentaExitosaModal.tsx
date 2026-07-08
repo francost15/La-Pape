@@ -2,7 +2,7 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency } from "@/lib/utils/format";
-import type { VentaCompletada } from "@/store/checkout-store";
+import type { VentaCompletada } from "@/interface/checkout";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import React from "react";

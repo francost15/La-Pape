@@ -1,12 +1,12 @@
-import { CartItem } from '@/store/ventas-store';
-import { db } from '@/lib/firebase';
-import { InsufficientStockError, InvalidQuantityError, ProductNotFoundError, VentaError } from '@/lib/errors';
+import type { CartItem } from "@/interface/ventas";
+import { db } from "@/lib/firebase";
 import {
-  collection,
-  doc,
-  runTransaction,
-  Timestamp,
-} from 'firebase/firestore';
+  InsufficientStockError,
+  InvalidQuantityError,
+  ProductNotFoundError,
+  VentaError,
+} from "@/lib/errors";
+import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 
 export interface CompleteVentaParams {
   items: CartItem[];
@@ -25,11 +25,11 @@ export interface CompleteVentaResult {
 
 /**
  * Orchestrates the full transactional flow of a sale.
- * 
- * Uses a Firestore atomic transaction to guarantee that either all steps succeed 
- * together or none do, preventing data inconsistencies (e.g. charging without 
+ *
+ * Uses a Firestore atomic transaction to guarantee that either all steps succeed
+ * together or none do, preventing data inconsistencies (e.g. charging without
  * reducing stock, or reducing stock for a failed payment).
- * 
+ *
  * Flow:
  * 1. Validates quantities and aggregates identical items
  * 2. Locks and reads current stock for all involved products
@@ -39,7 +39,7 @@ export interface CompleteVentaResult {
  * 6. Records the payment in VentaPagos
  * 7. Updates the stock count in the Productos collection
  * 8. Logs the inventory movement in InventarioMovimientos
- * 
+ *
  * @param params - The necessary data including the cart items, user, and totals
  * @returns An object containing the generated ventaId, the timestamp, and the confirmed total
  * @throws VentaError if the cart is empty
@@ -47,12 +47,10 @@ export interface CompleteVentaResult {
  * @throws ProductNotFoundError if a product no longer exists in DB
  * @throws InsufficientStockError if there isn't enough stock to fulfill the order
  */
-export async function completeVentaFlow(
-  params: CompleteVentaParams,
-): Promise<CompleteVentaResult> {
+export async function completeVentaFlow(params: CompleteVentaParams): Promise<CompleteVentaResult> {
   const { items, negocioId, sucursalId, userId, total, subtotal } = params;
   if (!items.length) {
-    throw new VentaError('No hay productos en el carrito');
+    throw new VentaError("No hay productos en el carrito");
   }
 
   const fecha = new Date();
@@ -63,17 +61,14 @@ export async function completeVentaFlow(
     if (item.quantity <= 0) {
       throw new InvalidQuantityError(item.product.nombre);
     }
-    qtyByProduct.set(
-      item.productId,
-      (qtyByProduct.get(item.productId) ?? 0) + item.quantity,
-    );
+    qtyByProduct.set(item.productId, (qtyByProduct.get(item.productId) ?? 0) + item.quantity);
   }
 
   const ventaId = await runTransaction(db, async (transaction) => {
     // Phase 1: Read all necessary data first (Firestore transaction rule)
     const stockByProduct = new Map<string, number>();
     for (const [productId, requestedQty] of qtyByProduct.entries()) {
-      const productRef = doc(db, 'productos', productId);
+      const productRef = doc(db, "productos", productId);
       const productSnap = await transaction.get(productRef);
       if (!productSnap.exists()) {
         throw new ProductNotFoundError(productId);
@@ -88,7 +83,7 @@ export async function completeVentaFlow(
     }
 
     // Phase 2: Perform all write operations
-    const ventaRef = doc(collection(db, 'ventas'));
+    const ventaRef = doc(collection(db, "ventas"));
     transaction.set(ventaRef, {
       negocio_id: negocioId,
       sucursal_id: sucursalId,
@@ -97,14 +92,14 @@ export async function completeVentaFlow(
       subtotal,
       descuento: 0,
       total,
-      estado: 'PAGADA',
-      tipo_venta: 'CONTADO',
+      estado: "PAGADA",
+      tipo_venta: "CONTADO",
       createdAt: now,
       updatedAt: now,
     });
 
     for (const item of items) {
-      const detalleRef = doc(collection(db, 'ventas_detalle'));
+      const detalleRef = doc(collection(db, "ventas_detalle"));
       transaction.set(detalleRef, {
         venta_id: ventaRef.id,
         producto_id: item.productId,
@@ -115,16 +110,16 @@ export async function completeVentaFlow(
       });
     }
 
-    const pagoRef = doc(collection(db, 'ventas_pagos'));
+    const pagoRef = doc(collection(db, "ventas_pagos"));
     transaction.set(pagoRef, {
       venta_id: ventaRef.id,
-      metodo_pago: 'EFECTIVO',
+      metodo_pago: "EFECTIVO",
       monto: total,
       createdAt: now,
     });
 
     for (const [productId, requestedQty] of qtyByProduct.entries()) {
-      const productRef = doc(db, 'productos', productId);
+      const productRef = doc(db, "productos", productId);
       const currentStock = stockByProduct.get(productId) ?? 0;
       transaction.update(productRef, {
         cantidad: currentStock - requestedQty,
@@ -133,11 +128,11 @@ export async function completeVentaFlow(
     }
 
     for (const item of items) {
-      const movimientoRef = doc(collection(db, 'inventario_movimientos'));
+      const movimientoRef = doc(collection(db, "inventario_movimientos"));
       transaction.set(movimientoRef, {
         producto_id: item.productId,
         sucursal_id: sucursalId,
-        tipo: 'SALIDA',
+        tipo: "SALIDA",
         cantidad: item.quantity,
         motivo: `Venta #${ventaRef.id}`,
         usuario_id: userId,
@@ -153,9 +148,9 @@ export async function completeVentaFlow(
 }
 
 /**
- * Utility to extract the name of a product from the cart items array 
+ * Utility to extract the name of a product from the cart items array
  * given its ID, primarily used for building readable error messages.
  */
 function itemName(items: CartItem[], productId: string): string {
-  return items.find((item) => item.productId === productId)?.product.nombre ?? 'Producto';
+  return items.find((item) => item.productId === productId)?.product.nombre ?? "Producto";
 }

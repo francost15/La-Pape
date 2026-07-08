@@ -2,7 +2,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { Metricas } from "@/store/resumen-store";
+import type { Metricas } from "@/interface/resumen";
 import React, { memo, useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, {

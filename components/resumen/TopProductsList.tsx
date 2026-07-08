@@ -2,7 +2,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { ProductoRanking } from "@/store/resumen-store";
+import type { ProductoRanking } from "@/interface/resumen";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";

@@ -1,5 +1,7 @@
-export type VentaEstado = 'PENDIENTE' | 'PAGADA' | 'CANCELADA' | 'REEMBOLSO' | 'EN_PROCESO';
-export type TipoVenta = 'CONTADO' | 'CREDITO';
+import type { Product } from "@/interface/products";
+
+export type VentaEstado = "PENDIENTE" | "PAGADA" | "CANCELADA" | "REEMBOLSO" | "EN_PROCESO";
+export type TipoVenta = "CONTADO" | "CREDITO";
 
 export interface Venta {
   id: string;
@@ -40,4 +42,36 @@ export interface UpdateVentaInput {
   estado?: VentaEstado;
   tipo_venta?: TipoVenta;
   notas?: string;
+}
+
+export interface CartItem {
+  productId: string;
+  product: Product;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface VentasStore {
+  items: CartItem[];
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getTotal: () => number;
+  getItemCount: () => number;
+}
+
+export interface DeleteConfirmItem {
+  productId: string;
+  nombre: string;
+}
+
+export interface VentasUIStore {
+  sheetVisible: boolean;
+  deleteConfirmItem: DeleteConfirmItem | null;
+  openSheet: () => void;
+  closeSheet: () => void;
+  setSheetVisible: (visible: boolean) => void;
+  openDeleteConfirm: (item: DeleteConfirmItem) => void;
+  closeDeleteConfirm: () => void;
 }

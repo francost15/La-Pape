@@ -1,7 +1,7 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { VentasPorUsuario as VentasPorUsuarioType } from "@/store/resumen-store";
+import type { VentasPorUsuario as VentasPorUsuarioType } from "@/interface/resumen";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Image } from "expo-image";

@@ -1,7 +1,7 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import type { UserRole } from "@/interface";
-import type { MiembroConUsuario } from "@/store/equipo-store";
+import type { MiembroConUsuario } from "@/interface/equipo";
 import { Image } from "expo-image";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from "react-native";

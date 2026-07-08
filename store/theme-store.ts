@@ -1,14 +1,8 @@
+import type { Theme, ThemeState } from "@/interface/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Appearance } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-type Theme = "light" | "dark" | "system";
-
-interface ThemeState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
 
 /**
  * Aplica la preferencia al `Appearance` de React Native, que es la ÚNICA fuente
