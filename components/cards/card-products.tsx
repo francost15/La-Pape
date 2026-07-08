@@ -1,25 +1,19 @@
-import { CardProductsProps } from "@/interface/products";
-import { formatCurrency } from "@/lib/utils/format";
-import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
+import { useHaptic } from "@/hooks/use-haptic";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { CardProductsProps } from "@/interface/products";
 import { useLayoutStore } from "@/store/layout-store";
 import * as Haptics from "expo-haptics";
-import { useHaptic } from "@/hooks/use-haptic";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
-import { Image } from "expo-image";
-import { IconSymbol } from "../ui/icon-symbol";
+import { CardProductCompact } from "./card-product/CardProductCompact";
+import { CardProductDesktop } from "./card-product/CardProductDesktop";
 
 /**
  * CardProducts — Digital Atelier style.
- * Desktop: clean card with hover elevation, no default border.
- * Mobile/ranking/stock: flat list items with subtle separators.
+ * Enruta a la variante correcta: compacta (mobile/ranking/stock) o card desktop.
  */
 export default React.memo(function CardProducts({
   product,
-  className = "",
   variant = "default",
   rankingData,
   rank,
@@ -41,390 +35,47 @@ export default React.memo(function CardProducts({
     });
   };
 
-  const hasImage = Boolean(product.imagen?.trim());
-
   const handleCardPress = () => {
     haptic();
     handlePress();
   };
 
-  const isRanking = variant === "ranking" && rankingData;
+  const hasImage = Boolean(product.imagen?.trim());
+  const isRanking = variant === "ranking" && !!rankingData;
   const isStock = variant === "stock";
-  const stockCantidad = stockData?.cantidad ?? product.cantidad;
-  const stockMinimo = stockData?.stockMinimo ?? product.stock_minimo ?? 0;
-  const imgSize = 52;
 
-  const ProductImage = () => (
-    <View
-      className="overflow-hidden rounded-[10px]"
-      style={{
-        height: imgSize,
-        width: imgSize,
-        backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
-      }}
-    >
-      {hasImage && !imageError ? (
-        <Image
-          source={{ uri: product.imagen }}
-          contentFit="cover"
-          className="h-full w-full"
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        <View className="h-full w-full items-center justify-center">
-          <IconSymbol
-            name="photo.fill"
-            size={20}
-            color={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
-          />
-        </View>
-      )}
-    </View>
-  );
+  const shared = {
+    product,
+    isDark,
+    colors,
+    hasImage,
+    imageError,
+    onImageError: () => setImageError(true),
+  };
 
-  const StockRightContent = () => (
-    <View className="items-end gap-0.5">
-      <Text className="text-[12px] tabular-nums" style={{ color: colors.textSecondary }}>
-        {stockMinimo > 0 ? `mín. ${stockMinimo}` : "mín. 0"}
-      </Text>
-      <Text
-        className={`text-[16px] font-bold tabular-nums ${
-          stockCantidad === 0 ? "text-red-500" : ""
-        }`}
-        style={{
-          color:
-            stockCantidad === 0
-              ? AppColors.error
-              : isDark
-                ? AppColors.primaryLight
-                : AppColors.primary,
-        }}
-      >
-        {stockCantidad} disp.
-      </Text>
-    </View>
-  );
-
-  const StockMiddleContent = () => (
-    <View className="min-w-0 flex-1 gap-0.5">
-      <Text
-        className="text-[14px] leading-5 font-semibold"
-        style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
-        numberOfLines={2}
-      >
-        {product.nombre}
-      </Text>
-      {product.marca ? (
-        <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
-          {product.marca}
-        </Text>
-      ) : null}
-    </View>
-  );
-
-  const RankingRightContent = () =>
-    isRanking ? (
-      <View className="items-end gap-0.5">
-        <Text className="text-[12px] tabular-nums" style={{ color: colors.textSecondary }}>
-          {rankingData.cantidad} ud.
-        </Text>
-        <Text
-          className="text-[16px] font-bold tabular-nums"
-          style={{
-            color: isDark ? AppColors.primaryLight : AppColors.primary,
-            fontFamily: AppFonts.display,
-          }}
-        >
-          {formatCurrency(rankingData.total)}
-        </Text>
-      </View>
-    ) : (
-      <View className="items-end gap-0.5">
-        <Text
-          className="text-[16px] font-bold"
-          style={{
-            color: isDark ? AppColors.primaryLight : AppColors.primary,
-            fontFamily: AppFonts.display,
-          }}
-        >
-          {formatCurrency(product.precio_venta)}
-        </Text>
-        {product.precio_mayoreo > 0 && (
-          <Text className="text-[11px]" style={{ color: colors.textLabel }}>
-            May: {formatCurrency(product.precio_mayoreo)}
-          </Text>
-        )}
-      </View>
-    );
-
-  const RankingMiddleContent = () =>
-    isRanking ? (
-      <View className="min-w-0 flex-1 gap-0.5">
-        <Text
-          className="text-[14px] leading-5 font-semibold"
-          style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
-          numberOfLines={2}
-        >
-          {product.nombre}
-        </Text>
-        {product.marca ? (
-          <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
-            {product.marca}
-          </Text>
-        ) : null}
-      </View>
-    ) : (
-      <View className="min-w-0 flex-1 gap-1">
-        <Text
-          className="text-[14px] leading-5 font-semibold"
-          style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
-          numberOfLines={2}
-        >
-          {product.nombre}
-        </Text>
-        <View className="flex-row items-center gap-2">
-          <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
-            {product.marca || "Genérico"}
-          </Text>
-          {product.cantidad !== undefined && (
-            <Text
-              className="text-[11px] font-medium"
-              style={{
-                color: product.cantidad > 0 ? AppColors.success : AppColors.error,
-              }}
-            >
-              {product.cantidad > 0 ? `${product.cantidad} disp.` : "Sin stock"}
-            </Text>
-          )}
-        </View>
-      </View>
-    );
-
-  /* ── Compact list variants (mobile, ranking, stock) ────── */
-  if (isMobile || isRanking || isStock) {
-    if (isStock) {
-      return (
-        <View
-          className="overflow-hidden rounded-xl"
-          style={{
-            backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F8F8F7",
-            borderWidth: 1,
-            borderColor: colors.border,
-          }}
-        >
-          <View
-            className="flex-row items-center gap-3"
-            style={{ paddingVertical: 12, paddingHorizontal: 12 }}
-          >
-            <ProductImage />
-            <StockMiddleContent />
-            <StockRightContent />
-          </View>
-        </View>
-      );
-    }
-    if (isRanking) {
-      return (
-        <View
-          className="overflow-hidden rounded-xl"
-          style={{
-            backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F8F8F7",
-            borderWidth: 1,
-            borderColor: colors.border,
-          }}
-        >
-          <Pressable
-            onPress={handleCardPress}
-            className="flex-row items-center gap-3"
-            style={{ paddingVertical: 12, paddingHorizontal: 12 }}
-            android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          >
-            {rank != null && (
-              <View
-                className="h-6 w-6 items-center justify-center rounded-md"
-                style={{ backgroundColor: AppColors.primary }}
-              >
-                <Text className="text-[11px] font-bold text-white">{rank}</Text>
-              </View>
-            )}
-            <ProductImage />
-            <RankingMiddleContent />
-            <RankingRightContent />
-          </Pressable>
-        </View>
-      );
-    }
-    /* Default mobile list item */
+  if (isStock) {
     return (
-      <TouchableOpacity
-        activeOpacity={0.7}
+      <CardProductCompact
+        mode="stock"
+        {...shared}
         onPress={handleCardPress}
-        className="w-full flex-row items-center gap-3 px-3 py-3.5"
-        style={{
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-        }}
-      >
-        <View
-          className="overflow-hidden rounded-[10px]"
-          style={{
-            height: 64,
-            width: 64,
-            backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
-          }}
-        >
-          {hasImage && !imageError ? (
-            <Image
-              source={{ uri: product.imagen }}
-              contentFit="cover"
-              className="h-full w-full"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <View className="h-full w-full items-center justify-center">
-              <IconSymbol
-                name="photo.fill"
-                size={22}
-                color={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
-              />
-            </View>
-          )}
-        </View>
-
-        <View className="min-w-0 flex-1 gap-1">
-          <Text
-            className="text-[14px] leading-5 font-semibold"
-            style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
-            numberOfLines={2}
-          >
-            {product.nombre}
-          </Text>
-          <View className="flex-row items-center gap-2">
-            <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
-              {product.marca || "Genérico"}
-            </Text>
-            {product.cantidad !== undefined && (
-              <Text
-                className="text-[11px] font-medium"
-                style={{
-                  color: product.cantidad > 0 ? AppColors.success : AppColors.error,
-                }}
-              >
-                {product.cantidad > 0 ? `${product.cantidad} disp.` : "Sin stock"}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <View className="items-end gap-0.5">
-          <Text
-            className="text-[16px] font-bold"
-            style={{
-              color: isDark ? AppColors.primaryLight : AppColors.primary,
-              fontFamily: AppFonts.display,
-            }}
-          >
-            {formatCurrency(product.precio_venta)}
-          </Text>
-          {product.precio_mayoreo > 0 && (
-            <Text className="text-[11px]" style={{ color: colors.textLabel }}>
-              May: {formatCurrency(product.precio_mayoreo)}
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
+        stockData={stockData}
+      />
     );
   }
-
-  /* ── Desktop grid card ─────────────────────────────────── */
-  return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPressIn={hapticMedium}
-      onPress={handlePress}
-      className="overflow-hidden rounded-xl"
-      style={{
-        backgroundColor: isDark ? AppColors.dark.surface : "#FFFFFF",
-        ...(Platform.OS === "web"
-          ? {
-              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-              transition: "box-shadow 0.2s ease, transform 0.2s ease",
-            }
-          : { elevation: 2 }),
-      }}
-    >
-      <View
-        className="h-44 w-full overflow-hidden"
-        style={{
-          backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
-        }}
-      >
-        {hasImage && !imageError ? (
-          <Image
-            source={{ uri: product.imagen }}
-            contentFit="cover"
-            className="h-full w-full"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <View className="h-full w-full items-center justify-center">
-            <IconSymbol
-              name="photo.fill"
-              size={32}
-              color={isDark ? AppColors.dark.textMuted : "#D1D5DB"}
-            />
-          </View>
-        )}
-      </View>
-
-      <View className="p-3.5">
-        <View className="mb-1.5 flex-row items-center justify-between gap-2">
-          {product.marca && (
-            <Text className="text-[12px] font-medium" style={{ color: colors.textSecondary }}>
-              {product.marca}
-            </Text>
-          )}
-          {product.cantidad !== undefined && (
-            <View
-              className="rounded-lg px-2 py-0.5"
-              style={{
-                backgroundColor:
-                  product.cantidad > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)",
-              }}
-            >
-              <Text
-                className="text-[11px] font-semibold"
-                style={{
-                  color: product.cantidad > 0 ? AppColors.success : AppColors.error,
-                }}
-              >
-                {product.cantidad > 0 ? `Stock: ${product.cantidad}` : "Sin stock"}
-              </Text>
-            </View>
-          )}
-        </View>
-        <Text
-          className="mb-2 text-[15px] font-semibold"
-          style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
-          numberOfLines={2}
-        >
-          {product.nombre}
-        </Text>
-        <View className="flex-row items-baseline gap-2">
-          <Text
-            className="text-[17px] font-bold"
-            style={{
-              color: isDark ? AppColors.primaryLight : AppColors.primary,
-              fontFamily: AppFonts.display,
-            }}
-          >
-            {formatCurrency(product.precio_venta)}
-          </Text>
-          <Text className="text-[12px]" style={{ color: colors.textLabel }}>
-            Mayoreo: {formatCurrency(product.precio_mayoreo)}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  if (isRanking) {
+    return (
+      <CardProductCompact
+        mode="ranking"
+        {...shared}
+        onPress={handleCardPress}
+        rankingData={rankingData}
+        rank={rank}
+      />
+    );
+  }
+  if (isMobile) {
+    return <CardProductCompact mode="mobile" {...shared} onPress={handleCardPress} />;
+  }
+  return <CardProductDesktop {...shared} onPress={handlePress} onPressIn={hapticMedium} />;
 });
