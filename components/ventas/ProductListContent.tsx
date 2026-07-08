@@ -22,8 +22,6 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
 
-const STAGGER_LIMIT = 12;
-
 interface ProductListContentProps {
   searchContextId: SearchContextId;
   onProductAdded?: (productName: string) => void;
@@ -57,7 +55,7 @@ export default function ProductListContent({
 }: ProductListContentProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_MIN_WIDTH;
-  const { isDark, colors } = useThemeColors();
+  const { colors } = useThemeColors();
   const { products, error, retry, refresh, loading } = useProductosScreen();
   const { searchText, setSearchText, filteredProducts } = useProductSearch(searchContextId);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -92,7 +90,7 @@ export default function ProductListContent({
           <Text
             style={{
               fontSize: 12,
-              color: colors.textMuted,
+              color: colors.textLabel,
               fontFamily: AppFonts.body,
               marginTop: 10,
               letterSpacing: 0.3,

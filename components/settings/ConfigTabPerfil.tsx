@@ -1,5 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { AppColors } from "@/constants/colors";
 import { auth } from "@/lib/firebase";
 import { updateUsuario } from "@/lib/services/usuarios";
 import { notify } from "@/lib/notify";
@@ -110,7 +111,7 @@ export default function ConfigTabPerfil() {
                   value={editNombre}
                   onChangeText={setEditNombre}
                   placeholder="Tu nombre"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={AppColors.light.textMuted}
                   className="rounded-xl bg-gray-100 px-4 py-2.5 text-base text-gray-900 dark:bg-neutral-700 dark:text-white"
                   autoFocus
                   editable={!saving}
@@ -147,7 +148,7 @@ export default function ConfigTabPerfil() {
                   onPress={() => setIsEditing(true)}
                   className="mt-1 flex-row items-center gap-1.5 self-start active:opacity-80"
                 >
-                  <IconSymbol name="pencil" size={14} color="#9ca3af" />
+                  <IconSymbol name="pencil" size={14} color={AppColors.light.textMuted} />
                   <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     Editar perfil
                   </Text>
@@ -167,7 +168,7 @@ export default function ConfigTabPerfil() {
 
       <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-3 px-4 py-3.5">
-          <IconSymbol name="envelope.fill" size={16} color="#9ca3af" />
+          <IconSymbol name="envelope.fill" size={16} color={AppColors.light.textMuted} />
           <Text className="w-20 text-sm text-gray-500">Email</Text>
           <Text
             className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
@@ -178,7 +179,7 @@ export default function ConfigTabPerfil() {
         </View>
         <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
         <View className="flex-row items-center gap-3 px-4 py-3.5">
-          <IconSymbol name="building.2.fill" size={16} color="#9ca3af" />
+          <IconSymbol name="building.2.fill" size={16} color={AppColors.light.textMuted} />
           <Text className="w-20 text-sm text-gray-500">Negocio</Text>
           <Text
             className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
@@ -205,7 +206,7 @@ export default function ConfigTabPerfil() {
         onPress={handleSignOut}
         className="flex-row items-center justify-center gap-2 rounded-2xl bg-red-50 py-4 active:opacity-80 dark:bg-red-900/20"
       >
-        <IconSymbol name="arrow.uturn.backward" size={18} color="#dc2626" />
+        <IconSymbol name="arrow.uturn.backward" size={18} color={AppColors.error} />
         <Text className="text-sm font-semibold text-red-600 dark:text-red-400">Cerrar sesión</Text>
       </TouchableOpacity>
     </View>

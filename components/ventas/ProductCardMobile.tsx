@@ -2,6 +2,7 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { Product } from "@/interface/products";
+import { formatCurrency } from "@/lib/utils/format";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -100,7 +101,11 @@ export default React.memo(function ProductCardMobile({
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <IconSymbol name="photo.fill" size={20} color={isDark ? "#5A6478" : "#C7C7CC"} />
+            <IconSymbol
+              name="photo.fill"
+              size={20}
+              color={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
+            />
           </View>
         )}
       </View>
@@ -143,7 +148,7 @@ export default React.memo(function ProductCardMobile({
             marginTop: 3,
           }}
         >
-          ${product.precio_venta.toLocaleString()}
+          {formatCurrency(product.precio_venta)}
         </Text>
       </View>
 

@@ -4,6 +4,7 @@ import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import ConfirmAlert from "@/components/ui/ConfirmAlert";
 import EmptyState from "@/components/ui/EmptyState";
 import { Venta, VentaDetalle } from "@/interface";
+import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
 import { notify } from "@/lib/notify";
 import { generateAndShareRecibo } from "@/lib/pdf/generate-recibo";
@@ -18,15 +19,8 @@ import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  SectionList,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import { ActivityIndicator, SectionList, Text, useWindowDimensions, View } from "react-native";
+import Animated, { FadeIn, ReduceMotion } from "react-native-reanimated";
 
 export default function HistoryScreen() {
   const { width } = useWindowDimensions();
@@ -239,29 +233,29 @@ export default function HistoryScreen() {
       const isTodayOrYesterday = section.label === "Hoy" || section.label === "Ayer";
       return (
         <Animated.View
-          entering={FadeIn.duration(320)}
+          entering={FadeIn.duration(320).reduceMotion(ReduceMotion.System)}
           className="mt-8 mb-4 flex-row items-baseline justify-between py-2"
         >
           <View className="flex-row items-center gap-3">
             <View
               className="h-4 w-[2.5px] rounded-full"
               style={{
-                backgroundColor: isTodayOrYesterday ? "#ea580c" : "#D4D4D4",
+                backgroundColor: isTodayOrYesterday ? AppColors.primary : "#D4D4D4",
               }}
             />
             <Text
-              className={`text-[12px] font-bold uppercase tracking-[0.2em] ${
+              className={`text-[12px] font-bold tracking-[0.2em] uppercase ${
                 isTodayOrYesterday
                   ? "text-[#ea580c] dark:text-[#FB923C]"
-                  : "text-[#9CA3AF] dark:text-[#5A6478]"
+                  : "text-[#6B7280] dark:text-[#8B95A5]"
               }`}
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {section.label}
             </Text>
           </View>
-          <Text 
-            className="text-[14px] font-bold tabular-nums text-[#111827] dark:text-[#F9FAFB]"
+          <Text
+            className="text-[14px] font-bold text-[#111827] tabular-nums dark:text-[#F9FAFB]"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             {formatCurrency(section.total)}
@@ -307,7 +301,10 @@ export default function HistoryScreen() {
 
   const ListEmptyComponent = useMemo(
     () => (
-      <Animated.View entering={FadeIn.duration(400)} className="mt-20 px-10">
+      <Animated.View
+        entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
+        className="mt-20 px-10"
+      >
         <EmptyState
           icon="clock"
           title={Strings.history.emptySales}
@@ -321,8 +318,8 @@ export default function HistoryScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
-        <ActivityIndicator size="large" color="#ea580c" />
-        <Text className="text-sm text-[#9CA3AF] dark:text-[#5A6478]">
+        <ActivityIndicator size="large" color={AppColors.primary} />
+        <Text className="text-sm text-[#6B7280] dark:text-[#8B95A5]">
           {Strings.history.loadingHistory}
         </Text>
       </View>
@@ -337,7 +334,7 @@ export default function HistoryScreen() {
             icon="error"
             title={error}
             description={Strings.errors.connection}
-            iconColor="#ef4444"
+            iconColor={AppColors.errorLight}
           />
         </View>
       </AnimatedScreen>

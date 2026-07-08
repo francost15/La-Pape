@@ -1,18 +1,18 @@
-import CampoImagen from '@/components/forms/products/CampoImagen';
-import FormProductos from '@/components/forms/FormProductos';
-import { auth, CreateProductFormData, createProductSchema, getProductosScreenData } from '@/lib';
-import { getCategoriasByNegocio } from '@/lib/services/categorias';
-import { notify } from '@/lib/notify';
-import type { UpdateProductInput } from '@/interface';
-import { getProductById, updateProduct } from '@/lib/services/productos';
-import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
-import { useProductosStore } from '@/store/productos-store';
-import { useSessionStore } from '@/store/session-store';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import CampoImagen from "@/components/forms/products/CampoImagen";
+import FormProductos from "@/components/forms/FormProductos";
+import { auth, CreateProductFormData, createProductSchema, getProductosScreenData } from "@/lib";
+import { getCategoriasByNegocio } from "@/lib/services/categorias";
+import { notify } from "@/lib/notify";
+import type { UpdateProductInput } from "@/interface";
+import { getProductById, updateProduct } from "@/lib/services/productos";
+import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
+import { useProductosStore } from "@/store/productos-store";
+import { useSessionStore } from "@/store/session-store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
   ActivityIndicator,
   Alert,
@@ -24,15 +24,15 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
-} from 'react-native';
+} from "react-native";
 import { useHaptic } from "@/hooks/use-haptic";
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { AppFonts } from '@/constants/typography';
-import { AppColors } from '@/constants/colors';
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 
 export default function EditProduct() {
   const haptic = useHaptic();
-  const isWeb = Platform.OS === 'web';
+  const isWeb = Platform.OS === "web";
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
   const tabBarHeight = useBottomTabBarHeight();
@@ -65,15 +65,15 @@ export default function EditProduct() {
   } = useForm<CreateProductFormData>({
     resolver: zodResolver(createProductSchema),
     defaultValues: {
-      nombre: '',
-      categoria_id: '',
+      nombre: "",
+      categoria_id: "",
       precio_venta: 0,
       precio_mayoreo: 0,
       costo_promedio: 0,
       cantidad: 0,
-      imagen: '',
-      descripcion: '',
-      marca: '',
+      imagen: "",
+      descripcion: "",
+      marca: "",
       stock_minimo: 0,
     },
   });
@@ -83,7 +83,7 @@ export default function EditProduct() {
       try {
         const user = auth.currentUser;
         if (!user) {
-          setTimeout(() => router.replace('/'), 100);
+          setTimeout(() => router.replace("/"), 100);
           return;
         }
 
@@ -110,19 +110,19 @@ export default function EditProduct() {
         }
 
         if (!product) {
-          Alert.alert('Error', 'Producto no encontrado', [
-            { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
+          Alert.alert("Error", "Producto no encontrado", [
+            { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
           ]);
           return;
         }
 
         // Usar negocioId del sessionStore si está disponible — evita un round-trip a Firestore
         const currentNegocioId =
-          negocioId ?? (await getNegocioIdByUsuario(user.uid, user.email || ''));
+          negocioId ?? (await getNegocioIdByUsuario(user.uid, user.email || ""));
 
         if (!currentNegocioId) {
-          Alert.alert('Error', 'No tienes un negocio asignado', [
-            { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
+          Alert.alert("Error", "No tienes un negocio asignado", [
+            { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
           ]);
           return;
         }
@@ -136,21 +136,21 @@ export default function EditProduct() {
         }
 
         reset({
-          nombre: product.nombre || '',
-          categoria_id: product.categoria_id || '',
+          nombre: product.nombre || "",
+          categoria_id: product.categoria_id || "",
           precio_venta: product.precio_venta || 0,
           precio_mayoreo: product.precio_mayoreo || 0,
           costo_promedio: product.costo_promedio || 0,
           cantidad: product.cantidad || 0,
-          imagen: product.imagen || '',
-          descripcion: product.descripcion || '',
-          marca: product.marca || '',
+          imagen: product.imagen || "",
+          descripcion: product.descripcion || "",
+          marca: product.marca || "",
           stock_minimo: product.stock_minimo ?? 0,
         });
       } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : 'Error al cargar los datos';
-        Alert.alert('Error', msg, [
-          { text: 'OK', onPress: () => setTimeout(() => router.back(), 100) },
+        const msg = error instanceof Error ? error.message : "Error al cargar los datos";
+        Alert.alert("Error", msg, [
+          { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
         ]);
       } finally {
         setLoadingData(false);
@@ -158,17 +158,17 @@ export default function EditProduct() {
     };
 
     loadData();
-  // negocioId y categories se leen del store pero no son deps de init (no deben retriggerar)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // negocioId y categories se leen del store pero no son deps de init (no deben retriggerar)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, productParam, reset, router]);
 
   const onSubmit = async (data: CreateProductFormData) => {
     if (!id) {
-      Alert.alert('Error', 'Id del producto no encontrado');
+      Alert.alert("Error", "Id del producto no encontrado");
       return;
     }
     if (!negocioId) {
-      Alert.alert('Error', 'No tienes un negocio asignado');
+      Alert.alert("Error", "No tienes un negocio asignado");
       return;
     }
 
@@ -191,18 +191,18 @@ export default function EditProduct() {
 
       const user = auth.currentUser;
       if (user) {
-        const storeData = await getProductosScreenData(user.uid, user.email || '');
+        const storeData = await getProductosScreenData(user.uid, user.email || "");
         setProducts(storeData.products);
       }
 
       const updatedProduct = await getProductById(id);
       if (updatedProduct) setCurrentProduct(updatedProduct);
 
-      notify.success({ title: 'Producto actualizado' });
+      notify.success({ title: "Producto actualizado" });
       router.back();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'No se pudo actualizar el producto';
-      notify.error({ title: 'Error', description: msg });
+      const msg = error instanceof Error ? error.message : "No se pudo actualizar el producto";
+      notify.error({ title: "Error", description: msg });
     } finally {
       setLoading(false);
     }
@@ -210,9 +210,9 @@ export default function EditProduct() {
 
   if (loadingData) {
     return (
-      <View className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14] justify-center items-center">
+      <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
         <ActivityIndicator size="large" color={AppColors.primary} />
-        <Text className="text-[#6B7280] dark:text-[#9CA3AF] mt-4">Cargando datos...</Text>
+        <Text className="mt-4 text-[#6B7280] dark:text-[#9CA3AF]">Cargando datos...</Text>
       </View>
     );
   }
@@ -220,17 +220,22 @@ export default function EditProduct() {
   const actionButtons = (
     <View className="flex-row gap-3">
       <TouchableOpacity
-        className="h-12 px-6 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-800 flex-row items-center justify-center active:opacity-80"
+        className="h-12 flex-row items-center justify-center rounded-full border border-gray-200 bg-white px-6 active:opacity-80 dark:border-neutral-800 dark:bg-neutral-800"
         onPress={() => router.back()}
         disabled={loading}
       >
-        <Text className="text-gray-500 dark:text-gray-400 text-sm font-bold tracking-wide uppercase" style={{ fontFamily: AppFonts.bodyStrong }}>Cancelar</Text>
+        <Text
+          className="text-sm font-bold tracking-wide text-gray-500 uppercase dark:text-gray-400"
+          style={{ fontFamily: AppFonts.bodyStrong }}
+        >
+          Cancelar
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="flex-1 h-12 bg-[#EA580C] rounded-full flex-row items-center justify-center gap-2 active:opacity-90"
-        style={{ 
-          boxShadow: Platform.OS === 'web' ? '0 8px 24px rgba(234, 88, 12, 0.3)' : undefined,
-          elevation: Platform.OS !== 'web' ? 6 : undefined,
+        className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-[#EA580C] active:opacity-90"
+        style={{
+          boxShadow: Platform.OS === "web" ? "0 8px 24px rgba(234, 88, 12, 0.3)" : undefined,
+          elevation: Platform.OS !== "web" ? 6 : undefined,
         }}
         onPress={handleSubmit(onSubmit)}
         disabled={loading}
@@ -240,8 +245,8 @@ export default function EditProduct() {
         ) : (
           <>
             <IconSymbol name="checkmark" size={16} color="white" />
-            <Text 
-              className="text-white font-bold text-[14px] tracking-widest"
+            <Text
+              className="text-[14px] font-bold tracking-widest text-white"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               GUARDAR CAMBIOS
@@ -258,11 +263,11 @@ export default function EditProduct() {
         haptic();
         router.back();
       }}
-      className="flex-row items-center gap-2 mb-6 active:opacity-70"
+      className="mb-6 flex-row items-center gap-2 active:opacity-70"
     >
       <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
-      <Text 
-        className="text-xs font-bold uppercase tracking-widest text-[#9CA3AF] dark:text-[#5A6478]"
+      <Text
+        className="text-xs font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         VOLVER
@@ -273,39 +278,56 @@ export default function EditProduct() {
   if (isDesktop) {
     return (
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ alignItems: 'center', padding: 48 }}
+          contentContainerStyle={{ alignItems: "center", padding: 48 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ width: '100%', maxWidth: 1200 }}>
+          <View style={{ width: "100%", maxWidth: 1200 }}>
             <BackButton />
-            <View className="flex-row gap-16 items-start">
+            <View className="flex-row items-start gap-16">
               {/* Columna izquierda: Imagen hero */}
               <View className="flex-1 gap-6">
-                 <View className="bg-white dark:bg-neutral-800 rounded-[32px] overflow-hidden" style={{ boxShadow: Platform.OS === 'web' ? '0 24px 48px rgba(0,0,0,0.06)' : undefined }}>
-                   <CampoImagen
-                      control={control}
-                      errors={errors}
-                      isWeb={isWeb}
-                      previewSize={{ width: 480, height: 480 }}
-                    />
-                 </View>
-                 <View className="px-2">
-                    <Text className="text-[10px] font-bold tracking-[0.2em] text-[#9CA3AF] uppercase mb-1">Guas de Edición</Text>
-                    <Text className="text-xs text-gray-400 leading-4">Actualiza la imagen del producto cargando un archivo o ingresando una URL directa.</Text>
-                 </View>
+                <View
+                  className="overflow-hidden rounded-[32px] bg-white dark:bg-neutral-800"
+                  style={{
+                    boxShadow: Platform.OS === "web" ? "0 24px 48px rgba(0,0,0,0.06)" : undefined,
+                  }}
+                >
+                  <CampoImagen
+                    control={control}
+                    errors={errors}
+                    isWeb={isWeb}
+                    previewSize={{ width: 480, height: 480 }}
+                  />
+                </View>
+                <View className="px-2">
+                  <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]">
+                    Guas de Edición
+                  </Text>
+                  <Text className="text-xs leading-4 text-gray-400">
+                    Actualiza la imagen del producto cargando un archivo o ingresando una URL
+                    directa.
+                  </Text>
+                </View>
               </View>
 
               {/* Columna derecha: Formulario */}
               <View style={{ width: 480 }} className="gap-8">
                 <View>
-                  <Text className="text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB] mb-1" style={{ fontFamily: AppFonts.display }}>Editor de Producto</Text>
-                  <Text className="text-sm text-gray-500 dark:text-gray-400">Actualiza los detalles técnicos y comerciales.</Text>
+                  <Text
+                    className="mb-1 text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
+                    style={{ fontFamily: AppFonts.display }}
+                  >
+                    Editor de Producto
+                  </Text>
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                    Actualiza los detalles técnicos y comerciales.
+                  </Text>
                 </View>
 
                 <FormProductos
@@ -315,7 +337,7 @@ export default function EditProduct() {
                   isWeb={isWeb}
                   hideImage
                 />
-                
+
                 <View className="mt-4">{actionButtons}</View>
               </View>
             </View>
@@ -327,7 +349,7 @@ export default function EditProduct() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
     >
       <ScrollView
@@ -338,20 +360,22 @@ export default function EditProduct() {
       >
         <BackButton />
         <View className="mb-6">
-          <Text className="text-3xl tracking-tighter text-[#111827] dark:text-[#F9FAFB]" style={{ fontFamily: AppFonts.display }}>Editar</Text>
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Modifica los campos necesarios para reflejar los cambios.</Text>
+          <Text
+            className="text-3xl tracking-tighter text-[#111827] dark:text-[#F9FAFB]"
+            style={{ fontFamily: AppFonts.display }}
+          >
+            Editar
+          </Text>
+          <Text className="text-sm text-gray-500 dark:text-gray-400">
+            Modifica los campos necesarios para reflejar los cambios.
+          </Text>
         </View>
 
-        <FormProductos
-          control={control}
-          errors={errors}
-          categories={categories}
-          isWeb={isWeb}
-        />
+        <FormProductos control={control} errors={errors} categories={categories} isWeb={isWeb} />
       </ScrollView>
 
       <View
-        className="px-6 py-4 bg-[#FAFAF9] dark:bg-[#0C0F14] border-t border-gray-100 dark:border-neutral-800"
+        className="border-t border-gray-100 bg-[#FAFAF9] px-6 py-4 dark:border-neutral-800 dark:bg-[#0C0F14]"
         style={{ paddingBottom: 16 + tabBarHeight }}
       >
         {actionButtons}

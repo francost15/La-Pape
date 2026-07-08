@@ -81,6 +81,13 @@ export const DesignSystem = {
     entrance: "cubic-bezier(0.0, 0, 0.2, 1)",
     exit: "cubic-bezier(0.4, 0, 1, 1)",
     bounce: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    // Ease-out fuerte para entradas/interacciones de UI (más punch que el
+    // `default`). Reanimated: Easing.bezier(0.23, 1, 0.32, 1).
+    strongOut: "cubic-bezier(0.23, 1, 0.32, 1)",
+  },
+  /** Coeficientes bezier para Easing.bezier() de Reanimated */
+  easingCurve: {
+    strongOut: [0.23, 1, 0.32, 1] as const,
   },
 
   /** Navbar height tokens */

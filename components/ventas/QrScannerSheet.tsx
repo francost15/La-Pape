@@ -1,23 +1,14 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppColors } from "@/constants/colors";
 import { notify } from "@/lib/notify";
 import { getProductById } from "@/lib/services/productos";
 import { useSessionStore } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
-import {
-  CameraView,
-  useCameraPermissions,
-} from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface QrScannerSheetProps {
   visible: boolean;
@@ -30,11 +21,7 @@ interface QrScannerSheetProps {
  * El QR debe contener el product.id (string).
  * Al escanear, busca el producto y lo agrega al carrito.
  */
-export default function QrScannerSheet({
-  visible,
-  onClose,
-  onProductAdded,
-}: QrScannerSheetProps) {
+export default function QrScannerSheet({ visible, onClose, onProductAdded }: QrScannerSheetProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const addItem = useVentasStore((s) => s.addItem);
   const negocioId = useSessionStore((s) => s.negocioId);
@@ -97,7 +84,7 @@ export default function QrScannerSheet({
         scannedRef.current = false;
       }
     },
-    [addItem, hapticMedium, negocioId, onClose, onProductAdded],
+    [addItem, hapticMedium, negocioId, onClose, onProductAdded]
   );
 
   const handleClose = useCallback(() => {
@@ -111,7 +98,7 @@ export default function QrScannerSheet({
     return (
       <Modal visible transparent animationType="fade">
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#ea580c" />
+          <ActivityIndicator size="large" color={AppColors.primary} />
           <Text style={styles.message}>Verificando permisos...</Text>
         </View>
       </Modal>
@@ -125,10 +112,7 @@ export default function QrScannerSheet({
           <Text style={styles.message}>
             La Pape necesita acceso a la cámara para escanear códigos QR
           </Text>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestPermission}
-          >
+          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
             <Text style={styles.permissionButtonText}>Permitir cámara</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
@@ -150,9 +134,7 @@ export default function QrScannerSheet({
         />
         <View style={styles.overlay}>
           <Text style={styles.title}>Escanear código QR</Text>
-          <Text style={styles.subtitle}>
-            Apunta la cámara al QR del producto
-          </Text>
+          <Text style={styles.subtitle}>Apunta la cámara al QR del producto</Text>
         </View>
         <TouchableOpacity
           style={styles.closeButton}
@@ -185,7 +167,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   permissionButton: {
-    backgroundColor: "#ea580c",
+    backgroundColor: AppColors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
@@ -200,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   cancelButtonText: {
-    color: "#9ca3af",
+    color: AppColors.light.textMuted,
     fontSize: 16,
   },
   overlay: {

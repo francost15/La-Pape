@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
+import { AppColors } from "@/constants/colors";
 import { IconSymbol } from "./icon-symbol";
 
 interface Props {
@@ -39,7 +40,11 @@ export class ErrorBoundary extends Component<Props, State> {
         <View className="flex-1 items-center justify-center bg-gray-50 p-8 dark:bg-neutral-900">
           <View className="max-w-sm items-center gap-4">
             <View className="h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <IconSymbol name="exclamationmark.triangle.fill" size={32} color="#ef4444" />
+              <IconSymbol
+                name="exclamationmark.triangle.fill"
+                size={32}
+                color={AppColors.errorLight}
+              />
             </View>
             <Text className="text-center text-xl font-bold text-gray-900 dark:text-white">
               Algo salió mal

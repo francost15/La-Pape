@@ -22,6 +22,7 @@ import {
 import { useSessionStore } from "@/store/session-store";
 import React, { useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 
 /**
@@ -113,7 +114,7 @@ export default function ResumenScreen() {
             icon="error"
             title={sessionError ?? "No tienes un negocio asignado"}
             description="Configura tu negocio para ver el resumen de ventas"
-            iconColor="#9ca3af"
+            iconColor={AppColors.light.textMuted}
           />
         </View>
       </AnimatedScreen>
@@ -124,8 +125,8 @@ export default function ResumenScreen() {
     return (
       <AnimatedScreen>
         <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
-          <ActivityIndicator size="large" color="#ea580c" />
-          <Text className="text-sm text-[#9CA3AF] dark:text-[#5A6478]">Cargando resumen...</Text>
+          <ActivityIndicator size="large" color={AppColors.primary} />
+          <Text className="text-sm text-[#6B7280] dark:text-[#8B95A5]">Cargando resumen...</Text>
         </View>
       </AnimatedScreen>
     );
@@ -139,7 +140,7 @@ export default function ResumenScreen() {
             icon="error"
             title={error}
             description="Verifica tu conexión e intenta nuevamente"
-            iconColor="#ef4444"
+            iconColor={AppColors.errorLight}
           />
         </View>
       </AnimatedScreen>
@@ -220,10 +221,10 @@ export default function ResumenScreen() {
  */
 function SectionTitle({ title }: { title: string }) {
   return (
-    <View className="mb-4 mt-4 flex-row items-center gap-3">
+    <View className="mt-4 mb-4 flex-row items-center gap-3">
       <View className="h-4 w-[2px] bg-[#E5E7EB] dark:bg-[#374151]" />
       <Text
-        className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9CA3AF] dark:text-[#5A6478]"
+        className="text-[10px] font-bold tracking-[0.25em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         {title}

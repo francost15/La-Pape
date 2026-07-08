@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useThemeColors } from "@/hooks/use-theme-colors";
-import { useHaptic } from "@/hooks/use-haptic";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import { useHaptic } from "@/hooks/use-haptic";
+import { useThemeColors } from "@/hooks/use-theme-colors";
+import React from "react";
 import { Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { IconSymbol } from "../ui/icon-symbol";
@@ -30,7 +30,7 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
 
   const borderRadius = 14;
   const iconSize = size === "large" ? 20 : 18;
-  const inputHeight = size === "large" ? 48 : 42;
+  const inputHeight = size === "large" ? 48 : 44;
   const hasText = searchText.trim().length > 0;
 
   // Premium Animated Container Style
@@ -47,13 +47,7 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
         { duration: 250 }
       ),
       borderColor: withTiming(
-        isFocused
-          ? isDark
-            ? colors.border
-            : "#D1D5DB"
-          : isDark
-            ? "transparent"
-            : "transparent",
+        isFocused ? AppColors.primary : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
         { duration: 250 }
       ),
     };
@@ -71,7 +65,7 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
             paddingHorizontal: 16,
             height: inputHeight,
             gap: 12,
-            borderWidth: 1,
+            borderWidth: isFocused ? 1.5 : 1,
             ...(Platform.OS === "web" && isFocused
               ? { boxShadow: `0 0 0 3px ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)"}` }
               : {}),
@@ -79,10 +73,10 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
           animatedContainerStyle,
         ]}
       >
-        <IconSymbol 
-          name="magnifyingglass" 
-          size={iconSize} 
-          color={isFocused ? colors.textPrimary : colors.textMuted} 
+        <IconSymbol
+          name="magnifyingglass"
+          size={iconSize}
+          color={isFocused ? colors.textPrimary : colors.textMuted}
         />
         <TextInput
           ref={ref}
@@ -144,7 +138,6 @@ const SearchProducts = React.forwardRef<TextInput, SearchProductsProps>(function
             alignItems: "center",
             justifyContent: "center",
             ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.04)" } : {}),
-            transform: [{ scale: isFocused ? 0.98 : 1 }], // Subtle connection slightly shrinking when search focused
           }}
           activeOpacity={0.85}
           accessibilityLabel="Escanear QR"

@@ -1,18 +1,18 @@
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
+import { formatCurrency } from "@/lib/utils/format";
 import type { VentaCompletada } from "@/store/checkout-store";
 import { useHaptic } from "@/hooks/use-haptic";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import React from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  type SharedValue,
+} from "react-native-reanimated";
 
 import { IconSymbol } from "../ui/icon-symbol";
 
@@ -35,16 +35,33 @@ export default function VentaExitosaModal({
   onDescargarRecibo,
   onEnviarRecibo,
 }: VentaExitosaModalProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, colors } = useThemeColors();
   const haptic = useHaptic();
+  const reduceMotion = useReducedMotion();
 
   const handleClose = () => {
     haptic();
     onClose();
   };
 
-  const colors = isDark ? AppColors.dark : AppColors.light;
+  // ── Feedback de escala al presionar los botones de recibo ──────────────
+  const descargarScale = useSharedValue(1);
+  const enviarScale = useSharedValue(1);
+  const descargarStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: descargarScale.value }],
+  }));
+  const enviarStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: enviarScale.value }],
+  }));
+
+  const handlePressIn = (scale: SharedValue<number>) => {
+    if (reduceMotion) return;
+    scale.value = withSpring(0.97, { damping: 15, stiffness: 400, mass: 0.5 });
+  };
+  const handlePressOut = (scale: SharedValue<number>) => {
+    if (reduceMotion) return;
+    scale.value = withSpring(1, { damping: 15, stiffness: 400, mass: 0.5 });
+  };
 
   return (
     <Modal
@@ -88,13 +105,20 @@ export default function VentaExitosaModal({
           }}
         >
           {/* Header */}
-          <View style={{ alignItems: "center", paddingTop: 36, paddingBottom: 28, paddingHorizontal: 24 }}>
+          <View
+            style={{
+              alignItems: "center",
+              paddingTop: 36,
+              paddingBottom: 28,
+              paddingHorizontal: 24,
+            }}
+          >
             <View
               style={{
                 width: 64,
                 height: 64,
                 borderRadius: 32,
-                backgroundColor: "rgba(22,163,74,0.1)",
+                backgroundColor: "rgba(22,163,74,0.1)", // success @ 10% — halo del ícono
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
@@ -146,11 +170,18 @@ export default function VentaExitosaModal({
                 borderBottomColor: colors.border,
               }}
             >
-              <Text style={{ fontSize: 14, color: colors.textSecondary, fontFamily: AppFonts.body }}>
+              <Text
+                style={{ fontSize: 14, color: colors.textSecondary, fontFamily: AppFonts.body }}
+              >
                 Fecha
               </Text>
               <Text
-                style={{ fontSize: 14, fontWeight: "500", color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
+                style={{
+                  fontSize: 14,
+                  fontWeight: "500",
+                  color: colors.textPrimary,
+                  fontFamily: AppFonts.bodyStrong,
+                }}
               >
                 {venta.fecha}
               </Text>
@@ -177,77 +208,85 @@ export default function VentaExitosaModal({
                 style={{
                   fontSize: 24,
                   fontWeight: "800",
-                  color: isDark ? "#F97316" : "#ea580c",
+                  color: isDark ? AppColors.primaryLight : AppColors.primary,
                   fontFamily: AppFonts.display,
                   letterSpacing: -0.5,
                 }}
               >
-                ${venta.total.toLocaleString()}
+                {formatCurrency(venta.total)}
               </Text>
             </View>
           </View>
 
           {/* Actions */}
           <View style={{ padding: 20, gap: 10 }}>
-            <TouchableOpacity
-              onPress={() => {
-                haptic();
-                onDescargarRecibo?.();
-              }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingVertical: 15,
-                borderRadius: 14,
-                backgroundColor: "#ea580c",
-              }}
-              activeOpacity={0.85}
-            >
-              <IconSymbol name="square.and.arrow.down" size={18} color="#fff" />
-              <Text
+            <Animated.View style={descargarStyle}>
+              <Pressable
+                onPress={() => {
+                  haptic();
+                  onDescargarRecibo?.();
+                }}
+                onPressIn={() => handlePressIn(descargarScale)}
+                onPressOut={() => handlePressOut(descargarScale)}
                 style={{
-                  fontSize: 15,
-                  fontWeight: "700",
-                  color: "#fff",
-                  fontFamily: AppFonts.bodyStrong,
-                  letterSpacing: -0.2,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  paddingVertical: 15,
+                  borderRadius: 14,
+                  backgroundColor: AppColors.primary,
                 }}
               >
-                Descargar Recibo
-              </Text>
-            </TouchableOpacity>
+                <IconSymbol name="square.and.arrow.down" size={18} color="#fff" />
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "700",
+                    color: "#fff",
+                    fontFamily: AppFonts.bodyStrong,
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  Descargar Recibo
+                </Text>
+              </Pressable>
+            </Animated.View>
 
-            <TouchableOpacity
-              onPress={() => {
-                haptic();
-                onEnviarRecibo?.();
-              }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingVertical: 15,
-                borderRadius: 14,
-                backgroundColor: AppColors.success,
-              }}
-              activeOpacity={0.85}
-            >
-              <IconSymbol name="paperplane.fill" size={16} color="#fff" />
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "700",
-                  color: "#fff",
-                  fontFamily: AppFonts.bodyStrong,
-                  letterSpacing: -0.2,
-                }}
-              >
-                Enviar Recibo
-              </Text>
-            </TouchableOpacity>
+            {onEnviarRecibo && (
+              <Animated.View style={enviarStyle}>
+                <Pressable
+                  onPress={() => {
+                    haptic();
+                    onEnviarRecibo();
+                  }}
+                  onPressIn={() => handlePressIn(enviarScale)}
+                  onPressOut={() => handlePressOut(enviarScale)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    paddingVertical: 15,
+                    borderRadius: 14,
+                    backgroundColor: AppColors.success,
+                  }}
+                >
+                  <IconSymbol name="paperplane.fill" size={16} color="#fff" />
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "700",
+                      color: "#fff",
+                      fontFamily: AppFonts.bodyStrong,
+                      letterSpacing: -0.2,
+                    }}
+                  >
+                    Enviar Recibo
+                  </Text>
+                </Pressable>
+              </Animated.View>
+            )}
 
             <TouchableOpacity
               onPress={handleClose}
@@ -262,7 +301,7 @@ export default function VentaExitosaModal({
                 style={{
                   fontSize: 15,
                   fontWeight: "600",
-                  color: isDark ? "#60A5FA" : "#2563EB",
+                  color: isDark ? AppColors.infoLight : AppColors.info,
                   fontFamily: AppFonts.bodyStrong,
                 }}
               >
@@ -282,7 +321,9 @@ export default function VentaExitosaModal({
               width: 32,
               height: 32,
               borderRadius: 16,
-              backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4",
+              backgroundColor: isDark
+                ? AppColors.dark.surfaceElevated
+                : AppColors.light.surfaceHover,
               alignItems: "center",
               justifyContent: "center",
             }}

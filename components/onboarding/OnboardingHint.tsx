@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useOnboardingStore } from "@/store/onboarding-store";
+import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import {
   getCompletedSteps,
   markStepCompleted,
@@ -20,24 +23,19 @@ export function OnboardingHint() {
     getCurrentStep,
   } = useOnboardingStore();
   const isDark = useColorScheme() === "dark";
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const reduceMotion = useReducedMotion();
+  const fadeAnim = useSharedValue(0);
   const currentStep = getCurrentStep();
 
   useEffect(() => {
-    if (isVisible) {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [isVisible, fadeAnim]);
+    // Reduced motion: saltamos directo a la opacidad final (duration 0) en vez de
+    // animar el fade; conservamos el cambio de opacidad para comunicar el estado
+    fadeAnim.value = withTiming(isVisible ? 1 : 0, {
+      duration: reduceMotion ? 0 : isVisible ? 300 : 200,
+    });
+  }, [isVisible, fadeAnim, reduceMotion]);
+
+  const fadeStyle = useAnimatedStyle(() => ({ opacity: fadeAnim.value }));
 
   useEffect(() => {
     getCompletedSteps().then(setCompletedSteps);
@@ -56,11 +54,7 @@ export function OnboardingHint() {
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        isDark ? styles.containerDark : styles.containerLight,
-        { opacity: fadeAnim },
-      ]}
+      style={[styles.container, isDark ? styles.containerDark : styles.containerLight, fadeStyle]}
     >
       <View style={styles.arrow} />
       <View style={styles.content}>
@@ -171,7 +165,7 @@ const styles = StyleSheet.create({
     color: "#4b5563",
   },
   descriptionDark: {
-    color: "#9ca3af",
+    color: AppColors.light.textMuted,
   },
   buttons: {
     flexDirection: "row",
@@ -187,13 +181,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   skipTextLight: {
-    color: "#6b7280",
+    color: AppColors.light.textSecondary,
   },
   skipTextDark: {
-    color: "#9ca3af",
+    color: AppColors.light.textMuted,
   },
   nextButton: {
-    backgroundColor: "#ea580c",
+    backgroundColor: AppColors.primary,
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 6,

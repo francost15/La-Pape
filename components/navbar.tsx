@@ -54,7 +54,7 @@ export default function Navbar() {
 
   return (
     <View
-      className="flex-row items-center justify-between px-4 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+      className="flex-row items-center justify-between bg-[#FAFAF9] px-4 dark:bg-[#0C0F14]"
       style={{
         height: 56,
         ...(Platform.OS === "ios" ? { paddingTop: 48 } : {}),
@@ -215,7 +215,11 @@ export default function Navbar() {
                   accessibilityRole="button"
                   accessibilityLabel="Configuración"
                 >
-                  <IconSymbol name="gearshape.fill" size={18} color="#6B7280" />
+                  <IconSymbol
+                    name="gearshape.fill"
+                    size={18}
+                    color={AppColors.light.textSecondary}
+                  />
                   <Text
                     className="text-sm font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
                     style={{ fontFamily: AppFonts.bodyStrong }}
@@ -223,7 +227,7 @@ export default function Navbar() {
                     Configuración
                   </Text>
                   <View className="flex-1" />
-                  <IconSymbol name="chevron.right" size={14} color="#9ca3af" />
+                  <IconSymbol name="chevron.right" size={14} color={AppColors.light.textMuted} />
                 </TouchableOpacity>
 
                 {/* Sign out */}

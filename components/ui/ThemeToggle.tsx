@@ -1,4 +1,5 @@
 import { IconSymbol } from "./icon-symbol";
+import { AppColors } from "@/constants/colors";
 import { useTheme } from "@/hooks/useTheme";
 import { Text, TouchableOpacity } from "react-native";
 
@@ -17,7 +18,7 @@ export function ThemeToggle() {
       accessibilityRole="button"
       accessibilityLabel={`Tema: ${label}. Toca para cambiar.`}
     >
-      <IconSymbol name={icon} size={20} color={isDark ? "#fbbf24" : "#f97316"} />
+      <IconSymbol name={icon} size={20} color={isDark ? "#fbbf24" : AppColors.primaryLight} />
       <Text className="text-sm text-gray-700 dark:text-gray-300">{label}</Text>
     </TouchableOpacity>
   );

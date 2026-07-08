@@ -3,6 +3,7 @@ import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { VentasPorUsuario as VentasPorUsuarioType } from "@/store/resumen-store";
 import { useHaptic } from "@/hooks/use-haptic";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Image } from "expo-image";
 import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -42,15 +43,22 @@ function VentasPorUsuarioRow({
   index,
   showDivider,
 }: VentasPorUsuarioRowProps) {
+  const reduceMotion = useReducedMotion();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(6);
   const [photoError, setPhotoError] = useState(false);
 
   useEffect(() => {
+    // Reduced motion: fila visible sin desplazamiento (sin animar el movimiento)
+    if (reduceMotion) {
+      opacity.value = 1;
+      translateY.value = 0;
+      return;
+    }
     const delay = index * 50;
     opacity.value = withDelay(delay, withTiming(1, { duration: 240 }));
     translateY.value = withDelay(delay, withTiming(0, { duration: 240 }));
-  }, [index, opacity, translateY]);
+  }, [index, opacity, translateY, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -95,7 +103,7 @@ function VentasPorUsuarioRow({
           >
             {item.nombre}
           </Text>
-          <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]">
+          <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]">
             {item.transacciones} {pluralize(item.transacciones, "venta", "ventas")}
           </Text>
         </View>
@@ -105,7 +113,7 @@ function VentasPorUsuarioRow({
           <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
+          <Text className="text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
             {porcentajeDelTotal.toFixed(0)}%
           </Text>
         </View>

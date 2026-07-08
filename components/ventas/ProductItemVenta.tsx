@@ -3,6 +3,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import { Product } from "@/interface/products";
+import { formatCurrency } from "@/lib/utils/format";
 import { useVentasStore } from "@/store/ventas-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -136,7 +137,7 @@ export default React.memo(function ProductItemVenta({
             letterSpacing: -0.5,
           }}
         >
-          ${product.precio_venta.toLocaleString()}
+          {formatCurrency(product.precio_venta)}
         </Text>
       </View>
 

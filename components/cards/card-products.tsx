@@ -2,19 +2,13 @@ import { CardProductsProps } from "@/interface/products";
 import { formatCurrency } from "@/lib/utils/format";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useLayoutStore } from "@/store/layout-store";
 import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  Platform,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { IconSymbol } from "../ui/icon-symbol";
 
@@ -32,13 +26,10 @@ export default React.memo(function CardProducts({
   stockData,
 }: CardProductsProps) {
   const isMobile = useLayoutStore((s) => s.isMobile);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, colors } = useThemeColors();
   const [imageError, setImageError] = useState(false);
   const haptic = useHaptic();
   const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
-
-  const colors = isDark ? AppColors.dark : AppColors.light;
 
   const handlePress = () => {
     router.push({
@@ -60,7 +51,7 @@ export default React.memo(function CardProducts({
   const isRanking = variant === "ranking" && rankingData;
   const isStock = variant === "stock";
   const stockCantidad = stockData?.cantidad ?? product.cantidad;
-  const stockMinimo = stockData?.stockMinimo ?? (product.stock_minimo ?? 0);
+  const stockMinimo = stockData?.stockMinimo ?? product.stock_minimo ?? 0;
   const imgSize = 52;
 
   const ProductImage = () => (
@@ -69,7 +60,7 @@ export default React.memo(function CardProducts({
       style={{
         height: imgSize,
         width: imgSize,
-        backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4",
+        backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
       }}
     >
       {hasImage && !imageError ? (
@@ -81,7 +72,11 @@ export default React.memo(function CardProducts({
         />
       ) : (
         <View className="h-full w-full items-center justify-center">
-          <IconSymbol name="photo.fill" size={20} color={isDark ? "#5A6478" : "#C7C7CC"} />
+          <IconSymbol
+            name="photo.fill"
+            size={20}
+            color={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
+          />
         </View>
       )}
     </View>
@@ -89,17 +84,21 @@ export default React.memo(function CardProducts({
 
   const StockRightContent = () => (
     <View className="items-end gap-0.5">
-      <Text
-        className="text-[12px] tabular-nums"
-        style={{ color: colors.textSecondary }}
-      >
+      <Text className="text-[12px] tabular-nums" style={{ color: colors.textSecondary }}>
         {stockMinimo > 0 ? `mín. ${stockMinimo}` : "mín. 0"}
       </Text>
       <Text
         className={`text-[16px] font-bold tabular-nums ${
           stockCantidad === 0 ? "text-red-500" : ""
         }`}
-        style={{ color: stockCantidad === 0 ? AppColors.error : isDark ? "#F97316" : "#ea580c" }}
+        style={{
+          color:
+            stockCantidad === 0
+              ? AppColors.error
+              : isDark
+                ? AppColors.primaryLight
+                : AppColors.primary,
+        }}
       >
         {stockCantidad} disp.
       </Text>
@@ -109,7 +108,7 @@ export default React.memo(function CardProducts({
   const StockMiddleContent = () => (
     <View className="min-w-0 flex-1 gap-0.5">
       <Text
-        className="text-[14px] font-semibold leading-5"
+        className="text-[14px] leading-5 font-semibold"
         style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
         numberOfLines={2}
       >
@@ -131,7 +130,10 @@ export default React.memo(function CardProducts({
         </Text>
         <Text
           className="text-[16px] font-bold tabular-nums"
-          style={{ color: isDark ? "#F97316" : "#ea580c", fontFamily: AppFonts.display }}
+          style={{
+            color: isDark ? AppColors.primaryLight : AppColors.primary,
+            fontFamily: AppFonts.display,
+          }}
         >
           {formatCurrency(rankingData.total)}
         </Text>
@@ -140,13 +142,16 @@ export default React.memo(function CardProducts({
       <View className="items-end gap-0.5">
         <Text
           className="text-[16px] font-bold"
-          style={{ color: isDark ? "#F97316" : "#ea580c", fontFamily: AppFonts.display }}
+          style={{
+            color: isDark ? AppColors.primaryLight : AppColors.primary,
+            fontFamily: AppFonts.display,
+          }}
         >
-          ${product.precio_venta.toLocaleString()}
+          {formatCurrency(product.precio_venta)}
         </Text>
         {product.precio_mayoreo > 0 && (
-          <Text className="text-[11px]" style={{ color: colors.textMuted }}>
-            May: ${product.precio_mayoreo.toLocaleString()}
+          <Text className="text-[11px]" style={{ color: colors.textLabel }}>
+            May: {formatCurrency(product.precio_mayoreo)}
           </Text>
         )}
       </View>
@@ -156,7 +161,7 @@ export default React.memo(function CardProducts({
     isRanking ? (
       <View className="min-w-0 flex-1 gap-0.5">
         <Text
-          className="text-[14px] font-semibold leading-5"
+          className="text-[14px] leading-5 font-semibold"
           style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
           numberOfLines={2}
         >
@@ -171,7 +176,7 @@ export default React.memo(function CardProducts({
     ) : (
       <View className="min-w-0 flex-1 gap-1">
         <Text
-          className="text-[14px] font-semibold leading-5"
+          className="text-[14px] leading-5 font-semibold"
           style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
           numberOfLines={2}
         >
@@ -235,8 +240,11 @@ export default React.memo(function CardProducts({
             android_ripple={{ color: "rgba(0,0,0,0.05)" }}
           >
             {rank != null && (
-              <View className="w-6 h-6 rounded-md items-center justify-center" style={{ backgroundColor: "#ea580c" }}>
-                <Text className="text-white text-[11px] font-bold">{rank}</Text>
+              <View
+                className="h-6 w-6 items-center justify-center rounded-md"
+                style={{ backgroundColor: AppColors.primary }}
+              >
+                <Text className="text-[11px] font-bold text-white">{rank}</Text>
               </View>
             )}
             <ProductImage />
@@ -251,7 +259,7 @@ export default React.memo(function CardProducts({
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={handleCardPress}
-        className="w-full flex-row items-center gap-3 py-3.5 px-3"
+        className="w-full flex-row items-center gap-3 px-3 py-3.5"
         style={{
           borderBottomWidth: 1,
           borderBottomColor: colors.border,
@@ -262,7 +270,7 @@ export default React.memo(function CardProducts({
           style={{
             height: 64,
             width: 64,
-            backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4",
+            backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
           }}
         >
           {hasImage && !imageError ? (
@@ -274,14 +282,18 @@ export default React.memo(function CardProducts({
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <IconSymbol name="photo.fill" size={22} color={isDark ? "#5A6478" : "#C7C7CC"} />
+              <IconSymbol
+                name="photo.fill"
+                size={22}
+                color={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
+              />
             </View>
           )}
         </View>
 
         <View className="min-w-0 flex-1 gap-1">
           <Text
-            className="text-[14px] font-semibold leading-5"
+            className="text-[14px] leading-5 font-semibold"
             style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}
             numberOfLines={2}
           >
@@ -307,13 +319,16 @@ export default React.memo(function CardProducts({
         <View className="items-end gap-0.5">
           <Text
             className="text-[16px] font-bold"
-            style={{ color: isDark ? "#F97316" : "#ea580c", fontFamily: AppFonts.display }}
+            style={{
+              color: isDark ? AppColors.primaryLight : AppColors.primary,
+              fontFamily: AppFonts.display,
+            }}
           >
-            ${product.precio_venta.toLocaleString()}
+            {formatCurrency(product.precio_venta)}
           </Text>
           {product.precio_mayoreo > 0 && (
-            <Text className="text-[11px]" style={{ color: colors.textMuted }}>
-              May: ${product.precio_mayoreo.toLocaleString()}
+            <Text className="text-[11px]" style={{ color: colors.textLabel }}>
+              May: {formatCurrency(product.precio_mayoreo)}
             </Text>
           )}
         </View>
@@ -331,13 +346,18 @@ export default React.memo(function CardProducts({
       style={{
         backgroundColor: isDark ? AppColors.dark.surface : "#FFFFFF",
         ...(Platform.OS === "web"
-          ? { boxShadow: "0 1px 4px rgba(0,0,0,0.04)", transition: "box-shadow 0.2s ease, transform 0.2s ease" }
+          ? {
+              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+              transition: "box-shadow 0.2s ease, transform 0.2s ease",
+            }
           : { elevation: 2 }),
       }}
     >
       <View
         className="h-44 w-full overflow-hidden"
-        style={{ backgroundColor: isDark ? AppColors.dark.surfaceElevated : "#F5F5F4" }}
+        style={{
+          backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
+        }}
       >
         {hasImage && !imageError ? (
           <Image
@@ -348,7 +368,11 @@ export default React.memo(function CardProducts({
           />
         ) : (
           <View className="h-full w-full items-center justify-center">
-            <IconSymbol name="photo.fill" size={32} color={isDark ? "#5A6478" : "#D1D5DB"} />
+            <IconSymbol
+              name="photo.fill"
+              size={32}
+              color={isDark ? AppColors.dark.textMuted : "#D1D5DB"}
+            />
           </View>
         )}
       </View>
@@ -364,9 +388,8 @@ export default React.memo(function CardProducts({
             <View
               className="rounded-lg px-2 py-0.5"
               style={{
-                backgroundColor: product.cantidad > 0
-                  ? "rgba(22,163,74,0.08)"
-                  : "rgba(220,38,38,0.08)",
+                backgroundColor:
+                  product.cantidad > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)",
               }}
             >
               <Text
@@ -390,12 +413,15 @@ export default React.memo(function CardProducts({
         <View className="flex-row items-baseline gap-2">
           <Text
             className="text-[17px] font-bold"
-            style={{ color: isDark ? "#F97316" : "#ea580c", fontFamily: AppFonts.display }}
+            style={{
+              color: isDark ? AppColors.primaryLight : AppColors.primary,
+              fontFamily: AppFonts.display,
+            }}
           >
-            ${product.precio_venta.toLocaleString()}
+            {formatCurrency(product.precio_venta)}
           </Text>
-          <Text className="text-[12px]" style={{ color: colors.textMuted }}>
-            Mayoreo: ${product.precio_mayoreo.toLocaleString()}
+          <Text className="text-[12px]" style={{ color: colors.textLabel }}>
+            Mayoreo: {formatCurrency(product.precio_mayoreo)}
           </Text>
         </View>
       </View>

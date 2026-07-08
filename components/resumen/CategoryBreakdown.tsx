@@ -1,5 +1,6 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
+import { AppColors } from "@/constants/colors";
 import { formatCurrency } from "@/lib/utils/format";
 import type { CategoriaVenta } from "@/store/resumen-store";
 import React from "react";
@@ -7,12 +8,12 @@ import { Text, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
 const COLORS = [
-  "#3b82f6",
-  "#ea580c",
+  AppColors.infoLight,
+  AppColors.primary,
   "#10b981",
   "#8b5cf6",
   "#f59e0b",
-  "#ef4444",
+  AppColors.errorLight,
   "#ec4899",
   "#14b8a6",
 ];
@@ -91,7 +92,7 @@ function LegendItem({ color, label, value, percentage }: LegendItemProps) {
         <Text className="flex-1 text-[12px] text-[#1A1A1A] dark:text-[#F0F0F0]" numberOfLines={1}>
           {label}
         </Text>
-        <Text className="mr-1.5 text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
+        <Text className="mr-1.5 text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
           {percentage.toFixed(0)}%
         </Text>
         <Text className="min-w-[58px] text-right text-[12px] font-semibold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">

@@ -1,25 +1,28 @@
 import { notify } from "@/lib/notify";
+import { formatCurrency } from "@/lib/utils/format";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { DesignSystem, DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import { Strings } from "@/constants/strings";
 import { useCompleteVenta } from "@/hooks/use-complete-venta";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
-import { useUndoRedo } from "@/hooks/useUndoRedo";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
+  Pressable,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
 import Animated, {
+  useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
@@ -54,32 +57,60 @@ export default function CartPanel() {
   const closeDeleteConfirm = useVentasUIStore((s) => s.closeDeleteConfirm);
 
   const haptic = useHaptic();
+  const reduceMotion = useReducedMotion();
   const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const total = getTotal();
 
   // ── Animación de éxito ────────────────────────────────────────────────
-  const successScale = useSharedValue(0);
+  // Valor inicial 0.5 (no 0): desde scale(0) el check se "teletransporta" al
+  // aparecer; partiendo de 0.5 el pop del spring se lee como una escala, no
+  // como algo que surge de la nada.
+  const successScale = useSharedValue(0.5);
   const successOpacity = useSharedValue(0);
   const listOpacity = useSharedValue(1);
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => clearTimeout(resetTimeoutRef.current), []);
 
   const playSuccessAnimation = useCallback(() => {
     successOpacity.value = withTiming(1, { duration: DesignSystem.animations.fast });
+    // Reduced motion: mostramos el check solo con opacidad, sin el pop del spring.
+    if (reduceMotion) {
+      successScale.value = 1;
+      return;
+    }
     successScale.value = withSequence(
-      withSpring(0, { damping: 4, stiffness: 200 }),
       withSpring(1.2, { damping: 5, stiffness: 300 }),
       withSpring(1, { damping: 6, stiffness: 350 })
     );
-  }, [successOpacity, successScale]);
+  }, [successOpacity, successScale, reduceMotion]);
 
   const resetSuccessAnimation = useCallback(() => {
-    successScale.value = 0;
+    successScale.value = 0.5;
     successOpacity.value = 0;
   }, [successScale, successOpacity]);
 
+  // ── Feedback de escala del CTA "Completar venta" ──────────────────────
+  const ctaScale = useSharedValue(1);
+  const ctaAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ctaScale.value }],
+  }));
+
+  const handleCtaPressIn = useCallback(() => {
+    if (reduceMotion) return;
+    ctaScale.value = withSpring(0.97, { damping: 15, stiffness: 400, mass: 0.5 });
+  }, [ctaScale, reduceMotion]);
+
+  const handleCtaPressOut = useCallback(() => {
+    if (reduceMotion) return;
+    ctaScale.value = withSpring(1, { damping: 15, stiffness: 400, mass: 0.5 });
+  }, [ctaScale, reduceMotion]);
+
   const { completeVenta } = useCompleteVenta(() => {
     playSuccessAnimation();
-    setTimeout(resetSuccessAnimation, 800);
+    clearTimeout(resetTimeoutRef.current);
+    resetTimeoutRef.current = setTimeout(resetSuccessAnimation, 800);
   });
 
   // ── Limpiar carrito ───────────────────────────────────────────────────
@@ -137,7 +168,7 @@ export default function CartPanel() {
           paddingHorizontal: 24,
           paddingVertical: 16,
         }}
-        accessibilityLabel={`${item.product.nombre}, cantidad ${item.quantity}, precio ${item.unitPrice}`}
+        accessibilityLabel={`${item.product.nombre}, cantidad ${item.quantity}, precio ${formatCurrency(item.unitPrice)}`}
       >
         <View
           style={{
@@ -184,7 +215,7 @@ export default function CartPanel() {
             }}
             numberOfLines={1}
           >
-            ${item.unitPrice.toLocaleString()} cada uno
+            {formatCurrency(item.unitPrice)} cada uno
           </Text>
         </View>
 
@@ -197,7 +228,7 @@ export default function CartPanel() {
               fontFamily: AppFonts.bodyStrong,
             }}
           >
-            ${(item.unitPrice * item.quantity).toLocaleString()}
+            {formatCurrency(item.unitPrice * item.quantity)}
           </Text>
           <QuantityStepper
             quantity={item.quantity}
@@ -271,7 +302,7 @@ export default function CartPanel() {
       {/* ── Footer: total + acciones ──────────────────────────────────── */}
       <View
         style={{
-          backgroundColor: isDark ? AppColors.dark.surface : AppColors.light.surface,
+          backgroundColor: colors.surface,
           paddingHorizontal: 24,
           paddingTop: 24,
           paddingBottom: 32,
@@ -328,45 +359,51 @@ export default function CartPanel() {
               lineHeight: 54,
             }}
           >
-            ${total.toLocaleString()}
+            {formatCurrency(total)}
           </Text>
         </View>
 
         {/* Botones */}
         <View style={{ gap: 12 }}>
-          <TouchableOpacity
-            onPress={openConfirm}
-            disabled={processing || isClearing}
-            activeOpacity={0.9}
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: DesignSystem.radius.xxl,
-              paddingVertical: 20,
-              backgroundColor: AppColors.primary,
-              opacity: processing || isClearing ? 0.6 : 1,
-              ...(Platform.OS === "web" ? { boxShadow: "0 12px 24px rgba(234, 88, 12, 0.2)" } : {}),
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="Completar venta"
-          >
-            {processing ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  letterSpacing: 1.5,
-                  color: "#ffffff",
-                  textTransform: "uppercase",
-                  fontFamily: AppFonts.bodyStrong,
-                }}
-              >
-                {Strings.ventas.completeSale}
-              </Text>
-            )}
-          </TouchableOpacity>
+          <Animated.View style={ctaAnimatedStyle}>
+            <Pressable
+              onPress={openConfirm}
+              onPressIn={handleCtaPressIn}
+              onPressOut={handleCtaPressOut}
+              disabled={processing || isClearing}
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: DesignSystem.radius.xxl,
+                paddingVertical: 20,
+                backgroundColor: AppColors.primary,
+                opacity: processing || isClearing ? 0.6 : 1,
+                ...(Platform.OS === "web"
+                  ? { boxShadow: "0 12px 24px rgba(234, 88, 12, 0.2)" }
+                  : {}),
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Completar venta"
+              accessibilityHint="Procesa el pago y registra la venta"
+            >
+              {processing ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "700",
+                    letterSpacing: 1.5,
+                    color: "#ffffff",
+                    textTransform: "uppercase",
+                    fontFamily: AppFonts.bodyStrong,
+                  }}
+                >
+                  {Strings.ventas.completeSale}
+                </Text>
+              )}
+            </Pressable>
+          </Animated.View>
 
           {isDesktop && (
             <TouchableOpacity

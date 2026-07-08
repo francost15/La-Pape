@@ -1,11 +1,12 @@
-import { DynamicIslandTabBar } from '@/components/DynamicIslandTabBar';
-import Navbar from '@/components/navbar';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { auth } from '@/lib/firebase';
-import { Tabs, useRouter } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { DynamicIslandTabBar } from "@/components/DynamicIslandTabBar";
+import Navbar from "@/components/navbar";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppColors } from "@/constants/colors";
+import { auth } from "@/lib/firebase";
+import { Tabs, useRouter } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function TabLayout() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        router.replace('/');
+        router.replace("/");
       }
       setCheckingAuth(false);
     });
@@ -23,8 +24,8 @@ export default function TabLayout() {
 
   if (checkingAuth) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
-        <ActivityIndicator size="large" color="#ea580c" />
+      <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
+        <ActivityIndicator size="large" color={AppColors.primary} />
       </View>
     );
   }
@@ -37,44 +38,36 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: '#ea580c',
-          tabBarInactiveTintColor: '#9CA3AF',
+          tabBarActiveTintColor: AppColors.primary,
+          tabBarInactiveTintColor: AppColors.light.textMuted,
         }}
       >
         <Tabs.Screen
           name="ventas"
           options={{
-            title: 'Ventas',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="cart.fill" color={color} />
-            ),
+            title: "Ventas",
+            tabBarIcon: ({ color }) => <IconSymbol size={32} name="cart.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="productos"
           options={{
-            title: 'Productos',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="bag.fill" color={color} />
-            ),
+            title: "Productos",
+            tabBarIcon: ({ color }) => <IconSymbol size={32} name="bag.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="history"
           options={{
-            title: 'Historial',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="clock.fill" color={color} />
-            ),
+            title: "Historial",
+            tabBarIcon: ({ color }) => <IconSymbol size={32} name="clock.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="resumen"
           options={{
-            title: 'Resumen',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="doc.text" color={color} />
-            ),
+            title: "Resumen",
+            tabBarIcon: ({ color }) => <IconSymbol size={32} name="doc.text" color={color} />,
           }}
         />
       </Tabs>

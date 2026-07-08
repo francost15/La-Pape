@@ -1,4 +1,5 @@
 import type { Periodo } from "@/interface";
+import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -90,11 +91,11 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
         style={[
           indicatorStyle,
           {
-            backgroundColor: "#ea580c",
+            backgroundColor: AppColors.primary,
             ...(Platform.OS === "web"
               ? { boxShadow: "0 1px 6px rgba(234,88,12,0.3)" }
               : {
-                  shadowColor: "#ea580c",
+                  shadowColor: AppColors.primary,
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: isDark ? 0.45 : 0.3,
                   shadowRadius: 4,

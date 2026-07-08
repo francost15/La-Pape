@@ -2,8 +2,10 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import ProductListContent from "@/components/ventas/ProductListContent";
 import QrScannerSheet from "@/components/ventas/QrScannerSheet";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
+import { DESKTOP_MIN_WIDTH, DesignSystem } from "@/constants/design-system";
 import { notify } from "@/lib/notify";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -20,6 +22,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
+  Easing,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
@@ -43,6 +46,7 @@ export default function AddProductsSheet() {
   const insets = useSafeAreaInsets();
   const { isDark, colors } = useThemeColors();
   const haptic = useHaptic();
+  const reduceMotion = useReducedMotion();
 
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
@@ -57,27 +61,45 @@ export default function AddProductsSheet() {
   // ── Animación ─────────────────────────────────────────────────────────
   const translateY = useSharedValue(height);
   const dragOffset = useSharedValue(0);
+  // El backdrop hace fade sincronizado con el sheet (opacidad = permitida
+  // incluso bajo reduced motion, ayuda a entender la aparición del overlay).
+  const backdropOpacity = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
 
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
   const closeSheet = useCallback(() => {
     haptic();
-    translateY.value = withTiming(height, { duration: 250 }, () => {
-      runOnJS(closeSheetStore)();
-    });
-  }, [haptic, height, translateY, closeSheetStore]);
+    backdropOpacity.value = withTiming(0, { duration: 250 });
+    translateY.value = withTiming(
+      height,
+      { duration: 250, easing: Easing.bezier(...DesignSystem.easingCurve.strongOut) },
+      () => {
+        runOnJS(closeSheetStore)();
+      }
+    );
+  }, [haptic, height, translateY, backdropOpacity, closeSheetStore]);
 
   const closeSheetRef = useRef(closeSheet);
   closeSheetRef.current = closeSheet;
 
   useEffect(() => {
     if (sheetVisible) {
+      backdropOpacity.value = withTiming(1, { duration: 250 });
+      // Reduced motion: el sheet aparece sin el spring de translate (directo a 0).
+      if (reduceMotion) {
+        translateY.value = 0;
+        return;
+      }
       translateY.value = height;
       translateY.value = withSpring(0, SPRING_CONFIG);
     }
-  }, [sheetVisible, height, translateY]);
+  }, [sheetVisible, height, translateY, backdropOpacity, reduceMotion]);
 
   // ── Teclado ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -123,7 +145,7 @@ export default function AddProductsSheet() {
       style={[StyleSheet.absoluteFill, { paddingTop: insets.top, zIndex: 9000 }]}
       pointerEvents="box-none"
     >
-      <View style={{ flex: 1, backgroundColor: backdropBg }}>
+      <Animated.View style={[{ flex: 1, backgroundColor: backdropBg }, backdropStyle]}>
         <Pressable
           style={{ flex: 1 }}
           onPress={() => {
@@ -209,7 +231,9 @@ export default function AddProductsSheet() {
                       width: 32,
                       height: 32,
                       borderRadius: 16,
-                      backgroundColor: isDark ? "#1A1F2B" : "#F5F5F4",
+                      backgroundColor: isDark
+                        ? AppColors.dark.surfaceElevated
+                        : AppColors.light.surfaceHover,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -238,7 +262,7 @@ export default function AddProductsSheet() {
             </View>
           </Animated.View>
         </GestureDetector>
-      </View>
+      </Animated.View>
 
       <QrScannerSheet
         visible={qrScannerVisible}

@@ -2,11 +2,13 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useHaptic } from "@/hooks/use-haptic";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency, formatTime } from "@/lib/utils/format";
+import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import React, { useEffect } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import Animated, {
   FadeInDown,
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -55,7 +57,7 @@ export default React.memo(function VentaCard({
 
   return (
     <Animated.View
-      entering={FadeInDown.duration(280).springify().damping(18)}
+      entering={FadeInDown.duration(280).springify().damping(18).reduceMotion(ReduceMotion.System)}
       className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1F2B]"
       style={{
         boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.02)" : undefined,
@@ -65,7 +67,7 @@ export default React.memo(function VentaCard({
       {/* Left accent bar */}
       <View
         className="border-l-[3px]"
-        style={{ borderLeftColor: isReembolso ? "#ef4444" : "#ea580c" }}
+        style={{ borderLeftColor: isReembolso ? AppColors.errorLight : AppColors.primary }}
       >
         <Pressable
           onPress={() => {
@@ -78,14 +80,14 @@ export default React.memo(function VentaCard({
           accessibilityLabel={`Venta ${formatCurrency(venta.total)}, ${detalles.length} productos`}
         >
           <View className="min-w-0 flex-1">
-            <Text 
-              className="text-[10px] font-bold text-[#9CA3AF] dark:text-[#5A6478] uppercase tracking-[0.15em] mb-0.5"
+            <Text
+              className="mb-0.5 text-[10px] font-bold tracking-[0.15em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               {formatTime(fecha)}
             </Text>
-            <Text 
-              className="text-[13px] text-[#4B5563] dark:text-[#9CA3AF]" 
+            <Text
+              className="text-[13px] text-[#4B5563] dark:text-[#9CA3AF]"
               style={{ fontFamily: AppFonts.body }}
               numberOfLines={1}
             >
@@ -103,15 +105,13 @@ export default React.memo(function VentaCard({
           <View
             className="h-8 w-8 items-center justify-center rounded-full"
             style={{
-              backgroundColor: expandido
-                ? "rgba(234,88,12,0.1)"
-                : "rgba(0,0,0,0.03)",
+              backgroundColor: expandido ? "rgba(234,88,12,0.1)" : "rgba(0,0,0,0.03)",
             }}
           >
             <IconSymbol
               name={expandido ? "chevron.up" : "chevron.down"}
               size={12}
-              color={expandido ? "#ea580c" : "#9CA3AF"}
+              color={expandido ? AppColors.primary : AppColors.light.textMuted}
             />
           </View>
         </Pressable>
@@ -127,8 +127,8 @@ export default React.memo(function VentaCard({
               borderTopColor: "rgba(0,0,0,0.04)",
             }}
           >
-            <Text 
-              className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#9CA3AF] dark:text-[#5A6478]"
+            <Text
+              className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
               DETALLE DE PRODUCTOS
@@ -145,8 +145,8 @@ export default React.memo(function VentaCard({
                     >
                       {d.cantidad} × {nombre}
                     </Text>
-                    <Text 
-                      className="text-[13px] font-bold tabular-nums text-[#111827] dark:text-[#F9FAFB]"
+                    <Text
+                      className="text-[13px] font-bold text-[#111827] tabular-nums dark:text-[#F9FAFB]"
                       style={{ fontFamily: AppFonts.bodyStrong }}
                     >
                       {formatCurrency(d.total_linea)}
@@ -164,14 +164,14 @@ export default React.memo(function VentaCard({
                 }}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
                 style={{
-                  backgroundColor: "#ea580c",
+                  backgroundColor: AppColors.primary,
                 }}
                 accessibilityRole="button"
                 accessibilityLabel="Ver recibo"
               >
                 <IconSymbol name="eye.fill" size={16} color="white" />
-                <Text 
-                  className="text-[14px] font-bold text-white uppercase tracking-wider"
+                <Text
+                  className="text-[14px] font-bold tracking-wider text-white uppercase"
                   style={{ fontFamily: AppFonts.bodyStrong }}
                 >
                   Ver Recibo
@@ -196,13 +196,11 @@ export default React.memo(function VentaCard({
                 <IconSymbol
                   name="arrow.uturn.backward"
                   size={14}
-                  color={isReembolso ? "#9ca3af" : "#dc2626"}
+                  color={isReembolso ? AppColors.light.textMuted : AppColors.error}
                 />
                 <Text
-                  className={`text-[13px] font-bold uppercase tracking-wider ${
-                    isReembolso
-                      ? "text-[#9CA3AF]"
-                      : "text-red-600 dark:text-red-400"
+                  className={`text-[13px] font-bold tracking-wider uppercase ${
+                    isReembolso ? "text-[#9CA3AF]" : "text-red-600 dark:text-red-400"
                   }`}
                   style={{ fontFamily: AppFonts.bodyStrong }}
                 >

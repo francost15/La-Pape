@@ -1,5 +1,6 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
+import { AppColors } from "@/constants/colors";
 import type { Product } from "@/interface";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -61,7 +62,7 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
             {product.nombre}
           </Text>
           {product.marca ? (
-            <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]" numberOfLines={1}>
+            <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]" numberOfLines={1}>
               {product.marca}
             </Text>
           ) : null}
@@ -76,12 +77,12 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
         >
           <Text
             className="text-[11px] font-bold tabular-nums"
-            style={{ color: isCritical ? "#dc2626" : "#ea580c" }}
+            style={{ color: isCritical ? AppColors.error : AppColors.primary }}
           >
             {isCritical ? "Sin stock" : `${product.cantidad} disp.`}
           </Text>
           {stockMinimo > 0 && !isCritical ? (
-            <Text className="text-center text-[9px]" style={{ color: "#f97316" }}>
+            <Text className="text-center text-[9px]" style={{ color: AppColors.primaryLight }}>
               mín. {stockMinimo}
             </Text>
           ) : null}

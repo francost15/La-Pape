@@ -5,10 +5,10 @@ import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import CircleIconButton from "@/components/ui/CircleIconButton";
 import EmptyState from "@/components/ui/EmptyState";
 import { Product } from "@/interface";
+import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
-import { useLayoutStore } from "@/store/layout-store";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
@@ -150,7 +150,7 @@ export default function ProductosScreen() {
         {/* Dynamic products count */}
         {filteredProducts.length > 0 && (
           <Text
-            className="text-[11px] font-bold tracking-widest text-[#9CA3AF] uppercase dark:text-[#5A6478]"
+            className="text-[11px] font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
             style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
           >
             {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
@@ -174,11 +174,11 @@ export default function ProductosScreen() {
     () => (
       <View className="w-full items-center py-4">
         {loadingMore ? (
-          <ActivityIndicator color="#ea580c" />
+          <ActivityIndicator color={AppColors.primary} />
         ) : hasMore ? (
           <TouchableOpacity
             className="rounded-xl px-6 py-3"
-            style={{ backgroundColor: "#ea580c" }}
+            style={{ backgroundColor: AppColors.primary }}
             onPress={loadMore}
           >
             <Text className="font-semibold text-white">{Strings.productos.loadMore}</Text>
@@ -198,11 +198,11 @@ export default function ProductosScreen() {
               icon="products"
               title={Strings.productos.emptyProductsAvailable}
               description={Strings.productos.emptyProductsHint}
-              iconColor="#ea580c"
+              iconColor={AppColors.primary}
             />
             <TouchableOpacity
               className="mt-4 rounded-xl px-5 py-3.5"
-              style={{ backgroundColor: "#ea580c" }}
+              style={{ backgroundColor: AppColors.primary }}
               onPress={goToCreateProduct}
             >
               <Text className="font-semibold text-white">
@@ -215,7 +215,7 @@ export default function ProductosScreen() {
             icon="search"
             title={Strings.common.noResults}
             description={Strings.productos.noSearchResults}
-            iconColor="#9ca3af"
+            iconColor={AppColors.light.textMuted}
           />
         )}
       </View>
@@ -229,7 +229,7 @@ export default function ProductosScreen() {
         <Text className="mb-4 text-center text-red-500">{error}</Text>
         <TouchableOpacity
           className="rounded-xl px-5 py-3.5"
-          style={{ backgroundColor: "#ea580c" }}
+          style={{ backgroundColor: AppColors.primary }}
           onPress={retry}
         >
           <Text className="font-semibold text-white">{Strings.common.retry}</Text>
@@ -263,8 +263,8 @@ export default function ProductosScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#ea580c"
-            colors={["#ea580c"]}
+            tintColor={AppColors.primary}
+            colors={[AppColors.primary]}
           />
         }
       />

@@ -1,6 +1,7 @@
-import { CreateProductFormData } from '@/lib';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { Text, TextInput, View } from 'react-native';
+import { AppColors } from "@/constants/colors";
+import { CreateProductFormData } from "@/lib";
+import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Text, TextInput, View } from "react-native";
 
 interface CampoNombreProps {
   control: Control<CreateProductFormData>;
@@ -10,7 +11,7 @@ interface CampoNombreProps {
 export default function CampoNombre({ control, errors }: CampoNombreProps) {
   return (
     <View>
-      <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-2">
+      <Text className="mt-2 mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
         Nombre del Producto *
       </Text>
       <Controller
@@ -18,20 +19,18 @@ export default function CampoNombre({ control, errors }: CampoNombreProps) {
         name="nombre"
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            className={`bg-white dark:bg-neutral-800 border ${
-              errors.nombre ? 'border-red-500' : 'border-gray-300 dark:border-neutral-700'
+            className={`border bg-white dark:bg-neutral-800 ${
+              errors.nombre ? "border-red-500" : "border-gray-300 dark:border-neutral-700"
             } rounded-lg px-4 py-3 text-black dark:text-white`}
             placeholder="Ej: Lápiz HB #2"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={AppColors.light.textMuted}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
           />
         )}
       />
-      {errors.nombre && (
-        <Text className="text-red-500 text-xs mt-1">{errors.nombre.message}</Text>
-      )}
+      {errors.nombre && <Text className="mt-1 text-xs text-red-500">{errors.nombre.message}</Text>}
     </View>
   );
 }

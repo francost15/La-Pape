@@ -1,7 +1,10 @@
 import type { IconSymbolName } from "@/components/ui/icon-symbol";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppColors } from "@/constants/colors";
+import { DesignSystem } from "@/constants/design-system";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import {
   BottomTabBarHeightCallbackContext,
   type BottomTabBarProps,
@@ -12,8 +15,8 @@ import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from
 import Animated, {
   Easing,
   FadeInDown,
+  ReduceMotion,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
   withSpring,
   withTiming,
@@ -22,20 +25,20 @@ import Animated, {
 const PC_ONLY_ROUTES = ["resumen"] as const;
 
 /* ─── Digital Atelier — Tab Bar Colors ─────────────────────────── */
-const ACTIVE_BG = "#ea580c";
+const ACTIVE_BG = AppColors.primary;
 const ACTIVE_ICON_COLOR = "#ffffff";
 
 const THEME = {
   light: {
     barBg: "rgba(255,255,255,0.72)",
     border: "rgba(0,0,0,0.06)",
-    shadow: "#1A1A1A",
+    shadow: AppColors.light.textPrimary,
     shadowOpacity: 0.12,
     webShadow: "0 8px 32px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.04)",
-    inactiveIcon: "#9CA3AF",
-    inactiveLabel: "#9CA3AF",
+    inactiveIcon: AppColors.light.textMuted,
+    inactiveLabel: AppColors.light.textMuted,
     pcBadgeBg: "rgba(234,88,12,0.08)",
-    pcBadgeText: "#c2410c",
+    pcBadgeText: AppColors.primaryDark,
   },
   dark: {
     barBg: "rgba(20,24,32,0.72)",
@@ -43,14 +46,16 @@ const THEME = {
     shadow: "#000000",
     shadowOpacity: 0.5,
     webShadow: "0 12px 48px rgba(0,0,0,0.4), 0 1px 6px rgba(0,0,0,0.2)",
-    inactiveIcon: "#5A6478",
-    inactiveLabel: "#5A6478",
+    inactiveIcon: AppColors.dark.textMuted,
+    inactiveLabel: AppColors.dark.textMuted,
     pcBadgeBg: "rgba(249,115,22,0.12)",
-    pcBadgeText: "#f97316",
+    pcBadgeText: AppColors.primaryLight,
   },
 } as const;
 
-const COLOR_EASING = Easing.bezier(0.25, 0.1, 0.25, 1);
+// Curva ease-out fuerte del design system: el movimiento entra rápido y desacelera
+// suavemente, en lugar del ease débil simétrico anterior
+const COLOR_EASING = Easing.bezier(...DesignSystem.easingCurve.strongOut);
 
 const ICON_MAP: Record<string, IconSymbolName> = {
   ventas: "cart.fill",
@@ -108,7 +113,11 @@ export function DynamicIslandTabBar({ state, descriptors, navigation, insets }: 
 
   return (
     <Animated.View
-      entering={FadeInDown.springify().damping(22).stiffness(280).mass(0.8)}
+      entering={FadeInDown.springify()
+        .damping(22)
+        .stiffness(280)
+        .mass(0.8)
+        .reduceMotion(ReduceMotion.System)}
       style={[
         styles.wrapper,
         {
@@ -294,14 +303,17 @@ const PcOnlyBadge = React.memo(function PcOnlyBadge({
   theme: ThemeColors;
 }) {
   const opacity = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     opacity.value = withTiming(visible ? 1 : 0, { duration: 250, easing: COLOR_EASING });
   }, [visible, opacity]);
 
+  // Reduced motion: conservamos el fade (comunica el cambio de estado) pero
+  // eliminamos el desplazamiento vertical dejando la posición final directa
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: withTiming(visible ? 0 : 4, { duration: 250 }) }],
+    transform: [{ translateY: reduceMotion ? 0 : withTiming(visible ? 0 : 4, { duration: 250 }) }],
   }));
 
   if (!tab?.pcOnly) return null;

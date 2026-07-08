@@ -29,6 +29,9 @@ export const AppColors = {
     textPrimary: "#1A1A1A",
     textSecondary: "#6B7280",
     textMuted: "#9CA3AF",
+    // Muted tone que SÍ cumple WCAG AA (4.5:1). Usar para labels/subtítulos
+    // que el usuario debe leer; `textMuted` queda solo para adornos decorativos.
+    textLabel: "#6B7280",
   },
 
   dark: {
@@ -41,5 +44,7 @@ export const AppColors = {
     textPrimary: "#F0F0F0",
     textSecondary: "#8B95A5",
     textMuted: "#5A6478",
+    // Muted tone que SÍ cumple WCAG AA (4.5:1) sobre superficies oscuras.
+    textLabel: "#8B95A5",
   },
 } as const;

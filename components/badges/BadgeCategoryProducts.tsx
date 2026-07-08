@@ -13,7 +13,7 @@ interface BadgeCategoryProductsProps {
   onCategoryPress: (categoryId: string | null) => void;
 }
 
-const ACTIVE_BG = "#ea580c";
+const ACTIVE_BG = AppColors.primary;
 
 /**
  * BadgeItem — Digital Atelier style.
@@ -34,8 +34,8 @@ function BadgeItem({
 }) {
   const haptic = useHaptic();
   const colors = isDark ? AppColors.dark : AppColors.light;
-  
-  const bgInactive = isDark ? "#1A1F2B" : "#F5F5F4";
+
+  const bgInactive = isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover;
   const textInactive = isDark ? "#A1A1AA" : "#71717A";
 
   return (
@@ -80,9 +80,7 @@ export default function BadgeCategoryProducts({
   const isDark = colorScheme === "dark";
 
   const sortedCategories = [...categories].sort((a, b) =>
-    orderBy === "asc"
-      ? a.nombre.localeCompare(b.nombre)
-      : b.nombre.localeCompare(a.nombre),
+    orderBy === "asc" ? a.nombre.localeCompare(b.nombre) : b.nombre.localeCompare(a.nombre)
   );
 
   const handlePress = (categoryId: string | null) => {
@@ -127,7 +125,16 @@ export default function BadgeCategoryProducts({
   }
 
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingVertical: 4, marginBottom: 16 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+        paddingHorizontal: 16,
+        paddingVertical: 4,
+        marginBottom: 16,
+      }}
+    >
       {allBadges}
     </View>
   );

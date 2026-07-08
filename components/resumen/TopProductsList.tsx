@@ -1,5 +1,6 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
+import { AppColors } from "@/constants/colors";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { ProductoRanking } from "@/store/resumen-store";
 import { Image } from "expo-image";
@@ -37,7 +38,7 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
       >
         <Text
           className="w-4 text-center text-[12px] font-bold tabular-nums"
-          style={{ color: rank === 1 ? "#ea580c" : "#9CA3AF" }}
+          style={{ color: rank === 1 ? AppColors.primary : AppColors.light.textSecondary }}
         >
           {rank}
         </Text>
@@ -65,7 +66,7 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
             {item.producto.nombre}
           </Text>
           {item.producto.marca ? (
-            <Text className="text-[10px] text-[#9CA3AF] dark:text-[#5A6478]" numberOfLines={1}>
+            <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]" numberOfLines={1}>
               {item.producto.marca}
             </Text>
           ) : null}
@@ -75,7 +76,7 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
           <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-[#9CA3AF] tabular-nums dark:text-[#5A6478]">
+          <Text className="text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
             {item.cantidad} {pluralize(item.cantidad, "ud.", "uds.")}
           </Text>
         </View>

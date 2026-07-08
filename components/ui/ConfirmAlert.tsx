@@ -1,16 +1,8 @@
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
 import React from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export interface ConfirmAlertProps {
   visible: boolean;
@@ -39,10 +31,7 @@ export default function ConfirmAlert({
   onCancel,
   danger = true,
 }: ConfirmAlertProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  
-  const colors = isDark ? AppColors.dark : AppColors.light;
+  const { isDark, colors } = useThemeColors();
   const overlayBg = isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.4)";
 
   return (
@@ -66,7 +55,11 @@ export default function ConfirmAlert({
                 borderWidth: 1.5,
                 borderColor: colors.border,
                 ...(Platform.OS === "web"
-                  ? { boxShadow: isDark ? "0 8px 32px rgba(0,0,0,0.5)" : "0 8px 32px rgba(0,0,0,0.12)" }
+                  ? {
+                      boxShadow: isDark
+                        ? "0 8px 32px rgba(0,0,0,0.5)"
+                        : "0 8px 32px rgba(0,0,0,0.12)",
+                    }
                   : { elevation: 10 }),
               },
             ]}
@@ -139,7 +132,7 @@ export default function ConfirmAlert({
                   style={{
                     fontSize: 15,
                     fontWeight: "700",
-                    color: danger ? "#f43f5e" : "#ea580c",
+                    color: danger ? "#f43f5e" : AppColors.primary,
                     fontFamily: AppFonts.bodyStrong,
                   }}
                 >

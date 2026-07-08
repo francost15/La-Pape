@@ -1,9 +1,11 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppColors } from "@/constants/colors";
+import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
@@ -25,9 +27,9 @@ export default function FooterProducts() {
 
   const TAB_BAR_CLEARANCE = 96 + insets.bottom;
 
-  const fabBg = isDark ? "rgba(44,44,46,0.98)" : "rgba(255,255,255,0.98)";
-  const fabTextColor = isDark ? "#FFFFFF" : "#1D1D1F";
-  const fabBorderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const fabBg = isDark ? AppColors.dark.surface : AppColors.light.surface;
+  const fabTextColor = isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary;
+  const fabBorderColor = isDark ? AppColors.dark.borderStrong : AppColors.light.borderStrong;
   const fabShadow = isDark ? "0 2px 12px rgba(0,0,0,0.35)" : "0 2px 12px rgba(0,0,0,0.1)";
 
   if (sheetVisible) return null;
@@ -69,7 +71,7 @@ export default function FooterProducts() {
         style={{
           color: fabTextColor,
           fontSize: 15,
-          fontWeight: "600",
+          fontFamily: AppFonts.bodyStrong,
           letterSpacing: 0,
         }}
       >

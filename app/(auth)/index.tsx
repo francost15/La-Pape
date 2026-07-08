@@ -1,5 +1,5 @@
 import AuthForm from "@/components/auth/AuthForm";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { signIn, signUp } from "@/lib/auth";
 import { getGoogleRedirectResult, signInWithGoogle } from "@/lib/authWithGoogle";
 import { auth } from "@/lib/firebase";
@@ -14,8 +14,7 @@ import { Platform, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, colors } = useThemeColors();
   const isWeb = Platform.OS === "web";
 
   const [loading, setLoading] = useState(false);
@@ -101,7 +100,7 @@ export default function AuthScreen() {
     <SafeAreaView
       className="flex-1 justify-center"
       style={{
-        backgroundColor: isDark ? "#0C0F14" : "#FAFAF9",
+        backgroundColor: colors.canvas,
         paddingHorizontal: isWeb ? 24 : 0,
         alignItems: isWeb ? undefined : "center",
       }}

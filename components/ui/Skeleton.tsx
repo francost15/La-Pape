@@ -1,3 +1,4 @@
+import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect } from "react";
 import { View, type ViewStyle } from "react-native";
@@ -24,10 +25,7 @@ export function Skeleton({ style, className, width, height, borderRadius = 8 }: 
 
   useEffect(() => {
     opacity.value = withRepeat(
-      withSequence(
-        withTiming(0.7, { duration: 800 }),
-        withTiming(0.3, { duration: 800 })
-      ),
+      withSequence(withTiming(0.7, { duration: 800 }), withTiming(0.3, { duration: 800 })),
       -1, // Infinito
       true
     );
@@ -37,7 +35,7 @@ export function Skeleton({ style, className, width, height, borderRadius = 8 }: 
     opacity: opacity.value,
   }));
 
-  const backgroundColor = isDark ? "#1E2433" : "#E5E7EB";
+  const backgroundColor = isDark ? AppColors.dark.surfaceHover : "#E5E7EB";
 
   return (
     <Animated.View
