@@ -6,6 +6,7 @@ import FooterProducts from "@/components/ventas/FooterProducts";
 import ProductListContent from "@/components/ventas/ProductListContent";
 import { VENTAS_TOUR } from "@/constants/tours";
 import { AppFonts } from "@/constants/typography";
+import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTour } from "@/hooks/useTour";
@@ -63,12 +64,11 @@ export default function VentasScreen() {
 
   useKeyboardShortcuts(shortcuts, isDesktop);
 
-  const shortcutsHint = React.useMemo(() => {
-    if (!isDesktop) return null;
-  }, [isDesktop]);
-
   return (
-    <AnimatedScreen className="flex-1 flex-row bg-[#FAFAF9] dark:bg-[#0C0F14]">
+    <AnimatedScreen
+      className="flex-1 flex-row"
+      style={{ backgroundColor: isDark ? AppColors.dark.canvas : AppColors.light.canvas }}
+    >
       {/* ─── ÁREA PRINCIPAL: ATELIER (CATÁLOGO) / CARRITO (MÓVIL) ────────── */}
       <View className="flex-1" style={!isDesktop ? { paddingBottom: 144 } : { flex: 0.7 }}>
         <View className="flex-1">
@@ -83,20 +83,29 @@ export default function VentasScreen() {
             <View className="flex-1">
               <View className="px-5 pt-12 pb-6">
                 <Text
-                  className="mb-2 text-[9px] font-bold tracking-[0.3em] text-[#9CA3AF] uppercase dark:text-[#5A6478]"
-                  style={{ fontFamily: AppFonts.bodyStrong }}
+                  className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
+                  style={{
+                    fontFamily: AppFonts.bodyStrong,
+                    color: isDark ? AppColors.dark.textMuted : AppColors.light.textMuted,
+                  }}
                 >
                   ORDEN ACTUAL
                 </Text>
                 <View className="flex-row items-center gap-2.5">
                   <Text
-                    className="text-3xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
-                    style={{ fontFamily: AppFonts.display }}
+                    className="text-3xl tracking-tight"
+                    style={{
+                      fontFamily: AppFonts.display,
+                      color: isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary,
+                    }}
                   >
                     Carrito
                   </Text>
                   {itemCount > 0 && (
-                    <View className="rounded-full bg-[#ea580c] px-2.5 py-0.5">
+                    <View
+                      className="rounded-full px-2.5 py-0.5"
+                      style={{ backgroundColor: AppColors.primary }}
+                    >
                       <Text className="text-[12px] leading-none font-bold text-white">
                         {itemCount}
                       </Text>
@@ -116,26 +125,35 @@ export default function VentasScreen() {
           style={{
             flex: 0.3,
             borderLeftWidth: 1.5,
-            borderLeftColor: "rgba(0,0,0,0.03)",
+            borderLeftColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)",
+            backgroundColor: isDark ? AppColors.dark.surface : AppColors.light.surface,
           }}
-          className="bg-white dark:bg-[#111820]"
         >
           <View className="px-6 pt-12 pb-6">
             <Text
-              className="mb-2 text-[9px] font-bold tracking-[0.3em] text-[#9CA3AF] uppercase dark:text-[#5A6478]"
-              style={{ fontFamily: AppFonts.bodyStrong }}
+              className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
+              style={{
+                fontFamily: AppFonts.bodyStrong,
+                color: isDark ? AppColors.dark.textMuted : AppColors.light.textMuted,
+              }}
             >
               ORDEN ACTUAL
             </Text>
             <View className="flex-row items-center gap-2.5">
               <Text
-                className="text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
-                style={{ fontFamily: AppFonts.display }}
+                className="text-2xl tracking-tight"
+                style={{
+                  fontFamily: AppFonts.display,
+                  color: isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary,
+                }}
               >
                 Carrito
               </Text>
               {itemCount > 0 && (
-                <View className="rounded-full bg-[#ea580c] px-2.5 py-0.5">
+                <View
+                  className="rounded-full px-2.5 py-0.5"
+                  style={{ backgroundColor: AppColors.primary }}
+                >
                   <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
                 </View>
               )}

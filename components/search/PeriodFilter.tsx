@@ -6,6 +6,7 @@ import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native
 import Animated, {
   FadeIn,
   FadeOut,
+  ReduceMotion,
   SlideInDown,
   SlideOutDown,
   ZoomIn,
@@ -46,8 +47,8 @@ function MobileModal({
       accessibilityViewIsModal
     >
       <Animated.View
-        entering={FadeIn.duration(200)}
-        exiting={FadeOut.duration(150)}
+        entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
+        exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
         className="flex-1 justify-end"
         style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       >
@@ -59,8 +60,11 @@ function MobileModal({
           accessibilityHint="Cierra el modal de selección de rango"
         />
         <Animated.View
-          entering={SlideInDown.springify().damping(20).stiffness(180)}
-          exiting={SlideOutDown.duration(200)}
+          entering={SlideInDown.springify()
+            .damping(20)
+            .stiffness(180)
+            .reduceMotion(ReduceMotion.System)}
+          exiting={SlideOutDown.duration(200).reduceMotion(ReduceMotion.System)}
         >
           <View className="rounded-t-3xl bg-white dark:bg-neutral-800">
             <View className="mt-3 mb-1 h-1 w-10 self-center rounded-full bg-gray-300 dark:bg-neutral-600" />
@@ -98,8 +102,8 @@ function DesktopModal({
       accessibilityViewIsModal
     >
       <Animated.View
-        entering={FadeIn.duration(200)}
-        exiting={FadeOut.duration(150)}
+        entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
+        exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
         className="flex-1 items-center justify-center"
         style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
       >
@@ -111,8 +115,8 @@ function DesktopModal({
           accessibilityHint="Cierra el modal de selección de rango"
         />
         <Animated.View
-          entering={ZoomIn.duration(250).springify().damping(18)}
-          exiting={ZoomOut.duration(150)}
+          entering={ZoomIn.duration(250).springify().damping(18).reduceMotion(ReduceMotion.System)}
+          exiting={ZoomOut.duration(150).reduceMotion(ReduceMotion.System)}
           className="w-full max-w-md"
         >
           <View
@@ -193,7 +197,10 @@ export default function PeriodFilter({
         <PeriodBadges periodo={periodo} onSelect={handleSelect} isMobile={isMobile} />
 
         {hasCustomRange ? (
-          <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+          <Animated.View
+            entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
+            exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
+          >
             <Pressable
               onPress={() => setShowModal(true)}
               className="mt-2 flex-row items-center gap-1.5 rounded-lg border border-orange-200/60 bg-orange-50 px-3 py-1.5 dark:border-orange-800/30 dark:bg-orange-900/20"

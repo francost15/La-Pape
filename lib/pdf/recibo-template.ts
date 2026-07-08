@@ -43,37 +43,6 @@ function shortId(id: string): string {
 export function buildReciboHTML(data: ReciboData, logoBase64: string): string {
   const negocio = data.negocioNombre ?? "La Pape";
 
-  const itemsRows = data.items
-    .map(
-      (item) => `
-      <tr>
-        <td style="padding:10px 12px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #ddd;font-family:Arial,Helvetica,sans-serif;">
-          ${item.nombre}
-        </td>
-        <td style="padding:10px 8px;font-size:13px;color:#444;text-align:center;border-bottom:1px solid #ddd;font-family:Arial,Helvetica,sans-serif;">
-          ${item.cantidad}
-        </td>
-        <td style="padding:10px 8px;font-size:13px;color:#444;text-align:right;border-bottom:1px solid #ddd;font-family:Arial,Helvetica,sans-serif;">
-          ${formatCurrency(item.precioUnitario)}
-        </td>
-        <td style="padding:10px 12px;font-size:13px;color:#1a1a1a;text-align:right;font-weight:bold;border-bottom:1px solid #ddd;font-family:Arial,Helvetica,sans-serif;">
-          ${formatCurrency(item.totalLinea)}
-        </td>
-      </tr>`,
-    )
-    .join("");
-
-  const descuentoRow =
-    data.descuento > 0
-      ? `
-      <tr>
-        <td colspan="3" style="padding:6px 12px;font-size:13px;color:#666;text-align:right;font-family:Arial,Helvetica,sans-serif;">Descuento</td>
-        <td style="padding:6px 12px;font-size:13px;color:#dc2626;text-align:right;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">
-          -${formatCurrency(data.descuento)}
-        </td>
-      </tr>`
-      : "";
-
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -81,169 +50,245 @@ export function buildReciboHTML(data: ReciboData, logoBase64: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Factura ${shortId(data.ventaId)}</title>
   <style>
+    /* Sin @import remoto: el recibo se genera/imprime a menudo sin red,
+       así que dependemos solo de fuentes del sistema para que nunca falle. */
     @page {
       size: A4;
-      margin: 10mm;
+      margin: 0; /* Remove browser headers and footers */
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
     @media print {
-      html, body { background: #fff !important; }
+      html, body { background: #ffffff !important; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    .container {
+      padding: 40mm 20mm; /* Emulate page margins safely */
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .logo-container {
+      padding: 4px 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .logo {
+      display: block;
+      height: 48px;
+      width: auto;
+      max-width: 200px;
+    }
+    .header-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: #111827;
+      text-transform: uppercase;
+    }
+    .business-name {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #111827;
+      margin-bottom: 2px;
+    }
+    .business-type {
+      font-size: 12px;
+      color: #6B7280;
+    }
+    .invoice-details {
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.8;
+      text-align: right;
+    }
+    .invoice-details strong {
+      color: #111827;
+      font-weight: 600;
+    }
+    .table-container {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    .table-container th {
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6B7280;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-bottom: 2px solid #111827;
+    }
+    .table-container th.center { text-align: center; }
+    .table-container th.right { text-align: right; }
+    .table-container td {
+      padding: 16px;
+      font-size: 13px;
+      color: #111827;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .table-container td.center { text-align: center; color: #4B5563; }
+    .table-container td.right { text-align: right; color: #4B5563; }
+    .table-container td.total-col {
+      text-align: right;
+      font-weight: 600;
+      color: #111827;
+    }
+    .summary-box {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .summary-box td {
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #4B5563;
+      text-align: right;
+    }
+    .summary-box td.label { width: 100%; }
+    .summary-box td.value { width: 120px; white-space: nowrap; color: #111827; }
+    .summary-box tr.grand-total td {
+      padding: 24px 16px 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .footer-divider {
+      border-top: 1px solid #E5E7EB;
+      margin: 40px 0 20px;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#fff;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff;">
-    <tr>
-      <td align="center" style="padding:40px 20px;">
-        <table cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;background:#fff;">
+<body>
+  <div class="container">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <!-- Header: Logo + FACTURA -->
+      <tr>
+        <td style="padding-bottom: 48px;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td width="50%" style="vertical-align:middle;">
+                <img src="${logoBase64}" alt="La Pape" style="display:block;height:52px;width:52px;border-radius:12px;" />
+              </td>
+              <td width="50%" style="vertical-align:middle;text-align:right;">
+                <span class="header-title">FACTURA</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-          <!-- Header: Logo + FACTURA -->
-          <tr>
-            <td style="padding-bottom:36px;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="80" style="vertical-align:middle;">
-                    <img src="${logoBase64}" alt="" width="60" style="display:block;" role="img" />
-                  </td>
-                  <td style="vertical-align:middle;text-align:right;">
-                    <span style="font-size:28px;letter-spacing:6px;color:#1a1a1a;">FACTURA</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+      <!-- Info: Negocio + Nro Factura -->
+      <tr>
+        <td style="padding-bottom: 8px;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td width="50%" style="vertical-align:top;">
+                <div class="business-name">${negocio}</div>
+                <div class="business-type">Papelería &amp; Suministros</div>
+              </td>
+              <td width="50%" style="vertical-align:top;" class="invoice-details">
+                <div>Comprobante n.º <strong>${shortId(data.ventaId)}</strong></div>
+                <div>${formatDate(data.fecha)}</div>
+                <div>${formatTime(data.fecha)}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-          <!-- Info: Negocio + Nro Factura -->
-          <tr>
-            <td style="padding-bottom:28px;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="55%" style="vertical-align:top;">
-                    <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-family:Arial,Helvetica,sans-serif;">
-                      ${negocio}
-                    </div>
-                    <div style="font-size:13px;color:#555;font-family:Arial,Helvetica,sans-serif;">
-                      Papelería &amp; Suministros
-                    </div>
-                  </td>
-                  <td style="vertical-align:top;text-align:right;font-family:Arial,Helvetica,sans-serif;">
-                    <div style="font-size:13px;color:#444;line-height:22px;">
-                      Factura n.º <strong style="color:#1a1a1a;">${shortId(data.ventaId)}</strong>
-                    </div>
-                    <div style="font-size:13px;color:#444;line-height:22px;">
-                      ${formatDate(data.fecha)}
-                    </div>
-                    <div style="font-size:13px;color:#444;line-height:22px;">
-                      ${formatTime(data.fecha)}
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+      <!-- Tabla de productos -->
+      <tr>
+        <td>
+          <table class="table-container">
+            <thead>
+              <tr>
+                <th>Artículo</th>
+                <th class="center">Cant.</th>
+                <th class="right">P. Unitario</th>
+                <th class="right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.items
+                .map(
+                  (item) => `
+              <tr>
+                <td>${item.nombre}</td>
+                <td class="center">${item.cantidad}</td>
+                <td class="right">${formatCurrency(item.precioUnitario)}</td>
+                <td class="total-col">${formatCurrency(item.totalLinea)}</td>
+              </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </td>
+      </tr>
 
-          <!-- Separador grueso -->
-          <tr>
-            <td style="border-top:2px solid #1a1a1a;padding-bottom:20px;"></td>
-          </tr>
+      <!-- Totales -->
+      <tr>
+        <td>
+          <table class="summary-box">
+            <tr>
+              <td class="label">Subtotal</td>
+              <td class="value">${formatCurrency(data.subtotal)}</td>
+            </tr>
+            ${
+              data.descuento > 0
+                ? `
+            <tr>
+              <td class="label">Descuento</td>
+              <td class="value" style="color: #DC2626;">-${formatCurrency(data.descuento)}</td>
+            </tr>`
+                : ""
+            }
+            <tr class="grand-total">
+              <td class="label">TOTAL</td>
+              <td class="value">${formatCurrency(data.total)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-          <!-- Tabla de productos -->
-          <tr>
-            <td style="padding-bottom:4px;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
-                <thead>
-                  <tr>
-                    <th style="padding:8px 12px;font-size:11px;color:#888;text-align:left;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1a1a1a;font-weight:normal;font-family:Arial,Helvetica,sans-serif;">
-                      Artículo
-                    </th>
-                    <th style="padding:8px 8px;font-size:11px;color:#888;text-align:center;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1a1a1a;font-weight:normal;font-family:Arial,Helvetica,sans-serif;">
-                      Cant.
-                    </th>
-                    <th style="padding:8px 8px;font-size:11px;color:#888;text-align:right;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1a1a1a;font-weight:normal;font-family:Arial,Helvetica,sans-serif;">
-                      P. Unitario
-                    </th>
-                    <th style="padding:8px 12px;font-size:11px;color:#888;text-align:right;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1a1a1a;font-weight:normal;font-family:Arial,Helvetica,sans-serif;">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsRows}
-                </tbody>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Totales -->
-          <tr>
-            <td style="padding-bottom:36px;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
-                <tr>
-                  <td style="padding:6px 12px;font-size:14px;color:#666;text-align:right;font-family:Arial,Helvetica,sans-serif;" colspan="3">
-                    Subtotal
-                  </td>
-                  <td style="padding:6px 12px;font-size:14px;color:#1a1a1a;text-align:right;font-family:Arial,Helvetica,sans-serif;" width="100">
-                    ${formatCurrency(data.subtotal)}
-                  </td>
-                </tr>
-                ${descuentoRow}
-                <tr>
-                  <td style="padding:14px 12px 6px;font-size:20px;font-weight:bold;color:#1a1a1a;text-align:right;font-family:Arial,Helvetica,sans-serif;" colspan="3">
-                    Total
-                  </td>
-                  <td style="padding:14px 12px 6px;font-size:20px;font-weight:bold;color:#1a1a1a;text-align:right;font-family:Arial,Helvetica,sans-serif;" width="100">
-                    ${formatCurrency(data.total)}
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Gracias -->
-          <tr>
-            <td style="padding-bottom:36px;">
-              <span style="font-size:24px;color:#1a1a1a;">¡Muchas gracias!</span>
-            </td>
-          </tr>
-
-          <!-- Separador fino -->
-          <tr>
-            <td style="border-top:1px solid #ccc;padding-bottom:20px;"></td>
-          </tr>
-
-          <!-- Footer: Pago + Negocio -->
-          <tr>
-            <td>
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="55%" style="vertical-align:top;">
-                    <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">
-                      Información de pago
-                    </div>
-                    <div style="font-size:12px;color:#555;line-height:20px;font-family:Arial,Helvetica,sans-serif;">
-                      Método: <strong>${data.metodoPago}</strong>
-                    </div>
-                    <div style="font-size:12px;color:#555;line-height:20px;font-family:Arial,Helvetica,sans-serif;">
-                      Estado: <strong>Pagada</strong>
-                    </div>
-                  </td>
-                  <td style="vertical-align:top;text-align:right;">
-                    <div style="font-size:18px;color:#1a1a1a;margin-bottom:4px;">
-                      ${negocio}
-                    </div>
-                    <div style="font-size:11px;color:#888;font-family:Arial,Helvetica,sans-serif;">
-                      Comprobante de venta
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
+      <!-- Footer -->
+      <tr>
+        <td>
+          <div class="footer-divider"></div>
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+              <td width="50%" style="vertical-align:top;">
+                <div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600;">
+                  Detalles de pago
+                </div>
+                <div style="font-size:13px;color:#111827;line-height:20px;">
+                  Método de pago: <strong>${data.metodoPago}</strong>
+                </div>
+                <div style="font-size:13px;color:#111827;line-height:20px;">
+                  Estado: <strong>Completada</strong>
+                </div>
+              </td>
+              <td width="50%" style="vertical-align:bottom;text-align:right;">
+                <div style="font-size:24px;font-weight:600;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;">
+                  ¡Gracias por su compra!
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>`;
 }

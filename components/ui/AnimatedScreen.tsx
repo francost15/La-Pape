@@ -1,6 +1,7 @@
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { Platform, StyleProp, ViewStyle } from "react-native";
+import React, { useEffect } from "react";
+import { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -16,27 +17,16 @@ interface AnimatedScreenProps {
 
 const TIMING_CONFIG = {
   duration: 260,
-  easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+  // Ease-out fuerte (no el débil `ease` de CSS): arranca rápido para dar
+  // respuesta inmediata en el frame que el usuario más mira.
+  easing: Easing.bezier(0.23, 1, 0.32, 1),
 };
 
-export default function AnimatedScreen({
-  children,
-  style,
-  className,
-}: AnimatedScreenProps) {
+export default function AnimatedScreen({ children, style, className }: AnimatedScreenProps) {
   const isFocused = useIsFocused();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(6);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    if (Platform.OS !== "web" || typeof window === "undefined") return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduceMotion(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (isFocused) {
@@ -58,10 +48,7 @@ export default function AnimatedScreen({
   }));
 
   return (
-    <Animated.View
-      style={[{ flex: 1 }, animatedStyle, style]}
-      className={className}
-    >
+    <Animated.View style={[{ flex: 1 }, animatedStyle, style]} className={className}>
       {children}
     </Animated.View>
   );
