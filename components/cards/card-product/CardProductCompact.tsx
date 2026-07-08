@@ -1,24 +1,9 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
-import type { Product } from "@/interface/products";
+import type { CardProductCompactProps } from "@/interface/products";
 import { formatCurrency } from "@/lib/utils/format";
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { ProductThumb } from "./ProductThumb";
-
-interface CardProductCompactProps {
-  mode: "stock" | "ranking" | "mobile";
-  product: Product;
-  isDark: boolean;
-  colors: ThemeColors;
-  hasImage: boolean;
-  imageError: boolean;
-  onImageError: () => void;
-  onPress: () => void;
-  rankingData?: { cantidad: number; total: number };
-  rank?: number | null;
-  stockData?: { cantidad?: number; stockMinimo?: number };
-}
 
 export function CardProductCompact({
   mode,

@@ -1,4 +1,4 @@
-import { TourStep } from "@/components/onboarding/Tour";
+import type { TourStep } from "@/interface/onboarding";
 
 export const VENTAS_TOUR: TourStep[] = [
   {

@@ -2,12 +2,7 @@ import { useEffect } from "react";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { ACTIVE_BG, isWeb, PILL_W } from "./constants";
 import { styles } from "./styles";
-
-interface SlidingIndicatorProps {
-  activeIndex: number;
-  tabCount: number;
-  islandWidth: number;
-}
+import type { SlidingIndicatorProps } from "@/interface/layout";
 
 export function SlidingIndicator({ activeIndex, tabCount, islandWidth }: SlidingIndicatorProps) {
   const activeTranslation = useSharedValue(activeIndex);

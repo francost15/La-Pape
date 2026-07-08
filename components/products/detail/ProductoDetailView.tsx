@@ -4,7 +4,7 @@ import ProductStockCard from "@/components/products/ProductStockCard";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { Product } from "@/interface/products";
+import type { ProductoDetailViewProps } from "@/interface/products";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
@@ -12,17 +12,6 @@ import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from
 import QRCode from "react-native-qrcode-svg";
 import { ProductoActions } from "./ProductoActions";
 import { ProductoInfo } from "./ProductoInfo";
-
-interface ProductoDetailViewProps {
-  product: Product;
-  categoria?: { nombre: string };
-  hasImg: boolean;
-  isCritical: boolean;
-  deleting: boolean;
-  onImageError: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}
 
 // A nivel de módulo (no dentro del render) para no recrear el componente en cada
 // pintado; lint `react-hooks` lo exige y evita resets de estado.

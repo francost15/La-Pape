@@ -1,20 +1,11 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
 import { formatCurrency } from "@/lib/utils/format";
-import type { CartItem } from "@/interface/ventas";
+import type { CartItemRowProps } from "@/interface/ventas";
 import { Image } from "expo-image";
 import { Platform, Text, View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";
 import QuantityStepper from "../QuantityStepper";
-
-interface CartItemRowProps {
-  item: CartItem;
-  isDark: boolean;
-  colors: ThemeColors;
-  onMinus: (item: CartItem) => void;
-  onPlus: (item: CartItem) => void;
-}
 
 export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemRowProps) {
   return (

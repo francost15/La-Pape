@@ -1,13 +1,12 @@
 import AuthForm from "@/components/auth/AuthForm";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { signIn, signUp } from "@/lib/auth";
 import { getGoogleRedirectResult, signInWithGoogle } from "@/lib/authWithGoogle";
-import { auth } from "@/lib/firebase";
 import { LoginFormData, loginSchema } from "@/lib/validations/auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Platform, View } from "react-native";
@@ -36,26 +35,19 @@ export default function AuthScreen() {
     },
   });
 
+  useRequireAuth({ redirectAuthenticatedTo: "/ventas" });
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && !navigatingRef.current) {
-        navigatingRef.current = true;
-        router.replace("/ventas");
-      }
-    });
+    if (!isWeb) return;
 
-    if (isWeb) {
-      getGoogleRedirectResult()
-        .then((result) => {
-          if (result?.user && !navigatingRef.current) {
-            navigatingRef.current = true;
-            router.replace("/ventas");
-          }
-        })
-        .catch((err) => console.error("Error en getGoogleRedirectResult:", err));
-    }
-
-    return unsubscribe;
+    getGoogleRedirectResult()
+      .then((result) => {
+        if (result?.user && !navigatingRef.current) {
+          navigatingRef.current = true;
+          router.replace("/ventas");
+        }
+      })
+      .catch((err) => console.error("Error en getGoogleRedirectResult:", err));
   }, [isWeb]);
 
   const onSubmit = async (data: LoginFormData) => {

@@ -1,10 +1,12 @@
 import type { Periodo } from "@/interface";
+import type { PeriodBadgesProps } from "@/interface/product-search";
 import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
+import { syncSlidingIndicator } from "@/lib/animations/sliding-indicator";
 import React, { useCallback, useEffect, useRef } from "react";
 import { LayoutChangeEvent, Platform, Pressable, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
 const PERIODOS: Periodo[] = ["semana", "mes", "año", "personalizado"];
 
@@ -14,14 +16,6 @@ const LABELS: Record<Periodo, string> = {
   año: "Año",
   personalizado: "Personalizado",
 };
-
-const SPRING_CONFIG = { damping: 18, stiffness: 200, mass: 0.8 };
-
-export interface PeriodBadgesProps {
-  periodo: Periodo;
-  onSelect: (p: Periodo) => void;
-  isMobile: boolean;
-}
 
 function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   const colorScheme = useColorScheme();
@@ -34,20 +28,11 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   const layoutsRef = useRef<Record<string, { x: number; width: number }>>({});
   const initializedRef = useRef(false);
 
-  const syncIndicator = useCallback(
-    (p: Periodo, animate: boolean) => {
-      const layout = layoutsRef.current[p];
-      if (!layout) return;
-      if (animate) {
-        indicatorX.value = withSpring(layout.x, SPRING_CONFIG);
-        indicatorW.value = withSpring(layout.width, SPRING_CONFIG);
-      } else {
-        indicatorX.value = layout.x;
-        indicatorW.value = layout.width;
-      }
-    },
-    [indicatorX, indicatorW]
-  );
+  const syncIndicator = useCallback((p: Periodo, animate: boolean) => {
+    const layout = layoutsRef.current[p];
+    if (!layout) return;
+    syncSlidingIndicator(indicatorX, indicatorW, layout, animate);
+  }, []);
 
   const handleLayout = useCallback(
     (p: Periodo) => (e: LayoutChangeEvent) => {

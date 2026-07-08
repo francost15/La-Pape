@@ -1,19 +1,13 @@
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect } from "react";
-import { StyleProp, ViewStyle } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
-interface AnimatedScreenProps {
-  children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-  className?: string;
-}
+import type { AnimatedScreenProps } from "@/interface/ui";
 
 const TIMING_CONFIG = {
   duration: 260,

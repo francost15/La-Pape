@@ -1,12 +1,6 @@
 import React from "react";
-import { AppFonts } from "@/constants/typography";
-import { View, type ViewProps } from "react-native";
-
-interface SectionCardProps extends ViewProps {
-  /** Título visible en la parte superior de la card */
-  title?: string;
-  children: React.ReactNode;
-}
+import { View } from "react-native";
+import type { SectionCardProps } from "@/interface/resumen";
 
 /**
  * SectionCard — Digital Atelier style.
@@ -24,11 +18,7 @@ export default function SectionCard({
   ...viewProps
 }: SectionCardProps) {
   return (
-    <View
-      {...viewProps}
-      className={[extraClassName].filter(Boolean).join(" ")}
-      style={[style]}
-    >
+    <View {...viewProps} className={[extraClassName].filter(Boolean).join(" ")} style={[style]}>
       {children}
     </View>
   );

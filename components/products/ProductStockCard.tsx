@@ -1,13 +1,8 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import type { ProductStockCardProps } from "@/interface/products";
 import { Platform, Text, View } from "react-native";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
-
-interface ProductStockCardProps {
-  cantidad: number;
-  stockMinimo: number | null | undefined;
-  isCritical: boolean;
-}
 
 /**
  * Card de inventario: muestra stock disponible con semáforo visual y stock mínimo.

@@ -1,23 +1,16 @@
-import { useThemeColors } from "@/hooks/use-theme-colors";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { Product } from "@/interface/products";
+import type { ProductCardMobileProps } from "@/interface/ventas";
+import { useCartProductActions } from "@/hooks/use-cart-product-actions";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { formatCurrency } from "@/lib/utils/format";
-import { useVentasStore } from "@/store/ventas-store";
-import * as Haptics from "expo-haptics";
-import { useHaptic } from "@/hooks/use-haptic";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
 
 const IMG_SIZE = 48;
-
-interface ProductCardMobileProps {
-  product: Product;
-  onProductAdded?: () => void;
-}
 
 /**
  * ProductCardMobile — Digital Atelier style.
@@ -28,39 +21,10 @@ export default React.memo(function ProductCardMobile({
   onProductAdded,
 }: ProductCardMobileProps) {
   const { isDark, colors } = useThemeColors();
-  const haptic = useHaptic();
-  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
   const [imageError, setImageError] = useState(false);
-
-  const addItem = useVentasStore((s) => s.addItem);
-  const updateQuantity = useVentasStore((s) => s.updateQuantity);
-  const removeItem = useVentasStore((s) => s.removeItem);
-  const cartItem = useVentasStore((s) => s.items.find((i) => i.productId === product.id));
-
-  const quantity = cartItem?.quantity ?? 0;
-  const inCart = quantity > 0;
-
-  const handleAdd = useCallback(() => {
-    if (!inCart) {
-      hapticMedium();
-      addItem(product, 1);
-      onProductAdded?.();
-    }
-  }, [inCart, hapticMedium, addItem, product, onProductAdded]);
-
-  const handlePlus = useCallback(() => {
-    haptic();
-    updateQuantity(product.id, quantity + 1);
-  }, [haptic, product.id, quantity, updateQuantity]);
-
-  const handleMinus = useCallback(() => {
-    haptic();
-    if (quantity === 1) {
-      removeItem(product.id);
-    } else {
-      updateQuantity(product.id, quantity - 1);
-    }
-  }, [haptic, product.id, quantity, removeItem, updateQuantity]);
+  const { quantity, inCart, handleAdd, handlePlus, handleMinus } = useCartProductActions(product, {
+    onProductAdded,
+  });
 
   const hasImage = product.imagen?.trim();
 

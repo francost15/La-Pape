@@ -33,3 +33,33 @@ export interface EquipoStore {
   addMiembro: (miembro: MiembroConUsuario) => void;
   clear: () => void;
 }
+
+export interface ConfigTabEquipoProps {
+  onRefresh: () => void;
+}
+
+export interface FormState {
+  nombre: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  telefono: string;
+  rol: UserRole;
+}
+
+export interface CrearUsuarioFormProps {
+  negocioId: string | null;
+  onCreated?: () => void;
+}
+
+export interface MiembroRowProps {
+  miembro: MiembroConUsuario;
+  currentUserId: string | null;
+  onRolChange: (
+    relId: string,
+    userId: string,
+    email: string | undefined,
+    rol: UserRole
+  ) => Promise<void>;
+  onDesactivar: (relId: string) => Promise<void>;
+}

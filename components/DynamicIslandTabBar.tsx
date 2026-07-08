@@ -16,10 +16,10 @@ import {
   ICON_MAP,
   isWeb,
   PC_ONLY_ROUTES,
-  type TabConfig,
   THEME,
 } from "./tab-bar/constants";
 import { styles } from "./tab-bar/styles";
+import type { TabConfig } from "@/interface/layout";
 
 export function DynamicIslandTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const { width } = useWindowDimensions();

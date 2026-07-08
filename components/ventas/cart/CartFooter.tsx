@@ -2,30 +2,12 @@ import { AppColors } from "@/constants/colors";
 import { DesignSystem } from "@/constants/design-system";
 import { Strings } from "@/constants/strings";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
+import type { CartFooterProps } from "@/interface/ventas";
+import { usePressScale } from "@/hooks/use-press-scale";
 import { formatCurrency } from "@/lib/utils/format";
-import { useCallback } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  type SharedValue,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { IconSymbol } from "../../ui/icon-symbol";
-
-interface CartFooterProps {
-  total: number;
-  colors: ThemeColors;
-  isDesktop: boolean;
-  processing: boolean;
-  isClearing: boolean;
-  reduceMotion: boolean;
-  successOpacity: SharedValue<number>;
-  successScale: SharedValue<number>;
-  onComplete: () => void;
-  onClearCart: () => void;
-}
 
 export function CartFooter({
   total,
@@ -39,21 +21,11 @@ export function CartFooter({
   onComplete,
   onClearCart,
 }: CartFooterProps) {
-  // Feedback de escala del CTA "Completar venta" (concern exclusivo del footer).
-  const ctaScale = useSharedValue(1);
-  const ctaAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: ctaScale.value }],
-  }));
-
-  const handleCtaPressIn = useCallback(() => {
-    if (reduceMotion) return;
-    ctaScale.value = withSpring(0.97, { damping: 15, stiffness: 400, mass: 0.5 });
-  }, [ctaScale, reduceMotion]);
-
-  const handleCtaPressOut = useCallback(() => {
-    if (reduceMotion) return;
-    ctaScale.value = withSpring(1, { damping: 15, stiffness: 400, mass: 0.5 });
-  }, [ctaScale, reduceMotion]);
+  const {
+    animatedStyle: ctaAnimatedStyle,
+    onPressIn: handleCtaPressIn,
+    onPressOut: handleCtaPressOut,
+  } = usePressScale(reduceMotion);
 
   return (
     <View

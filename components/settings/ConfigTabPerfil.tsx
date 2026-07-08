@@ -4,12 +4,12 @@ import { AppColors } from "@/constants/colors";
 import { auth } from "@/lib/firebase";
 import { updateUsuario } from "@/lib/services/usuarios";
 import { notify } from "@/lib/notify";
+import { useSignOut } from "@/hooks/use-sign-out";
+import { resetAllTours } from "@/store/onboarding-store";
 import { useSessionStore } from "@/store/session-store";
-import { resetAllTours } from "@/hooks/useTour";
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { updateProfile, onAuthStateChanged, signOut } from "firebase/auth";
-import React, { useCallback, useEffect, useState } from "react";
+import { updateProfile } from "firebase/auth";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -21,51 +21,36 @@ import {
 } from "react-native";
 
 export default function ConfigTabPerfil() {
+  const userId = useSessionStore((s) => s.userId);
+  const userEmail = useSessionStore((s) => s.userEmail);
+  const displayName = useSessionStore((s) => s.displayName);
+  const photoURL = useSessionStore((s) => s.photoURL);
+  const usuarioDoc = useSessionStore((s) => s.usuarioDoc);
   const negocioId = useSessionStore((s) => s.negocioId);
-  const [authUser, setAuthUser] = useState<{
-    displayName: string | null;
-    email: string | null;
-    photoURL: string | null;
-    uid: string;
-  } | null>(null);
+  const patchProfile = useSessionStore((s) => s.patchProfile);
+
   const [photoFailed, setPhotoFailed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editNombre, setEditNombre] = useState("");
   const [saving, setSaving] = useState(false);
+  const handleSignOut = useSignOut();
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      if (u) {
-        setAuthUser({
-          displayName: u.displayName,
-          email: u.email,
-          photoURL: u.photoURL,
-          uid: u.uid,
-        });
-        setEditNombre(u.displayName ?? u.email?.split("@")[0] ?? "");
-      } else {
-        setAuthUser(null);
-      }
-    });
-    return unsub;
-  }, []);
+  const nombreBase = usuarioDoc?.nombre ?? displayName ?? userEmail?.split("@")[0] ?? "Usuario";
 
-  const handleSignOut = useCallback(async () => {
-    try {
-      await signOut(auth);
-      router.replace("/");
-    } catch {
-      notify.error({ title: "Error al cerrar sesión" });
-    }
-  }, []);
+  const handleStartEdit = useCallback(() => {
+    setEditNombre(nombreBase);
+    setIsEditing(true);
+  }, [nombreBase]);
 
   const handleSave = useCallback(async () => {
-    if (!authUser?.uid || !editNombre.trim()) return;
+    if (!userId || !editNombre.trim()) return;
     setSaving(true);
     try {
-      await updateUsuario(authUser.uid, { nombre: editNombre.trim() }, authUser.email ?? undefined);
-      await updateProfile(auth.currentUser!, { displayName: editNombre.trim() });
-      setAuthUser((p) => (p ? { ...p, displayName: editNombre.trim() } : null));
+      await updateUsuario(userId, { nombre: editNombre.trim() }, userEmail ?? undefined);
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: editNombre.trim() });
+      }
+      patchProfile({ displayName: editNombre.trim() });
       setIsEditing(false);
       Keyboard.dismiss();
       notify.success({ title: "Perfil actualizado" });
@@ -74,25 +59,25 @@ export default function ConfigTabPerfil() {
     } finally {
       setSaving(false);
     }
-  }, [authUser, editNombre]);
+  }, [userId, userEmail, editNombre, patchProfile]);
 
   const handleCancelEdit = useCallback(() => {
-    setEditNombre(authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario");
+    setEditNombre(nombreBase);
     setIsEditing(false);
     Keyboard.dismiss();
-  }, [authUser]);
+  }, [nombreBase]);
 
-  const nombre = authUser?.displayName ?? authUser?.email?.split("@")[0] ?? "Usuario";
-  const email = authUser?.email ?? "";
+  const nombre = nombreBase;
+  const email = userEmail ?? usuarioDoc?.email ?? "";
   const inicial = (nombre[0] ?? "?").toUpperCase();
 
   return (
     <View className="gap-4">
       <View className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-4">
-          {authUser?.photoURL && !photoFailed ? (
+          {photoURL && !photoFailed ? (
             <Image
-              source={{ uri: authUser.photoURL }}
+              source={{ uri: photoURL }}
               style={{ width: 72, height: 72, borderRadius: 36 }}
               contentFit="cover"
               onError={() => setPhotoFailed(true)}
@@ -145,7 +130,7 @@ export default function ConfigTabPerfil() {
                 <Text className="text-lg font-bold text-gray-900 dark:text-white">{nombre}</Text>
                 <Text className="text-sm text-gray-500 dark:text-gray-400">{email}</Text>
                 <Pressable
-                  onPress={() => setIsEditing(true)}
+                  onPress={handleStartEdit}
                   className="mt-1 flex-row items-center gap-1.5 self-start active:opacity-80"
                 >
                   <IconSymbol name="pencil" size={14} color={AppColors.light.textMuted} />

@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import type { QrScannerSheetProps } from "@/interface/ventas";
 import { AppColors } from "@/constants/colors";
 import { notify } from "@/lib/notify";
 import { getProductById } from "@/lib/services/productos";
@@ -9,12 +10,6 @@ import * as Haptics from "expo-haptics";
 import { useHaptic } from "@/hooks/use-haptic";
 import React, { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-interface QrScannerSheetProps {
-  visible: boolean;
-  onClose: () => void;
-  onProductAdded?: (productName: string) => void;
-}
 
 /**
  * Modal que muestra la cámara para escanear códigos QR de productos.

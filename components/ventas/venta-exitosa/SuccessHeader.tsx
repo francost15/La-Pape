@@ -1,10 +1,10 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
+import type { SuccessHeaderProps } from "@/interface/ventas";
 import { Text, View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";
 
-export function SuccessHeader({ colors }: { colors: ThemeColors }) {
+export function SuccessHeader({ colors }: SuccessHeaderProps) {
   return (
     <View
       style={{ alignItems: "center", paddingTop: 36, paddingBottom: 28, paddingHorizontal: 24 }}

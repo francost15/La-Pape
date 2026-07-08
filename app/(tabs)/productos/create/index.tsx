@@ -5,9 +5,10 @@ import { notify } from "@/lib/notify";
 import { createProduct } from "@/lib/services/productos";
 import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
 import { useProductosStore } from "@/store/productos-store";
+import { useSessionStore } from "@/store/session-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
@@ -51,13 +52,18 @@ function BackButton({ isDark }: { isDark: boolean }) {
 
 export default function CreateProduct() {
   const isWeb = Platform.OS === "web";
+  const sessionUserId = useSessionStore((s) => s.userId);
+  const sessionUserEmail = useSessionStore((s) => s.userEmail);
+  const sessionNegocioId = useSessionStore((s) => s.negocioId);
   const negocioId = useProductosStore((s) => s.negocioId);
   const categories = useProductosStore((s) => s.categories);
+  const loading = useProductosStore((s) => s.loading);
+  const productLoading = useProductosStore((s) => s.productLoading);
   const setNegocioId = useProductosStore((s) => s.setNegocioId);
   const setCategories = useProductosStore((s) => s.setCategories);
   const setProducts = useProductosStore((s) => s.setProducts);
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
+  const setLoading = useProductosStore((s) => s.setLoading);
+  const setProductLoading = useProductosStore((s) => s.setProductLoading);
 
   const {
     control,
@@ -83,14 +89,14 @@ export default function CreateProduct() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const user = auth.currentUser;
-        if (!user) {
+        setProductLoading(true);
+        if (!sessionUserId) {
           router.replace("/");
           return;
         }
 
-        // Cargar negocio y categorías
-        const currentNegocioId = await getNegocioIdByUsuario(user.uid, user.email || "");
+        const currentNegocioId =
+          sessionNegocioId ?? (await getNegocioIdByUsuario(sessionUserId, sessionUserEmail || ""));
         if (!currentNegocioId) {
           Alert.alert("Error", "No tienes un negocio asignado");
           router.back();
@@ -98,20 +104,29 @@ export default function CreateProduct() {
         }
 
         setNegocioId(currentNegocioId);
-        const categoriasData = await getCategoriasByNegocio(currentNegocioId);
-        setCategories(categoriasData);
+        if (categories.length === 0) {
+          const categoriasData = await getCategoriasByNegocio(currentNegocioId);
+          setCategories(categoriasData);
+        }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Error al cargar los datos";
         Alert.alert("Error", message);
         router.back();
       } finally {
-        setLoadingData(false);
+        setProductLoading(false);
       }
     };
 
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    sessionUserId,
+    sessionUserEmail,
+    sessionNegocioId,
+    categories.length,
+    setCategories,
+    setNegocioId,
+    setProductLoading,
+  ]);
 
   const onSubmit = async (data: CreateProductFormData) => {
     if (!negocioId) {
@@ -137,7 +152,6 @@ export default function CreateProduct() {
 
       reset();
 
-      // Refrescar los productos en el store para que se actualice la lista
       const user = auth.currentUser;
       if (user) {
         const storeData = await getProductosScreenData(user.uid, user.email || "");
@@ -156,7 +170,7 @@ export default function CreateProduct() {
 
   const { isDark, colors } = useThemeColors();
 
-  if (loadingData) {
+  if (productLoading) {
     return (
       <View
         className="flex-1 items-center justify-center"

@@ -1,17 +1,6 @@
 import { Strings } from "@/constants/strings";
+import type { CartConfirmDialogsProps } from "@/interface/ventas";
 import ConfirmAlert from "../../ui/ConfirmAlert";
-
-interface CartConfirmDialogsProps {
-  deleteConfirmItem: { nombre: string } | null;
-  confirmVisible: boolean;
-  clearCartConfirmVisible: boolean;
-  onConfirmRemove: () => void;
-  onCancelRemove: () => void;
-  onCompleteVenta: () => void;
-  onCancelComplete: () => void;
-  onConfirmClear: () => void;
-  onCancelClear: () => void;
-}
 
 export function CartConfirmDialogs({
   deleteConfirmItem,

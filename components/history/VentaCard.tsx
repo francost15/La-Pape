@@ -1,6 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useHaptic } from "@/hooks/use-haptic";
-import { Venta, VentaDetalle } from "@/interface";
+import type { VentaCardProps } from "@/interface/ventas";
 import { formatCurrency, formatTime } from "@/lib/utils/format";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
@@ -13,18 +13,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
-interface VentaCardProps {
-  venta: Venta;
-  detalles: VentaDetalle[];
-  fecha: Date;
-  isReembolso: boolean;
-  expandido: boolean;
-  productNames: Record<string, string>;
-  onToggle: () => void;
-  onVerRecibo: (v: Venta) => void;
-  onReembolso: (v: Venta) => void;
-}
 
 /**
  * VentaCard — Digital Atelier Style

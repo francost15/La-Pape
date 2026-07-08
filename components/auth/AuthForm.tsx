@@ -1,34 +1,10 @@
-import type { LoginFormData } from "@/lib/validations/auth-schema";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
+import type { AuthFormProps } from "@/interface/session";
 import { Image } from "expo-image";
 import * as React from "react";
-import {
-  Control,
-  Controller,
-  FieldErrors,
-  UseFormHandleSubmit,
-} from "react-hook-form";
-import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-export interface AuthFormProps {
-  control: Control<LoginFormData>;
-  errors: FieldErrors<LoginFormData>;
-  handleSubmit: UseFormHandleSubmit<LoginFormData>;
-  onSubmit: (data: LoginFormData) => Promise<void>;
-  onGooglePress: () => Promise<void>;
-  loading: boolean;
-  isSignUp: boolean;
-  onToggleSignUp: () => void;
-  isDark?: boolean;
-  isWeb?: boolean;
-}
+import { Controller } from "react-hook-form";
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function AuthForm({
   control,
@@ -235,9 +211,7 @@ export default function AuthForm({
             fontFamily: AppFonts.body,
           }}
         >
-          {isSignUp
-            ? "¿Ya tienes cuenta? Inicia sesión"
-            : "¿No tienes cuenta? Regístrate"}
+          {isSignUp ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
         </Text>
       </TouchableOpacity>
     </View>

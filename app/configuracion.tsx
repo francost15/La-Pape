@@ -5,13 +5,12 @@ import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { auth } from "@/lib/firebase";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useEquipoStore } from "@/store/equipo-store";
 import { useLayoutStore } from "@/store/layout-store";
 import { useSessionStore } from "@/store/session-store";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -72,30 +71,13 @@ function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => v
 export default function ConfiguracionScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("perfil");
-  const [authUser, setAuthUser] = useState<{
-    uid: string;
-    email: string | null;
-    displayName: string | null;
-    photoURL: string | null;
-  } | null>(null);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.replace("/");
-        setAuthUser(null);
-      } else {
-        setAuthUser({
-          uid: user.uid,
-          email: user.email ?? null,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-        });
-      }
-    });
-    return unsub;
-  }, [router]);
+  useRequireAuth({ redirectUnauthenticatedTo: "/" });
 
+  const userId = useSessionStore((s) => s.userId);
+  const userEmail = useSessionStore((s) => s.userEmail);
+  const displayName = useSessionStore((s) => s.displayName);
+  const photoURL = useSessionStore((s) => s.photoURL);
   const negocioId = useSessionStore((s) => s.negocioId);
   const loadMiembros = useEquipoStore((s) => s.loadMiembros);
   const isTablet = useLayoutStore((s) => s.viewportWidth) >= 768;
@@ -103,16 +85,16 @@ export default function ConfiguracionScreen() {
   const refreshEquipo = useCallback(() => {
     loadMiembros(
       negocioId,
-      authUser
+      userId
         ? {
-            userId: authUser.uid,
-            email: authUser.email,
-            displayName: authUser.displayName,
-            photoURL: authUser.photoURL,
+            userId,
+            email: userEmail,
+            displayName,
+            photoURL,
           }
         : undefined
     );
-  }, [loadMiembros, negocioId, authUser]);
+  }, [loadMiembros, negocioId, userId, userEmail, displayName, photoURL]);
 
   useEffect(() => {
     if (activeTab === "equipo") {

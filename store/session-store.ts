@@ -13,6 +13,7 @@ const initialState = {
   userEmail: null,
   displayName: null,
   photoURL: null,
+  usuarioDoc: null,
   negocioId: null,
   sucursalId: null,
   ready: false,
@@ -51,6 +52,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
             activo: true,
             createdAt: Timestamp.now(),
           });
+          usuarioDoc = await getUsuarioById(uid);
         } catch (e) {
           console.warn("No se pudo crear doc usuarios en hydrate:", e);
         }
@@ -64,11 +66,21 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         console.warn("No se pudieron obtener sucursales, continuando sin sucursal");
       }
 
-      set({ negocioId, sucursalId, ready: true });
+      set({ negocioId, sucursalId, usuarioDoc, ready: true });
     } catch (err) {
       console.error("Error al hidratar sesión:", err);
       set({ ready: true, error: "Error al cargar datos del negocio" });
     }
+  },
+
+  patchProfile: (data) => {
+    set((state) => ({
+      displayName: data.displayName !== undefined ? data.displayName : state.displayName,
+      usuarioDoc:
+        state.usuarioDoc && data.displayName
+          ? { ...state.usuarioDoc, nombre: data.displayName }
+          : state.usuarioDoc,
+    }));
   },
 
   clear: () => {

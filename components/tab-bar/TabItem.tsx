@@ -1,17 +1,9 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import React from "react";
 import { Pressable, View } from "react-native";
-import { ACTIVE_ICON_COLOR, type TabConfig, type TabTheme } from "./constants";
+import { ACTIVE_ICON_COLOR } from "./constants";
 import { styles } from "./styles";
-
-interface TabItemProps {
-  tab: TabConfig;
-  isFocused: boolean;
-  isCompact: boolean;
-  theme: TabTheme;
-  onPress: () => void;
-  onLongPress: () => void;
-}
+import type { TabItemProps } from "@/interface/layout";
 
 export const TabItem = React.memo(function TabItem({
   tab,

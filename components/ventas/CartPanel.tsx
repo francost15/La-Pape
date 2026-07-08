@@ -5,19 +5,21 @@ import { useHaptic } from "@/hooks/use-haptic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { notify } from "@/lib/notify";
+import {
+  fadeCartListOut,
+  playCartSuccessAnimation,
+  resetCartSuccessAnimation,
+  showCartList,
+  springCartListIn,
+} from "@/lib/animations/cart-panel";
 import { useCheckoutStore } from "@/store/checkout-store";
 import type { CartItem } from "@/interface/ventas";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { FlashList } from "@shopify/flash-list";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useWindowDimensions, View } from "react-native";
-import Animated, {
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import EmptyState from "../ui/EmptyState";
 import { CartConfirmDialogs } from "./cart/CartConfirmDialogs";
 import { CartFooter } from "./cart/CartFooter";
@@ -43,10 +45,14 @@ export default function CartPanel() {
   const openDeleteConfirm = useVentasUIStore((s) => s.openDeleteConfirm);
   const closeDeleteConfirm = useVentasUIStore((s) => s.closeDeleteConfirm);
 
+  const clearCartConfirmVisible = useVentasUIStore((s) => s.clearCartConfirmVisible);
+  const isClearing = useVentasUIStore((s) => s.isClearing);
+  const openClearCartConfirm = useVentasUIStore((s) => s.openClearCartConfirm);
+  const closeClearCartConfirm = useVentasUIStore((s) => s.closeClearCartConfirm);
+  const setIsClearing = useVentasUIStore((s) => s.setIsClearing);
+
   const haptic = useHaptic();
   const reduceMotion = useReducedMotion();
-  const [clearCartConfirmVisible, setClearCartConfirmVisible] = useState(false);
-  const [isClearing, setIsClearing] = useState(false);
   const total = getTotal();
 
   // ── Animación de éxito ────────────────────────────────────────────────
@@ -61,22 +67,12 @@ export default function CartPanel() {
   useEffect(() => () => clearTimeout(resetTimeoutRef.current), []);
 
   const playSuccessAnimation = useCallback(() => {
-    successOpacity.value = withTiming(1, { duration: DesignSystem.animations.fast });
-    // Reduced motion: mostramos el check solo con opacidad, sin el pop del spring.
-    if (reduceMotion) {
-      successScale.value = 1;
-      return;
-    }
-    successScale.value = withSequence(
-      withSpring(1.2, { damping: 5, stiffness: 300 }),
-      withSpring(1, { damping: 6, stiffness: 350 })
-    );
-  }, [successOpacity, successScale, reduceMotion]);
+    playCartSuccessAnimation(successOpacity, successScale, reduceMotion);
+  }, [reduceMotion, successOpacity, successScale]);
 
   const resetSuccessAnimation = useCallback(() => {
-    successScale.value = 0.5;
-    successOpacity.value = 0;
-  }, [successScale, successOpacity]);
+    resetCartSuccessAnimation(successOpacity, successScale);
+  }, [successOpacity, successScale]);
 
   const { completeVenta } = useCompleteVenta(() => {
     playSuccessAnimation();
@@ -87,26 +83,26 @@ export default function CartPanel() {
   // ── Limpiar carrito ───────────────────────────────────────────────────
   const handleClearCartPress = useCallback(() => {
     haptic();
-    setClearCartConfirmVisible(true);
-  }, [haptic]);
+    openClearCartConfirm();
+  }, [haptic, openClearCartConfirm]);
 
   const handleConfirmClearCart = useCallback(() => {
     setIsClearing(true);
-    listOpacity.value = withTiming(0, { duration: DesignSystem.animations.normal });
+    fadeCartListOut(listOpacity);
     setTimeout(() => {
       clearCart();
       setIsClearing(false);
-      listOpacity.value = 1;
+      showCartList(listOpacity);
       notify.info({ title: Strings.ventas.cartEmptied });
     }, DesignSystem.animations.normal + 100);
-    setClearCartConfirmVisible(false);
-  }, [clearCart, listOpacity]);
+    closeClearCartConfirm();
+  }, [clearCart, listOpacity, setIsClearing, closeClearCartConfirm]);
 
   const handleCancelClearCart = useCallback(() => {
-    listOpacity.value = withSpring(1, { damping: 10, stiffness: 200 });
+    springCartListIn(listOpacity);
     setIsClearing(false);
-    setClearCartConfirmVisible(false);
-  }, [listOpacity]);
+    closeClearCartConfirm();
+  }, [listOpacity, setIsClearing, closeClearCartConfirm]);
 
   // ── Eliminar ítem ─────────────────────────────────────────────────────
   const handleMinus = useCallback(

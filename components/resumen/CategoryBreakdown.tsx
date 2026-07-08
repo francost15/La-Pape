@@ -2,7 +2,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency } from "@/lib/utils/format";
-import type { CategoriaVenta } from "@/interface/resumen";
+import type { CategoriaVenta, CategoryBreakdownProps, LegendItemProps } from "@/interface/resumen";
 import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
@@ -70,13 +70,6 @@ function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
 
 // ─── Legend Item ──────────────────────────────────────────────────────────────
 
-interface LegendItemProps {
-  color: string;
-  label: string;
-  value: number;
-  percentage: number;
-}
-
 /**
  * Fila de leyenda con barra de progreso de 1px — muy delgada para no
  * competir visualmente con los datos. El color del punto es el identificador.
@@ -109,11 +102,6 @@ function LegendItem({ color, label, value, percentage }: LegendItemProps) {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-
-interface CategoryBreakdownProps {
-  data: CategoriaVenta[];
-  isMobile: boolean;
-}
 
 export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownProps) {
   const total = data.reduce((s, d) => s + d.total, 0);

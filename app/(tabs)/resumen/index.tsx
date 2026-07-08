@@ -6,113 +6,36 @@ import VentasPorUsuario from "@/components/resumen/VentasPorUsuario";
 import PeriodFilter from "@/components/search/PeriodFilter";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import EmptyState from "@/components/ui/EmptyState";
-import { useUsuariosMap } from "@/hooks/use-usuarios-map";
-import { getProductosScreenData } from "@/lib";
-import { filterVentasByPeriodo, useFiltrosStore } from "@/store/filtros-store";
-import { useLayoutStore } from "@/store/layout-store";
-import { useProductosStore } from "@/store/productos-store";
-import {
-  selectCategorias,
-  selectMetricas,
-  selectProductosBajoStock,
-  selectProductosRanking,
-  selectVentasPorUsuario,
-  useResumenStore,
-} from "@/store/resumen-store";
-import { useSessionStore } from "@/store/session-store";
-import React, { useEffect, useMemo } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { useResumen } from "@/hooks/use-resumen";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import React from "react";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
-/**
- * Resumen Screen — Digital Atelier style.
- *
- * Flat background canvas, no card wrappers on sections.
- * KPIs render directly on canvas. Sections separated by title + spacing.
- */
 export default function ResumenScreen() {
-  const negocioId = useSessionStore((s) => s.negocioId);
-  const sessionReady = useSessionStore((s) => s.ready);
-  const sessionError = useSessionStore((s) => s.error);
-  const userId = useSessionStore((s) => s.userId);
-  const userEmail = useSessionStore((s) => s.userEmail);
+  const {
+    loading,
+    error,
+    noNegocio,
+    isMobile,
+    periodo,
+    setPeriodo,
+    rangoPersonalizado,
+    setRangoPersonalizado,
+    metricas,
+    ranking,
+    categorias,
+    ventasPorUsuario,
+    productosBajoStock,
+  } = useResumen();
 
-  const periodo = useFiltrosStore((s) => s.periodo);
-  const rangoPersonalizado = useFiltrosStore((s) => s.rangoPersonalizado);
-  const setPeriodo = useFiltrosStore((s) => s.setPeriodo);
-  const setRangoPersonalizado = useFiltrosStore((s) => s.setRangoPersonalizado);
-  const isMobile = useLayoutStore((s) => s.isMobile);
-
-  const products = useProductosStore((s) => s.products);
-  const categories = useProductosStore((s) => s.categories);
-  const setProducts = useProductosStore((s) => s.setProducts);
-  const setCategories = useProductosStore((s) => s.setCategories);
-  const resetProductos = useProductosStore((s) => s.reset);
-
-  const ventas = useResumenStore((s) => s.ventas);
-  const detallesMap = useResumenStore((s) => s.detallesMap);
-  const loading = useResumenStore((s) => s.loading);
-  const error = useResumenStore((s) => s.error);
-  const subscribe = useResumenStore((s) => s.subscribe);
-  const resetResumen = useResumenStore((s) => s.reset);
-
-  const ventasFiltradas = useMemo(
-    () => filterVentasByPeriodo(ventas, periodo, rangoPersonalizado),
-    [ventas, periodo, rangoPersonalizado]
-  );
-
-  const usuariosMap = useUsuariosMap(negocioId, ventasFiltradas);
-
-  useEffect(() => {
-    if (!sessionReady) return;
-    if (!negocioId) {
-      resetResumen();
-      resetProductos();
-      return;
-    }
-    return subscribe(negocioId);
-  }, [sessionReady, negocioId, subscribe, resetResumen, resetProductos]);
-
-  useEffect(() => {
-    if (!sessionReady || !negocioId || !userId || products.length > 0) return;
-    getProductosScreenData(userId, userEmail ?? "")
-      .then(({ products: p, categories: c }) => {
-        setProducts(p);
-        setCategories(c);
-      })
-      .catch((err) => console.error("Error cargando productos:", err));
-  }, [sessionReady, negocioId, userId, userEmail, products.length, setProducts, setCategories]);
-
-  const metricas = useMemo(
-    () => selectMetricas(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products]
-  );
-
-  const ranking = useMemo(
-    () => selectProductosRanking(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products]
-  );
-
-  const categorias = useMemo(
-    () => selectCategorias(ventasFiltradas, detallesMap, products, categories),
-    [ventasFiltradas, detallesMap, products, categories]
-  );
-
-  const ventasPorUsuario = useMemo(
-    () => selectVentasPorUsuario(ventasFiltradas, usuariosMap),
-    [ventasFiltradas, usuariosMap]
-  );
-
-  const productosBajoStock = useMemo(() => selectProductosBajoStock(products), [products]);
-
-  if (sessionReady && !negocioId) {
+  if (noNegocio) {
     return (
       <AnimatedScreen>
         <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
           <EmptyState
             icon="error"
-            title={sessionError ?? "No tienes un negocio asignado"}
+            title={error ?? "No tienes un negocio asignado"}
             description="Configura tu negocio para ver el resumen de ventas"
             iconColor={AppColors.light.textMuted}
           />
@@ -158,7 +81,6 @@ export default function ResumenScreen() {
         }}
       >
         <View className="gap-6">
-          {/* Period filter */}
           <PeriodFilter
             periodo={periodo}
             onPeriodoChange={setPeriodo}
@@ -166,10 +88,8 @@ export default function ResumenScreen() {
             onRangoPersonalizadoChange={setRangoPersonalizado}
           />
 
-          {/* KPIs — directly on canvas, no card wrapper */}
           <KpiGrid metricas={metricas} isMobile={isMobile} />
 
-          {/* ── Section: Sales by User + Categories ─────── */}
           {isMobile ? (
             <>
               <SectionTitle title="Ventas por Usuario" />
@@ -190,7 +110,6 @@ export default function ResumenScreen() {
             </View>
           )}
 
-          {/* ── Section: Top Products + Low Stock ─────── */}
           {isMobile ? (
             <>
               <SectionTitle title="Productos Más Vendidos" />
@@ -216,9 +135,6 @@ export default function ResumenScreen() {
   );
 }
 
-/**
- * Section title component — separates sections by typography, not borders.
- */
 function SectionTitle({ title }: { title: string }) {
   return (
     <View className="mt-4 mb-4 flex-row items-center gap-3">

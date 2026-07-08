@@ -1,12 +1,7 @@
 import { formatCurrency } from "@/lib/utils/format";
+import type { ProductPriceCardProps } from "@/interface/products";
 import { Platform, Text, View } from "react-native";
 import { AppFonts } from "@/constants/typography";
-
-interface ProductPriceCardProps {
-  precioVenta: number;
-  precioMayoreo: number;
-  costoPromedio: number;
-}
 
 /**
  * Card de precios del producto: venta destacado en grande, mayoreo y costo en fila compacta.

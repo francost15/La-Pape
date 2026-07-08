@@ -1,13 +1,8 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import type { ProductoActionsProps } from "@/interface/products";
 import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from "react-native";
-
-interface ProductoActionsProps {
-  deleting: boolean;
-  onEdit: () => void;
-  onDelete: () => void;
-}
 
 export function ProductoActions({ deleting, onEdit, onDelete }: ProductoActionsProps) {
   return (

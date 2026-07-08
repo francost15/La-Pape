@@ -1,12 +1,7 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppFonts } from "@/constants/typography";
+import type { EditProductActionsProps } from "@/interface/products";
 import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from "react-native";
-
-interface EditProductActionsProps {
-  loading: boolean;
-  onCancel: () => void;
-  onSave: () => void;
-}
 
 export function EditProductActions({ loading, onCancel, onSave }: EditProductActionsProps) {
   return (

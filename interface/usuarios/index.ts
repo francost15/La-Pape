@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'VENDEDOR' | 'CAJERO';
+export type UserRole = "ADMIN" | "VENDEDOR" | "CAJERO";
 
 export interface Usuario {
   id: string;
@@ -28,3 +28,12 @@ export interface UpdateUsuarioInput {
   rol?: UserRole;
   activo?: boolean;
 }
+
+/** DTO de display para listas y mapas de usuarios (nombre, foto). */
+export interface UsuarioInfo {
+  nombre: string;
+  email?: string;
+  foto?: string;
+}
+
+export type UsuariosMap = Record<string, UsuarioInfo>;

@@ -1,56 +1,34 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
-import { Usuario } from "@/interface";
-import { auth } from "@/lib/firebase";
-import { getUsuarioById } from "@/lib/services/usuarios";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { useSessionStore } from "@/store/session-store";
 
 const isWeb = Platform.OS === "web";
 
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
-  const [usuarioData, setUsuarioData] = useState<Usuario | null>(null);
+  const userId = useSessionStore((s) => s.userId);
+  const displayName = useSessionStore((s) => s.displayName);
+  const userEmail = useSessionStore((s) => s.userEmail);
+  const photoURL = useSessionStore((s) => s.photoURL);
+  const usuarioDoc = useSessionStore((s) => s.usuarioDoc);
+
   const [menuVisible, setMenuVisible] = useState(false);
   const [photoLoadFailed, setPhotoLoadFailed] = useState(false);
+  const handleSignOut = useSignOut();
 
-  const loadUsuario = useCallback(async (uid: string) => {
-    try {
-      const data = await getUsuarioById(uid);
-      setUsuarioData(data);
-    } catch (error) {
-      console.error("Error cargando usuario:", error);
-      setUsuarioData(null);
-    }
-  }, []);
+  const nombre = usuarioDoc?.nombre ?? displayName ?? null;
+  const email = userEmail ?? usuarioDoc?.email ?? "";
+  const inicial = (nombre?.[0] ?? displayName?.[0] ?? email?.[0] ?? "?").toUpperCase();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u ?? null);
-      setPhotoLoadFailed(false);
-      if (u) loadUsuario(u.uid);
-      else setUsuarioData(null);
-    });
-    return () => unsubscribe();
-  }, [loadUsuario]);
-
-  const handleSignOut = async () => {
+  const onSignOut = async () => {
     setMenuVisible(false);
-    try {
-      await signOut(auth);
-      router.replace("/");
-    } catch (error: any) {
-      console.error("Error al cerrar sesión:", error);
-    }
+    await handleSignOut();
   };
-
-  const nombre = usuarioData?.nombre ?? user?.displayName ?? null;
-  const email = user?.email ?? usuarioData?.email ?? "";
-  const inicial = (nombre?.[0] ?? user?.displayName?.[0] ?? email?.[0] ?? "?").toUpperCase();
 
   return (
     <View
@@ -73,7 +51,7 @@ export default function Navbar() {
         />
       </Link>
 
-      {user && (
+      {userId && (
         <>
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
@@ -88,9 +66,9 @@ export default function Navbar() {
             accessibilityLabel="Abrir menú de usuario"
             accessibilityHint="Muestra opciones de perfil y cierre de sesión"
           >
-            {user.photoURL && !photoLoadFailed ? (
+            {photoURL && !photoLoadFailed ? (
               <Image
-                source={{ uri: user.photoURL }}
+                source={{ uri: photoURL }}
                 style={{ width: 36, height: 36, borderRadius: 18 }}
                 contentFit="cover"
                 onError={() => setPhotoLoadFailed(true)}
@@ -118,7 +96,6 @@ export default function Navbar() {
             )}
           </TouchableOpacity>
 
-          {/* ── User Menu Modal ───────────────────────── */}
           <Modal
             visible={menuVisible}
             transparent
@@ -144,7 +121,6 @@ export default function Navbar() {
                 }}
                 className="bg-white dark:bg-[#141820]"
               >
-                {/* Handle indicator */}
                 <View
                   style={{
                     width: 36,
@@ -157,11 +133,10 @@ export default function Navbar() {
                   className="bg-gray-900 dark:bg-white"
                 />
 
-                {/* User info */}
                 <View className="mb-5 flex-row items-center gap-3">
-                  {user.photoURL && !photoLoadFailed ? (
+                  {photoURL && !photoLoadFailed ? (
                     <Image
-                      source={{ uri: user.photoURL }}
+                      source={{ uri: photoURL }}
                       style={{ width: 48, height: 48, borderRadius: 24 }}
                       contentFit="cover"
                       onError={() => setPhotoLoadFailed(true)}
@@ -204,7 +179,6 @@ export default function Navbar() {
                   </View>
                 </View>
 
-                {/* Settings */}
                 <TouchableOpacity
                   onPress={() => {
                     setMenuVisible(false);
@@ -230,9 +204,8 @@ export default function Navbar() {
                   <IconSymbol name="chevron.right" size={14} color={AppColors.light.textMuted} />
                 </TouchableOpacity>
 
-                {/* Sign out */}
                 <TouchableOpacity
-                  onPress={handleSignOut}
+                  onPress={onSignOut}
                   className="rounded-xl py-3.5"
                   style={{
                     backgroundColor: "rgba(220, 38, 38, 0.08)",

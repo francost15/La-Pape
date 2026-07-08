@@ -1,18 +1,13 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
-import type { Product } from "@/interface";
+import type { ProductosBajoStockListProps, StockRowProps } from "@/interface/resumen";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 // ─── Row de stock ─────────────────────────────────────────────────────────────
-
-interface StockRowProps {
-  product: Product;
-  showDivider: boolean;
-}
 
 /**
  * Fila con indicador de stock como pill badge compacto.
@@ -93,10 +88,6 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
 });
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-
-interface ProductosBajoStockListProps {
-  items: Product[];
-}
 
 export default function ProductosBajoStockList({ items }: ProductosBajoStockListProps) {
   return (

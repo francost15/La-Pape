@@ -2,7 +2,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { Metricas } from "@/interface/resumen";
+import type { KpiCardConfig, KpiCardProps, KpiGridProps } from "@/interface/resumen";
 import React, { memo, useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -11,24 +11,6 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-
-// ─── Tipos ───────────────────────────────────────────────────────────────────
-
-interface KpiCardConfig {
-  label: string;
-  value: string;
-  subtitle: string;
-  accentColor: string;
-}
-
-interface KpiCardProps extends KpiCardConfig {
-  index: number;
-}
-
-interface KpiGridProps {
-  metricas: Metricas;
-  isMobile: boolean;
-}
 
 // ─── Card individual ─────────────────────────────────────────────────────────
 

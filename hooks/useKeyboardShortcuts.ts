@@ -1,6 +1,5 @@
 import { useEffect, useCallback } from "react";
 import { Platform } from "react-native";
-import { router } from "expo-router";
 
 export interface Shortcut {
   key: string;
@@ -54,50 +53,6 @@ export function useKeyboardShortcuts(shortcuts: Shortcut[], enabled = true) {
       }
     },
     [shortcuts, enabled]
-  );
-
-  useEffect(() => {
-    if (!enabled || Platform.OS !== "web") return;
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown, enabled]);
-}
-
-export function useNavigationShortcuts(enabled = true) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (!enabled || Platform.OS !== "web") return;
-
-      const ctrl = event.ctrlKey || event.metaKey;
-      const key = `${ctrl ? "ctrl+" : ""}${event.key.toLowerCase()}`;
-      const shiftKey = `${key}+shift`;
-
-      if (DEFAULT_SHORTCUTS[shiftKey]?.screen) {
-        event.preventDefault();
-        router.push(
-          DEFAULT_SHORTCUTS[shiftKey].screen as
-            | "/(tabs)/ventas"
-            | "/(tabs)/productos"
-            | "/(tabs)/history"
-            | "/(tabs)/resumen"
-        );
-        return;
-      }
-
-      if (DEFAULT_SHORTCUTS[key]?.screen) {
-        event.preventDefault();
-        router.push(
-          DEFAULT_SHORTCUTS[key].screen as
-            | "/(tabs)/ventas"
-            | "/(tabs)/productos"
-            | "/(tabs)/history"
-            | "/(tabs)/resumen"
-        );
-        return;
-      }
-    },
-    [enabled]
   );
 
   useEffect(() => {

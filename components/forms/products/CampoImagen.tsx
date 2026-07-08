@@ -1,19 +1,11 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
-import { CreateProductFormData } from "@/lib";
+import type { CampoImagenProps } from "@/interface/products";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Image } from "expo-image";
 import { Alert, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
-
-interface CampoImagenProps {
-  control: Control<CreateProductFormData>;
-  errors: FieldErrors<CreateProductFormData>;
-  isWeb?: boolean;
-  /** Tamaño fijo del preview en layout tipo detalle (ej. 420x420 desktop) */
-  previewSize?: { width: number; height: number };
-}
 
 export default function CampoImagen({
   control,

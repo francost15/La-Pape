@@ -1,15 +1,9 @@
 import CircleIconButton from "@/components/ui/CircleIconButton";
+import type { QuantityStepperProps } from "@/interface/ventas";
 import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import React from "react";
 import { Text, View } from "react-native";
-
-interface QuantityStepperProps {
-  quantity: number;
-  onMinus: () => void;
-  onPlus: () => void;
-  size?: number;
-}
 
 /**
  * QuantityStepper — Digital Atelier style.

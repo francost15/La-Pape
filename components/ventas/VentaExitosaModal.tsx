@@ -1,20 +1,12 @@
 import { AppColors } from "@/constants/colors";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import type { VentaCompletada } from "@/interface/checkout";
+import type { VentaExitosaModalProps } from "@/interface/ventas";
 import { Modal, Platform, Pressable, TouchableOpacity } from "react-native";
 import { IconSymbol } from "../ui/icon-symbol";
 import { SuccessActions } from "./venta-exitosa/SuccessActions";
 import { SuccessDetails } from "./venta-exitosa/SuccessDetails";
 import { SuccessHeader } from "./venta-exitosa/SuccessHeader";
-
-interface VentaExitosaModalProps {
-  visible: boolean;
-  venta: VentaCompletada;
-  onClose: () => void;
-  onDescargarRecibo?: () => void;
-  onEnviarRecibo?: () => void;
-}
 
 /**
  * VentaExitosaModal — Digital Atelier style.
@@ -82,6 +74,7 @@ export default function VentaExitosaModal({
 
           <SuccessActions
             isDark={isDark}
+            colors={colors}
             onContinuar={handleClose}
             onDescargarRecibo={onDescargarRecibo}
             onEnviarRecibo={onEnviarRecibo}

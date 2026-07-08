@@ -1,52 +1,43 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
+import type { TourProps } from "@/interface/onboarding";
+import { useOnboardingStore } from "@/store/onboarding-store";
 
-export interface TourStep {
-  id: string;
-  target?: string;
-  title: string;
-  description: string;
-  position?: "top" | "bottom" | "center";
-}
-
-interface TourProps {
-  steps: TourStep[];
-  isOpen: boolean;
-  onClose: () => void;
-  onComplete?: () => void;
-}
-
-export function Tour({ steps, isOpen, onClose, onComplete }: TourProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+export function Tour({ onComplete }: Pick<TourProps, "onComplete">) {
+  const isOpen = useOnboardingStore((s) => s.isTourOpen);
+  const steps = useOnboardingStore((s) => s.tourSteps);
+  const currentStep = useOnboardingStore((s) => s.tourStepIndex);
+  const nextTourStep = useOnboardingStore((s) => s.nextTourStep);
+  const prevTourStep = useOnboardingStore((s) => s.prevTourStep);
+  const closeTour = useOnboardingStore((s) => s.closeTour);
+  const completeTour = useOnboardingStore((s) => s.completeTour);
   const { isDark } = useTheme();
 
   const step = steps[currentStep];
   const isLast = currentStep === steps.length - 1;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLast) {
       onComplete?.();
-      onClose();
+      await completeTour();
     } else {
-      setCurrentStep((c) => c + 1);
+      nextTourStep();
     }
   };
 
   const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep((c) => c - 1);
-    }
+    prevTourStep();
   };
 
   const handleSkip = () => {
-    onClose();
+    closeTour();
   };
 
   if (!isOpen || !step) return null;
 
   return (
-    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={closeTour}>
       <View className="flex-1 bg-black/60">
         <View
           className={`absolute right-4 bottom-8 left-4 mx-auto max-w-sm rounded-2xl p-5 ${

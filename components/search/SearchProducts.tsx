@@ -2,18 +2,11 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import type { SearchProductsProps } from "@/interface/product-search";
 import React from "react";
 import { Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { IconSymbol } from "../ui/icon-symbol";
-
-interface SearchProductsProps {
-  searchText: string;
-  onSearchChange: (searchText: string) => void;
-  size?: "default" | "large";
-  showQrButton?: boolean;
-  onQrPress?: () => void;
-}
 
 /**
  * SearchProducts — Digital Atelier style.

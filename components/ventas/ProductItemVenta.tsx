@@ -1,23 +1,15 @@
+import type { ProductItemVentaProps } from "@/interface/ventas";
+import { useCartProductActions } from "@/hooks/use-cart-product-actions";
+import { useResponsive } from "@/hooks/use-responsive";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { formatCurrency } from "@/lib/utils/format";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
-import { Product } from "@/interface/products";
-import { formatCurrency } from "@/lib/utils/format";
-import { useVentasStore } from "@/store/ventas-store";
-import * as Haptics from "expo-haptics";
-import { useHaptic } from "@/hooks/use-haptic";
-import React, { useState, useCallback } from "react";
-import { Platform, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import React, { useState } from "react";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
-
-interface ProductItemVentaProps {
-  product: Product;
-  compact?: boolean;
-  onProductAdded?: () => void;
-}
 
 /**
  * ProductItemVenta — Digital Atelier style.
@@ -31,41 +23,12 @@ export default React.memo(function ProductItemVenta({
   compact = false,
   onProductAdded,
 }: ProductItemVentaProps) {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDesktop } = useResponsive();
   const { isDark, colors } = useThemeColors();
   const [imageError, setImageError] = useState(false);
-
-  const addItem = useVentasStore((s) => s.addItem);
-  const updateQuantity = useVentasStore((s) => s.updateQuantity);
-  const removeItem = useVentasStore((s) => s.removeItem);
-  const cartItem = useVentasStore((s) => s.items.find((i) => i.productId === product.id));
-
-  const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
-  const quantity = cartItem?.quantity ?? 0;
-  const inCart = quantity > 0;
-
-  const handleAdd = useCallback(() => {
-    if (!inCart) {
-      hapticMedium();
-      addItem(product, 1);
-      onProductAdded?.();
-    }
-  }, [inCart, hapticMedium, addItem, product, onProductAdded]);
-
-  const handlePlus = useCallback(() => {
-    hapticMedium();
-    updateQuantity(product.id, quantity + 1);
-  }, [hapticMedium, product.id, quantity, updateQuantity]);
-
-  const handleMinus = useCallback(() => {
-    hapticMedium();
-    if (quantity === 1) {
-      removeItem(product.id);
-    } else {
-      updateQuantity(product.id, quantity - 1);
-    }
-  }, [hapticMedium, product.id, quantity, removeItem, updateQuantity]);
+  const { quantity, inCart, handleAdd, handlePlus, handleMinus } = useCartProductActions(product, {
+    onProductAdded,
+  });
 
   const hasImage = product.imagen?.trim();
   const imgSize = isDesktop ? 56 : 48;

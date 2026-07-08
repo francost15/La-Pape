@@ -1,17 +1,10 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
-import { Categoria } from "@/interface/categorias";
+import type { BadgeCategoryProductsProps } from "@/interface/products";
 import { useLayoutStore } from "@/store/layout-store";
 import { useHaptic } from "@/hooks/use-haptic";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-interface BadgeCategoryProductsProps {
-  categories: Categoria[];
-  orderBy?: "asc" | "desc";
-  selectedCategoryId?: string | null;
-  onCategoryPress: (categoryId: string | null) => void;
-}
 
 const ACTIVE_BG = AppColors.primary;
 

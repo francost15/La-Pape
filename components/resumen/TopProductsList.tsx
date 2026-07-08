@@ -2,19 +2,13 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { ProductoRanking } from "@/interface/resumen";
+import type { RankingRowProps, TopProductsListProps } from "@/interface/resumen";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 // ─── Row de ranking ───────────────────────────────────────────────────────────
-
-interface RankingRowProps {
-  item: ProductoRanking;
-  rank: number;
-  showDivider: boolean;
-}
 
 /**
  * Fila de ranking: número de posición como indicador tipográfico limpio,
@@ -86,11 +80,6 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
 });
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-
-interface TopProductsListProps {
-  title: string;
-  items: ProductoRanking[];
-}
 
 export default function TopProductsList({ title, items }: TopProductsListProps) {
   return (

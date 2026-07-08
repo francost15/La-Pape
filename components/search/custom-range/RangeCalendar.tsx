@@ -1,5 +1,5 @@
-import type { RangoFechas } from "@/interface";
-import { useEffect, useMemo, useState } from "react";
+import type { RangeCalendarProps } from "@/interface/product-search";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import {
   DAY_HEADERS,
@@ -11,9 +11,9 @@ import {
   type CalendarView,
 } from "./calendar-utils";
 
-interface RangeCalendarProps {
-  rango: RangoFechas;
-  onRangoChange: (r: RangoFechas) => void;
+function getYearsAround(anchorYear: number): number[] {
+  const yearStart = anchorYear - 10;
+  return Array.from({ length: 21 }, (_, i) => yearStart + i);
 }
 
 export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
@@ -25,12 +25,16 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
   const [calendarView, setCalendarView] = useState<CalendarView>("days");
   const [selectingEnd, setSelectingEnd] = useState(false);
 
-  useEffect(() => {
+  const inicioKey = rango.inicio?.getTime() ?? null;
+  const [trackedInicioKey, setTrackedInicioKey] = useState<number | null>(inicioKey);
+
+  if (inicioKey !== trackedInicioKey) {
+    setTrackedInicioKey(inicioKey);
     if (rango.inicio && !selectingEnd) {
       setViewYear(rango.inicio.getFullYear());
       setViewMonth(rango.inicio.getMonth());
     }
-  }, [rango.inicio, selectingEnd]);
+  }
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
@@ -86,19 +90,9 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
     setViewYear(y);
   };
 
-  const currentYear = now.getFullYear();
-  const yearsList = useMemo(() => {
-    const yearStart = currentYear - 10;
-    return Array.from({ length: 21 }, (_, i) => yearStart + i);
-  }, [currentYear]);
-  const blanks = useMemo(
-    () => Array.from({ length: firstDayOfWeek }, (_, i) => i),
-    [firstDayOfWeek]
-  );
-  const daysList = useMemo(
-    () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
-    [daysInMonth]
-  );
+  const yearsList = getYearsAround(now.getFullYear());
+  const blanks = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+  const daysList = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   if (calendarView === "years") {
     return (

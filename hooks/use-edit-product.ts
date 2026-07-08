@@ -8,7 +8,7 @@ import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 
@@ -22,6 +22,8 @@ export function useEditProduct() {
   const router = useRouter();
   // negocioId viene del sessionStore (ya hidratado en login).
   const sessionNegocioId = useSessionStore((s) => s.negocioId);
+  const sessionUserId = useSessionStore((s) => s.userId);
+  const sessionUserEmail = useSessionStore((s) => s.userEmail);
 
   const {
     negocioId: storeNegocioId,
@@ -31,11 +33,13 @@ export function useEditProduct() {
     setProducts,
     currentProduct,
     setCurrentProduct,
+    loading,
+    productLoading,
+    setLoading,
+    setProductLoading,
   } = useProductosStore();
 
   const negocioId = sessionNegocioId ?? storeNegocioId;
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
 
   const {
     control,
@@ -61,8 +65,8 @@ export function useEditProduct() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const user = auth.currentUser;
-        if (!user) {
+        setProductLoading(true);
+        if (!sessionUserId) {
           setTimeout(() => router.replace("/"), 100);
           return;
         }
@@ -98,7 +102,7 @@ export function useEditProduct() {
 
         // Usar negocioId del sessionStore si está disponible — evita un round-trip a Firestore
         const currentNegocioId =
-          negocioId ?? (await getNegocioIdByUsuario(user.uid, user.email || ""));
+          negocioId ?? (await getNegocioIdByUsuario(sessionUserId, sessionUserEmail || ""));
 
         if (!currentNegocioId) {
           Alert.alert("Error", "No tienes un negocio asignado", [
@@ -133,7 +137,7 @@ export function useEditProduct() {
           { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
         ]);
       } finally {
-        setLoadingData(false);
+        setProductLoading(false);
       }
     };
 
@@ -193,7 +197,7 @@ export function useEditProduct() {
     errors,
     categories,
     loading,
-    loadingData,
+    loadingData: productLoading,
     submit: handleSubmit(onSubmit),
     goBack: () => router.back(),
   };

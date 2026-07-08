@@ -7,29 +7,28 @@ import ProductListContent from "@/components/ventas/ProductListContent";
 import { VENTAS_TOUR } from "@/constants/tours";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useTour } from "@/hooks/useTour";
+import { useResponsive } from "@/hooks/use-responsive";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useCheckoutStore } from "@/store/checkout-store";
+import { useOnboardingStore } from "@/store/onboarding-store";
 import { useVentasStore } from "@/store/ventas-store";
-import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import React, { useCallback, useEffect, useRef } from "react";
-import { Text, TextInput, useWindowDimensions, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
 export default function VentasScreen() {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDesktop } = useResponsive();
+  const { isDark, colors } = useThemeColors();
   const itemCount = useVentasStore((s) => s.getItemCount());
   const openConfirm = useCheckoutStore((s) => s.openConfirm);
   const searchInputRef = useRef<TextInput>(null);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const { isOpen, startTour, completeTour } = useTour("ventas", VENTAS_TOUR);
+  const startTour = useOnboardingStore((s) => s.startTour);
+  const completeTour = useOnboardingStore((s) => s.completeTour);
 
   useOnboardingAfterLogin();
 
   useEffect(() => {
-    startTour();
+    startTour("ventas", VENTAS_TOUR);
   }, [startTour]);
 
   const focusSearch = useCallback(() => {
@@ -65,10 +64,7 @@ export default function VentasScreen() {
   useKeyboardShortcuts(shortcuts, isDesktop);
 
   return (
-    <AnimatedScreen
-      className="flex-1 flex-row"
-      style={{ backgroundColor: isDark ? AppColors.dark.canvas : AppColors.light.canvas }}
-    >
+    <AnimatedScreen className="flex-1 flex-row" style={{ backgroundColor: colors.canvas }}>
       {/* ─── ÁREA PRINCIPAL: ATELIER (CATÁLOGO) / CARRITO (MÓVIL) ────────── */}
       <View className="flex-1" style={!isDesktop ? { paddingBottom: 144 } : { flex: 0.7 }}>
         <View className="flex-1">
@@ -86,7 +82,7 @@ export default function VentasScreen() {
                   className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
                   style={{
                     fontFamily: AppFonts.bodyStrong,
-                    color: isDark ? AppColors.dark.textMuted : AppColors.light.textMuted,
+                    color: colors.textMuted,
                   }}
                 >
                   ORDEN ACTUAL
@@ -96,7 +92,7 @@ export default function VentasScreen() {
                     className="text-3xl tracking-tight"
                     style={{
                       fontFamily: AppFonts.display,
-                      color: isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary,
+                      color: colors.textPrimary,
                     }}
                   >
                     Carrito
@@ -126,7 +122,7 @@ export default function VentasScreen() {
             flex: 0.3,
             borderLeftWidth: 1.5,
             borderLeftColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.03)",
-            backgroundColor: isDark ? AppColors.dark.surface : AppColors.light.surface,
+            backgroundColor: colors.surface,
           }}
         >
           <View className="px-6 pt-12 pb-6">
@@ -134,7 +130,7 @@ export default function VentasScreen() {
               className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
               style={{
                 fontFamily: AppFonts.bodyStrong,
-                color: isDark ? AppColors.dark.textMuted : AppColors.light.textMuted,
+                color: colors.textMuted,
               }}
             >
               ORDEN ACTUAL
@@ -144,7 +140,7 @@ export default function VentasScreen() {
                 className="text-2xl tracking-tight"
                 style={{
                   fontFamily: AppFonts.display,
-                  color: isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary,
+                  color: colors.textPrimary,
                 }}
               >
                 Carrito
@@ -166,7 +162,7 @@ export default function VentasScreen() {
       {!isDesktop && <FooterProducts />}
 
       <OnboardingHint />
-      <Tour steps={VENTAS_TOUR} isOpen={isOpen} onClose={completeTour} onComplete={completeTour} />
+      <Tour onComplete={completeTour} />
     </AnimatedScreen>
   );
 }

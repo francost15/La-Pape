@@ -1,6 +1,7 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import type { UserRole } from "@/interface";
+import type { ConfigTabEquipoProps } from "@/interface/equipo";
 import { notify } from "@/lib/notify";
 import { useEquipoStore } from "@/store/equipo-store";
 import { useSessionStore } from "@/store/session-store";
@@ -8,10 +9,6 @@ import { useCallback } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { CrearUsuarioForm } from "./equipo/CrearUsuarioForm";
 import { MiembroRow } from "./equipo/MiembroRow";
-
-interface ConfigTabEquipoProps {
-  onRefresh: () => void;
-}
 
 export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
   const negocioId = useSessionStore((s) => s.negocioId);

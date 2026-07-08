@@ -1,10 +1,14 @@
-import { auth, getProductosScreenData } from '@/lib';
-import { getNegocioIdByUsuario } from '@/lib/services/usuarios-negocios';
-import { useProductosStore } from '@/store/productos-store';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect } from 'react';
+import { getProductosScreenData } from "@/lib";
+import { useProductosStore } from "@/store/productos-store";
+import { useSessionStore } from "@/store/session-store";
+import { useCallback, useEffect } from "react";
 
 export function useProductosScreen() {
+  const sessionReady = useSessionStore((s) => s.ready);
+  const userId = useSessionStore((s) => s.userId);
+  const userEmail = useSessionStore((s) => s.userEmail);
+  const negocioIdFromSession = useSessionStore((s) => s.negocioId);
+
   const {
     products,
     categories,
@@ -17,53 +21,49 @@ export function useProductosScreen() {
     setError,
   } = useProductosStore();
 
-  // Función auxiliar para cargar los datos del usuario
-  const loadData = async (userId: string, email: string) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const loadData = useCallback(
+    async (uid: string, email: string) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const data = await getProductosScreenData(userId, email);
-      setProducts(data.products);
-      setCategories(data.categories);
+        const data = await getProductosScreenData(uid, email);
+        setProducts(data.products);
+        setCategories(data.categories);
 
-      const negocioId = await getNegocioIdByUsuario(userId, email);
-      if (negocioId) setNegocioId(negocioId);
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Error al cargar los productos';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (negocioIdFromSession) {
+          setNegocioId(negocioIdFromSession);
+        }
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Error al cargar los productos";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [negocioIdFromSession, setCategories, setError, setLoading, setNegocioId, setProducts]
+  );
 
   useEffect(() => {
-    // Verifica si el usuario está autenticado y obtiene los productos y categorías
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setError('No hay usuario autenticado');
-        setLoading(false);
-        return;
-      }
+    if (!sessionReady) return;
 
-      await loadData(user.uid, user.email || '');
-    });
-
-    return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const refresh = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      setError('No hay usuario autenticado');
+    if (!userId || !userEmail) {
+      setError("No hay usuario autenticado");
       setLoading(false);
       return;
     }
-    await loadData(user.uid, user.email || '');
-  };
 
-  const retry = refresh;
+    loadData(userId, userEmail);
+  }, [sessionReady, userId, userEmail, loadData, setError, setLoading]);
 
-  return { products, categories, loading, error, retry, refresh };
+  const refresh = useCallback(async () => {
+    if (!userId || !userEmail) {
+      setError("No hay usuario autenticado");
+      setLoading(false);
+      return;
+    }
+    await loadData(userId, userEmail);
+  }, [userId, userEmail, loadData, setError, setLoading]);
+
+  return { products, categories, loading, error, retry: refresh, refresh };
 }

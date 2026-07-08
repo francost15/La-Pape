@@ -2,14 +2,9 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import React, { useEffect } from "react";
 import { Text } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { COLOR_EASING, type TabConfig, type TabTheme } from "./constants";
+import { COLOR_EASING } from "./constants";
 import { styles } from "./styles";
-
-interface PcOnlyBadgeProps {
-  tab: TabConfig;
-  visible: boolean;
-  theme: TabTheme;
-}
+import type { PcOnlyBadgeProps } from "@/interface/layout";
 
 export const PcOnlyBadge = React.memo(function PcOnlyBadge({
   tab,

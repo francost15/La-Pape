@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable } from "react-native";
-
-interface PerformanceMetrics {
-  fps: number;
-  memory?: number;
-  jsThreadTime?: number;
-  timestamp: number;
-}
+import type { PerformanceMetrics } from "@/interface/ui";
 
 export function PerformanceMonitor() {
   const [metrics, setMetrics] = useState<PerformanceMetrics[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const lastTime = useRef(performance.now());
+  const lastTime = useRef<number | null>(null);
   const frames = useRef(0);
 
   useEffect(() => {
     if (!isVisible) return;
 
+    lastTime.current = performance.now();
+    frames.current = 0;
+
     const measure = () => {
+      if (lastTime.current === null) return;
       const now = performance.now();
       frames.current++;
 

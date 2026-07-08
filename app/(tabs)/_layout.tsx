@@ -2,27 +2,14 @@ import { DynamicIslandTabBar } from "@/components/DynamicIslandTabBar";
 import Navbar from "@/components/navbar";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
-import { auth } from "@/lib/firebase";
-import { Tabs, useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useRequireAuth } from "@/hooks/use-require-auth";
+import { Tabs } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
-  const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const { ready } = useRequireAuth({ redirectUnauthenticatedTo: "/" });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.replace("/");
-      }
-      setCheckingAuth(false);
-    });
-    return unsubscribe;
-  }, [router]);
-
-  if (checkingAuth) {
+  if (!ready) {
     return (
       <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
         <ActivityIndicator size="large" color={AppColors.primary} />

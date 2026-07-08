@@ -1,6 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
-import type { UserRole } from "@/interface";
+import type { CrearUsuarioFormProps, FormState } from "@/interface/equipo";
 import { notify } from "@/lib/notify";
 import { createUserWithAuthAndLink } from "@/lib/services/usuarios";
 import { useCallback, useState } from "react";
@@ -15,15 +15,6 @@ import {
 } from "react-native";
 import { ROL_CLASSES, ROL_LABELS, ROLES } from "./roles";
 
-interface FormState {
-  nombre: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  telefono: string;
-  rol: UserRole;
-}
-
 const EMPTY_FORM: FormState = {
   nombre: "",
   email: "",
@@ -32,11 +23,6 @@ const EMPTY_FORM: FormState = {
   telefono: "",
   rol: "VENDEDOR",
 };
-
-interface CrearUsuarioFormProps {
-  negocioId: string | null;
-  onCreated: () => void;
-}
 
 export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);

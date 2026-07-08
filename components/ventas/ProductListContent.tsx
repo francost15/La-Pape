@@ -2,7 +2,7 @@ import SearchProducts from "@/components/search/SearchProducts";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import type { SearchContextId } from "@/interface/product-search";
+import type { ProductListContentProps } from "@/interface/ventas";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AppColors } from "@/constants/colors";
@@ -13,7 +13,6 @@ import {
   FlatList,
   RefreshControl,
   Text,
-  TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View,
@@ -21,19 +20,6 @@ import {
 import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
-
-interface ProductListContentProps {
-  searchContextId: SearchContextId;
-  onProductAdded?: (productName: string) => void;
-  searchSize?: "default" | "large";
-  showQrButton?: boolean;
-  onQrPress?: () => void;
-  listKey?: string;
-  contentContainerStyle?: object;
-  keyboardDismissMode?: "none" | "on-drag" | "interactive";
-  keyboardShouldPersistTaps?: "always" | "never" | "handled";
-  searchInputRef?: React.RefObject<TextInput | null>;
-}
 
 /**
  * ProductListContent — Digital Atelier style.

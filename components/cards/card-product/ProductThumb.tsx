@@ -1,18 +1,7 @@
+import type { ProductThumbProps } from "@/interface/products";
 import { Image } from "expo-image";
-import type { StyleProp, ViewStyle } from "react-native";
 import { View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";
-
-interface ProductThumbProps {
-  uri?: string;
-  hasImage: boolean;
-  imageError: boolean;
-  onError: () => void;
-  iconSize: number;
-  fallbackColor: string;
-  className?: string;
-  style?: StyleProp<ViewStyle>;
-}
 
 /**
  * Thumbnail de producto: imagen con fallback a ícono. Unifica los cuatro

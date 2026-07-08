@@ -1,7 +1,6 @@
 import { AppColors } from "@/constants/colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect } from "react";
-import { View, type ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,14 +8,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-
-interface SkeletonProps {
-  style?: ViewStyle;
-  className?: string;
-  width?: number | string;
-  height?: number | string;
-  borderRadius?: number;
-}
+import type { SkeletonProps } from "@/interface/ui";
 
 export function Skeleton({ style, className, width, height, borderRadius = 8 }: SkeletonProps) {
   const colorScheme = useColorScheme();

@@ -1,7 +1,7 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
-import type { VentasPorUsuario as VentasPorUsuarioType } from "@/interface/resumen";
+import type { VentasPorUsuarioProps, VentasPorUsuarioRowProps } from "@/interface/resumen";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Image } from "expo-image";
@@ -25,13 +25,6 @@ function getInitials(nombre: string): string {
 }
 
 // ─── Row individual ───────────────────────────────────────────────────────────
-
-interface VentasPorUsuarioRowProps {
-  item: VentasPorUsuarioType;
-  porcentajeDelTotal: number;
-  index: number;
-  showDivider: boolean;
-}
 
 /**
  * Fila de vendedor sin fondo de row — separada por divisor sutil.
@@ -133,10 +126,6 @@ function VentasPorUsuarioRow({
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 const MAX_VISIBLE = 5;
-
-interface VentasPorUsuarioProps {
-  data: VentasPorUsuarioType[];
-}
 
 export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   const [expanded, setExpanded] = useState(false);

@@ -1,11 +1,6 @@
 import { AppFonts } from "@/constants/typography";
-import type { Product } from "@/interface/products";
+import type { ProductoInfoProps } from "@/interface/products";
 import { Text, View } from "react-native";
-
-interface ProductoInfoProps {
-  product: Product;
-  categoria?: { nombre: string };
-}
 
 export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
   return (

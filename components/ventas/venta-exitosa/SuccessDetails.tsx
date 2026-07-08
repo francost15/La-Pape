@@ -1,15 +1,8 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
-import type { VentaCompletada } from "@/interface/checkout";
+import type { SuccessDetailsProps } from "@/interface/ventas";
 import { formatCurrency } from "@/lib/utils/format";
 import { StyleSheet, Text, View } from "react-native";
-
-interface SuccessDetailsProps {
-  venta: VentaCompletada;
-  isDark: boolean;
-  colors: ThemeColors;
-}
 
 export function SuccessDetails({ venta, isDark, colors }: SuccessDetailsProps) {
   return (

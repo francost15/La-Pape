@@ -1,7 +1,8 @@
 import type { Periodo, RangoFechas } from "@/interface";
+import type { PeriodFilterProps } from "@/interface/product-search";
 import { formatDate as formatDateUtil } from "@/lib/utils/format";
 import { useLayoutStore } from "@/store/layout-store";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -14,16 +15,6 @@ import Animated, {
 } from "react-native-reanimated";
 import CustomRangeContent from "./CustomRangeContent";
 import PeriodBadges from "./PeriodBadges";
-
-export type { Periodo, RangoFechas };
-
-export interface PeriodFilterProps {
-  periodo: Periodo;
-  onPeriodoChange: (periodo: Periodo) => void;
-  rangoPersonalizado?: RangoFechas;
-  onRangoPersonalizadoChange?: (rango: RangoFechas) => void;
-  formatDate?: (date: Date | null) => string;
-}
 
 // Dos variantes de modal: mobile usa slide-up desde abajo (UX móvil nativa);
 // desktop usa zoom centrado para no ocupar toda la pantalla
@@ -158,20 +149,17 @@ export default function PeriodFilter({
     fin: rangoPersonalizado?.fin || null,
   });
 
-  useEffect(() => {
-    if (rangoPersonalizado) setRangoTemporal(rangoPersonalizado);
-  }, [rangoPersonalizado]);
-
   const handleSelect = useCallback(
     (p: Periodo) => {
       if (p === "personalizado") {
+        setRangoTemporal(rangoPersonalizado ?? { inicio: null, fin: null });
         setShowModal(true);
       } else {
         onPeriodoChange(p);
         onRangoPersonalizadoChange?.({ inicio: null, fin: null });
       }
     },
-    [onPeriodoChange, onRangoPersonalizadoChange]
+    [onPeriodoChange, onRangoPersonalizadoChange, rangoPersonalizado]
   );
 
   const handleCloseModal = useCallback(() => setShowModal(false), []);

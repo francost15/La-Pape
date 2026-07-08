@@ -1,23 +1,12 @@
-import { Categoria } from '@/interface';
-import { CreateProductFormData } from '@/lib/validations/product-schema';
-import { Control, FieldErrors } from 'react-hook-form';
-import { View } from 'react-native';
-import CampoCategoria from './products/CampoCategoria';
-import CampoCostos from './products/CampoCostos';
-import CampoDescripcion from './products/CampoDescripcion';
-import CampoImagen from './products/CampoImagen';
-import CampoMarca from './products/CampoMarca';
-import CampoNombre from './products/CampoNombre';
-import CampoPrecios from './products/CampoPrecios';
-
-interface FormProductosProps {
-  control: Control<CreateProductFormData>;
-  errors: FieldErrors<CreateProductFormData>;
-  categories: Categoria[];
-  isWeb?: boolean;
-  /** Cuando true, no se renderiza el campo imagen (para layouts que lo ubican aparte) */
-  hideImage?: boolean;
-}
+import type { FormProductosProps } from "@/interface/products";
+import { View } from "react-native";
+import CampoCategoria from "./products/CampoCategoria";
+import CampoCostos from "./products/CampoCostos";
+import CampoDescripcion from "./products/CampoDescripcion";
+import CampoImagen from "./products/CampoImagen";
+import CampoMarca from "./products/CampoMarca";
+import CampoNombre from "./products/CampoNombre";
+import CampoPrecios from "./products/CampoPrecios";
 
 export default function FormProductos({
   control,

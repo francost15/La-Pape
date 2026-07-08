@@ -1,23 +1,13 @@
-import React, { Component, ReactNode } from "react";
+import React, { Component } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { AppColors } from "@/constants/colors";
 import { IconSymbol } from "./icon-symbol";
+import type { ErrorBoundaryProps, ErrorBoundaryState } from "@/interface/ui";
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-}
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, error: null };
 
-interface State {
-  hasError: boolean;
-  error: Error | null;
-}
-
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 

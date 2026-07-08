@@ -3,8 +3,7 @@ import React from "react";
 import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Text, View } from "react-native";
-
-type EmptyStateIcon = "cart" | "clock" | "search" | "products" | "error";
+import type { EmptyStateIcon, EmptyStateProps } from "@/interface/ui";
 
 const ICON_MAP: Record<EmptyStateIcon, string> = {
   cart: "cart.fill",
@@ -13,16 +12,6 @@ const ICON_MAP: Record<EmptyStateIcon, string> = {
   products: "bag.fill",
   error: "exclamationmark.triangle.fill",
 };
-
-interface EmptyStateProps {
-  /** Ícono predefinido (uso habitual) */
-  icon?: EmptyStateIcon;
-  /** SF Symbol raw para casos que no están en el mapa predefinido */
-  iconName?: string;
-  title: string;
-  description?: string;
-  iconColor?: string;
-}
 
 /**
  * EmptyState — Digital Atelier style.

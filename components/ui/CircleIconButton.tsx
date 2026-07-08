@@ -1,26 +1,15 @@
-import type { IconSymbolName } from "@/components/ui/icon-symbol";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import type { CircleIconButtonProps } from "@/interface/ui";
+import {
+  animateCircleButtonPressIn,
+  animateCircleButtonPressOut,
+} from "@/lib/animations/circle-icon-button";
 import React from "react";
 import { Pressable, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-
-type Variant = "primary" | "secondary" | "success";
-
-interface CircleIconButtonProps {
-  icon: IconSymbolName;
-  variant?: Variant;
-  onPress: () => void;
-  size?: number;
-  /** Cuando false, renderiza como View (solo visual) para usar dentro de otro Pressable */
-  interactive?: boolean;
-  accessibilityLabel?: string;
-}
-
-// Spring corto y firme: el botón se hunde al tacto y vuelve rápido.
-const PRESS_SPRING = { damping: 15, stiffness: 400, mass: 0.5 };
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
 export default function CircleIconButton({
   icon,
@@ -70,10 +59,10 @@ export default function CircleIconButton({
       <Pressable
         onPress={handlePress}
         onPressIn={() => {
-          if (!reduceMotion) scale.value = withSpring(0.94, PRESS_SPRING);
+          if (!reduceMotion) animateCircleButtonPressIn(scale);
         }}
         onPressOut={() => {
-          if (!reduceMotion) scale.value = withSpring(1, PRESS_SPRING);
+          if (!reduceMotion) animateCircleButtonPressOut(scale);
         }}
         className={`${bgClass} items-center justify-center rounded-full`}
         style={buttonStyle}

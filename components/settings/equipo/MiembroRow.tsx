@@ -1,24 +1,12 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import type { UserRole } from "@/interface";
-import type { MiembroConUsuario } from "@/interface/equipo";
+import type { MiembroRowProps } from "@/interface/equipo";
 import { Image } from "expo-image";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { RolBadge } from "./RolBadge";
 import { ROL_CLASSES, ROL_LABELS, ROLES } from "./roles";
-
-interface MiembroRowProps {
-  miembro: MiembroConUsuario;
-  currentUserId: string | null;
-  onRolChange: (
-    relId: string,
-    userId: string,
-    email: string | undefined,
-    rol: UserRole
-  ) => Promise<void>;
-  onDesactivar: (relId: string) => Promise<void>;
-}
 
 export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }: MiembroRowProps) {
   const [expanded, setExpanded] = useState(false);

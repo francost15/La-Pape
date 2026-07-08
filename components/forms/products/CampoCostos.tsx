@@ -1,12 +1,7 @@
 import { AppColors } from "@/constants/colors";
-import { CreateProductFormData } from "@/lib";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import type { CampoCostosProps } from "@/interface/products";
+import { Controller } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
-
-interface CampoCostosProps {
-  control: Control<CreateProductFormData>;
-  errors: FieldErrors<CreateProductFormData>;
-}
 
 export default function CampoCostos({ control, errors }: CampoCostosProps) {
   return (

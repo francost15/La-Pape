@@ -1,15 +1,7 @@
-import type { RangoFechas } from "@/interface";
+import type { CustomRangeContentProps } from "@/interface/product-search";
 import { Pressable, Text, View } from "react-native";
 import { RangeCalendar } from "./custom-range/RangeCalendar";
 import { formatDateShort } from "./custom-range/calendar-utils";
-
-export interface CustomRangeContentProps {
-  rangoTemporal: RangoFechas;
-  onRangoChange: (rango: RangoFechas) => void;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isMobile: boolean;
-}
 
 export default function CustomRangeContent({
   rangoTemporal,

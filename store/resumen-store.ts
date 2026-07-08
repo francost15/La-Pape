@@ -7,8 +7,7 @@ import type {
   ResumenStore,
   VentasPorUsuario,
 } from "@/interface/resumen";
-import { onVentasByNegocio } from "@/lib/services/ventas";
-import { getDetallesByVenta } from "@/lib/services/ventas-detalle";
+import { createVentasDetallesListener } from "@/lib/services/ventas/ventas-listener";
 import { create } from "zustand";
 
 const INITIAL_STATE: ResumenState = {
@@ -22,65 +21,15 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
   ...INITIAL_STATE,
 
   subscribe: (negocioId: string) => {
-    set({ loading: true, error: null });
-    const cache: Record<string, VentaDetalle[]> = {};
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const fetchDetalles = async (ids: string[]) => {
-      const results = await Promise.all(
-        ids.map(async (id) => ({
-          id,
-          dets: await getDetallesByVenta(id),
-        }))
-      );
-      const stillEmpty: string[] = [];
-      for (const { id, dets } of results) {
-        if (dets.length > 0) {
-          cache[id] = dets;
-        } else {
-          stillEmpty.push(id);
-        }
-      }
-      return stillEmpty;
-    };
-
-    const unsub = onVentasByNegocio(
-      negocioId,
-      async (ventasFromDb) => {
-        if (retryTimer) {
-          clearTimeout(retryTimer);
-          retryTimer = null;
-        }
-
-        const idsToFetch = ventasFromDb.map((v) => v.id).filter((id) => !cache[id]?.length);
-
-        if (idsToFetch.length > 0) {
-          const stillEmpty = await fetchDetalles(idsToFetch);
-
-          if (stillEmpty.length > 0) {
-            retryTimer = setTimeout(async () => {
-              await fetchDetalles(stillEmpty);
-              set({ detallesMap: { ...cache } });
-            }, 2000);
-          }
-        }
-
-        set({
-          ventas: ventasFromDb,
-          detallesMap: { ...cache },
-          loading: false,
-        });
-      },
-      (err) => {
+    return createVentasDetallesListener(negocioId, {
+      onLoading: () => set({ loading: true, error: null }),
+      onData: (ventasFromDb, detallesMap) =>
+        set({ ventas: ventasFromDb, detallesMap, loading: false }),
+      onError: (err) => {
         console.error("Error en listener de resumen:", err);
         set({ error: "No se pudieron cargar los datos", loading: false });
-      }
-    );
-
-    return () => {
-      unsub();
-      if (retryTimer) clearTimeout(retryTimer);
-    };
+      },
+    });
   },
 
   reset: () => set(INITIAL_STATE),

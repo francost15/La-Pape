@@ -1,22 +1,20 @@
-import { Venta, VentaDetalle } from "@/interface";
+import type { Venta, HistorySection, VentaListItem } from "@/interface/ventas";
+import type { VentaDetalle } from "@/interface/ventas-detalle";
 import { formatDateHeader, getDateKey } from "./format";
 
-export interface VentaGroup {
-  key: string;
-  label: string;
-  ventas: { venta: Venta; detalles: VentaDetalle[]; fecha: Date }[];
-  total: number;
-}
+export type { VentaListItem, HistorySection };
+
+/** @deprecated Usar HistorySection desde @/interface/ventas */
+export interface VentaGroup extends HistorySection {}
 
 export function groupVentasByDate(
   ventas: Venta[],
-  detallesMap: Record<string, VentaDetalle[]>,
-): VentaGroup[] {
-  const groups: Record<string, VentaGroup> = {};
+  detallesMap: Record<string, VentaDetalle[]>
+): HistorySection[] {
+  const groups: Record<string, HistorySection> = {};
 
   for (const venta of ventas) {
-    const fecha =
-      venta.fecha instanceof Date ? venta.fecha : new Date(venta.fecha);
+    const fecha = venta.fecha instanceof Date ? venta.fecha : new Date(venta.fecha);
     const key = getDateKey(fecha);
 
     if (!groups[key]) {

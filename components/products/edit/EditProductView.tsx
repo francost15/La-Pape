@@ -4,10 +4,9 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
-import type { CreateProductFormData } from "@/lib";
+import type { EditProductViewProps } from "@/interface/products";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
-import type { Control, FieldErrors } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,15 +17,6 @@ import {
   View,
 } from "react-native";
 import { EditProductActions } from "./EditProductActions";
-
-interface EditProductViewProps {
-  control: Control<CreateProductFormData>;
-  errors: FieldErrors<CreateProductFormData>;
-  categories: React.ComponentProps<typeof FormProductos>["categories"];
-  loading: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-}
 
 // A nivel de módulo para no recrear el componente en cada render (lint react-hooks).
 function BackButton() {

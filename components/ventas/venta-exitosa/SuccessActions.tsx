@@ -1,33 +1,24 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
+import { usePressScaleHandlers } from "@/hooks/use-press-scale";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  type SharedValue,
-} from "react-native-reanimated";
+import type { SuccessActionsProps } from "@/interface/ventas";
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { IconSymbol } from "../../ui/icon-symbol";
-
-interface SuccessActionsProps {
-  isDark: boolean;
-  onContinuar: () => void;
-  onDescargarRecibo?: () => void;
-  onEnviarRecibo?: () => void;
-}
 
 export function SuccessActions({
   isDark,
+  colors,
   onContinuar,
   onDescargarRecibo,
   onEnviarRecibo,
 }: SuccessActionsProps) {
   const haptic = useHaptic();
   const reduceMotion = useReducedMotion();
+  const { onPressIn, onPressOut } = usePressScaleHandlers(reduceMotion);
 
-  // ── Feedback de escala al presionar los botones de recibo ──────────────
   const descargarScale = useSharedValue(1);
   const enviarScale = useSharedValue(1);
   const descargarStyle = useAnimatedStyle(() => ({
@@ -37,15 +28,6 @@ export function SuccessActions({
     transform: [{ scale: enviarScale.value }],
   }));
 
-  const handlePressIn = (scale: SharedValue<number>) => {
-    if (reduceMotion) return;
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 400, mass: 0.5 });
-  };
-  const handlePressOut = (scale: SharedValue<number>) => {
-    if (reduceMotion) return;
-    scale.value = withSpring(1, { damping: 15, stiffness: 400, mass: 0.5 });
-  };
-
   return (
     <View style={{ padding: 20, gap: 10 }}>
       <Animated.View style={descargarStyle}>
@@ -54,8 +36,8 @@ export function SuccessActions({
             haptic();
             onDescargarRecibo?.();
           }}
-          onPressIn={() => handlePressIn(descargarScale)}
-          onPressOut={() => handlePressOut(descargarScale)}
+          onPressIn={() => onPressIn(descargarScale)}
+          onPressOut={() => onPressOut(descargarScale)}
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -88,8 +70,8 @@ export function SuccessActions({
               haptic();
               onEnviarRecibo();
             }}
-            onPressIn={() => handlePressIn(enviarScale)}
-            onPressOut={() => handlePressOut(enviarScale)}
+            onPressIn={() => onPressIn(enviarScale)}
+            onPressOut={() => onPressOut(enviarScale)}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -122,6 +104,8 @@ export function SuccessActions({
           paddingVertical: 14,
           alignItems: "center",
           justifyContent: "center",
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.border,
         }}
         activeOpacity={0.7}
       >

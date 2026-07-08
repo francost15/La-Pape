@@ -1,3 +1,4 @@
+import type { UsuarioInfo, UsuariosMap } from "@/interface/usuarios";
 import type { Venta } from "@/interface";
 import { auth } from "@/lib/firebase";
 import { getUsuarioByEmail, getUsuarioById } from "@/lib/services/usuarios";
@@ -5,13 +6,7 @@ import { getUsuariosByNegocio } from "@/lib/services/usuarios-negocios";
 import { useSessionStore } from "@/store/session-store";
 import { useCallback, useEffect, useState } from "react";
 
-export interface UsuarioInfo {
-  nombre: string;
-  email?: string;
-  foto?: string;
-}
-
-export type UsuariosMap = Record<string, UsuarioInfo>;
+export type { UsuarioInfo, UsuariosMap } from "@/interface/usuarios";
 
 /**
  * Resuelve y cachea los datos de display (nombre, foto) de los usuarios
@@ -27,17 +22,13 @@ export type UsuariosMap = Record<string, UsuarioInfo>;
  * - Se prioriza displayName del auth provider (Google, etc.)
  * - Se usa photoURL del auth si el doc de Firestore no tiene foto.
  */
-export function useUsuariosMap(
-  negocioId: string | null,
-  ventasFiltradas: Venta[],
-): UsuariosMap {
+export function useUsuariosMap(negocioId: string | null, ventasFiltradas: Venta[]): UsuariosMap {
   const userId = useSessionStore((s) => s.userId);
   const userEmail = useSessionStore((s) => s.userEmail);
   // Prioriza el displayName del auth sobre el guardado en Firestore
   const displayName =
     useSessionStore((s) => s.displayName) ?? auth.currentUser?.displayName ?? null;
-  const photoURL =
-    useSessionStore((s) => s.photoURL) ?? auth.currentUser?.photoURL ?? null;
+  const photoURL = useSessionStore((s) => s.photoURL) ?? auth.currentUser?.photoURL ?? null;
 
   const [usuariosMap, setUsuariosMap] = useState<UsuariosMap>({});
 
@@ -54,7 +45,7 @@ export function useUsuariosMap(
         ? ((await getUsuarioByEmail(userEmail!)) ?? (await getUsuarioById(uid)))
         : await getUsuarioById(uid);
 
-      const data = usuario as (typeof usuario) & { foto?: string };
+      const data = usuario as typeof usuario & { foto?: string };
 
       const nombre =
         (isCurrentUser && displayName?.trim() ? displayName : null) ??
@@ -71,7 +62,7 @@ export function useUsuariosMap(
         },
       ];
     },
-    [userId, userEmail, displayName, photoURL],
+    [userId, userEmail, displayName, photoURL]
   );
 
   // ── Carga inicial: todos los usuarios del negocio ──────────────────────
@@ -81,7 +72,7 @@ export function useUsuariosMap(
 
     getUsuariosByNegocio(negocioId)
       .then((usuarioNegocios) =>
-        Promise.all(usuarioNegocios.map((u) => resolveUsuario(u.usuario_id))),
+        Promise.all(usuarioNegocios.map((u) => resolveUsuario(u.usuario_id)))
       )
       .then((entries) => {
         if (!cancelled) setUsuariosMap(Object.fromEntries(entries));
@@ -97,9 +88,9 @@ export function useUsuariosMap(
 
   // ── Llenado incremental: busca usuarios faltantes en ventas filtradas ──
   useEffect(() => {
-    const missingIds = [
-      ...new Set(ventasFiltradas.map((v) => v.usuario_id)),
-    ].filter((id) => !usuariosMap[id]);
+    const missingIds = [...new Set(ventasFiltradas.map((v) => v.usuario_id))].filter(
+      (id) => !usuariosMap[id]
+    );
 
     if (missingIds.length === 0) return;
 

@@ -3,17 +3,7 @@ import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
 import React from "react";
 import { Modal, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-export interface ConfirmAlertProps {
-  visible: boolean;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  danger?: boolean;
-}
+import type { ConfirmAlertProps } from "@/interface/ui";
 
 /**
  * ConfirmAlert — Digital Atelier style.
@@ -43,7 +33,7 @@ export default function ConfirmAlert({
       accessibilityViewIsModal
     >
       <View style={styles.container}>
-        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: overlayBg }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: overlayBg }]} />
         <Pressable style={styles.pressable} onPress={onCancel}>
           <Pressable
             style={[

@@ -1,21 +1,9 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import type { ThemeColors } from "@/hooks/use-theme-colors";
-import type { Product } from "@/interface/products";
+import type { CardProductDesktopProps } from "@/interface/products";
 import { formatCurrency } from "@/lib/utils/format";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { ProductThumb } from "./ProductThumb";
-
-interface CardProductDesktopProps {
-  product: Product;
-  isDark: boolean;
-  colors: ThemeColors;
-  hasImage: boolean;
-  imageError: boolean;
-  onImageError: () => void;
-  onPress: () => void;
-  onPressIn: () => void;
-}
 
 export function CardProductDesktop({
   product,

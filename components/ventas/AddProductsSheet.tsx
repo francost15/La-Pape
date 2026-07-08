@@ -5,11 +5,16 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { DESKTOP_MIN_WIDTH, DesignSystem } from "@/constants/design-system";
+import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import { notify } from "@/lib/notify";
+import {
+  animateSheetClose,
+  animateSheetOpen,
+  createSheetPanGesture,
+} from "@/lib/animations/add-products-sheet";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { useHaptic } from "@/hooks/use-haptic";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Keyboard,
   Platform,
@@ -21,19 +26,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  Easing,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { useSharedValue, useAnimatedStyle } from "react-native-reanimated";
+import { GestureDetector } from "react-native-gesture-handler";
 
 const SHEET_HEIGHT_PERCENT = 0.72;
-const DISMISS_THRESHOLD = 80;
-const SPRING_CONFIG = { damping: 20, stiffness: 200, mass: 0.8 };
 
 /**
  * AddProductsSheet — Digital Atelier style.
@@ -50,8 +46,12 @@ export default function AddProductsSheet() {
 
   const sheetVisible = useVentasUIStore((s) => s.sheetVisible);
   const closeSheetStore = useVentasUIStore((s) => s.closeSheet);
+  const qrScannerVisible = useVentasUIStore((s) => s.qrScannerVisible);
+  const openQrScanner = useVentasUIStore((s) => s.openQrScanner);
+  const closeQrScanner = useVentasUIStore((s) => s.closeQrScanner);
+  // keyboardHeight es una medición efímera de eventos del teclado (no estado
+  // compartido), por eso se mantiene local.
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [qrScannerVisible, setQrScannerVisible] = useState(false);
 
   const baseSheetHeight = height * SHEET_HEIGHT_PERCENT;
   const spaceAboveKeyboard = height - insets.top - keyboardHeight;
@@ -75,31 +75,14 @@ export default function AddProductsSheet() {
 
   const closeSheet = useCallback(() => {
     haptic();
-    backdropOpacity.value = withTiming(0, { duration: 250 });
-    translateY.value = withTiming(
-      height,
-      { duration: 250, easing: Easing.bezier(...DesignSystem.easingCurve.strongOut) },
-      () => {
-        runOnJS(closeSheetStore)();
-      }
-    );
-  }, [haptic, height, translateY, backdropOpacity, closeSheetStore]);
-
-  const closeSheetRef = useRef(closeSheet);
-  closeSheetRef.current = closeSheet;
+    animateSheetClose(translateY, backdropOpacity, height, closeSheetStore);
+  }, [haptic, height, closeSheetStore, translateY, backdropOpacity]);
 
   useEffect(() => {
     if (sheetVisible) {
-      backdropOpacity.value = withTiming(1, { duration: 250 });
-      // Reduced motion: el sheet aparece sin el spring de translate (directo a 0).
-      if (reduceMotion) {
-        translateY.value = 0;
-        return;
-      }
-      translateY.value = height;
-      translateY.value = withSpring(0, SPRING_CONFIG);
+      animateSheetOpen(translateY, backdropOpacity, height, reduceMotion);
     }
-  }, [sheetVisible, height, translateY, backdropOpacity, reduceMotion]);
+  }, [sheetVisible, height, reduceMotion, translateY, backdropOpacity]);
 
   // ── Teclado ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -115,21 +98,10 @@ export default function AddProductsSheet() {
     };
   }, []);
 
-  // ── Gesto de arrastre para cerrar ─────────────────────────────────────
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      dragOffset.value = translateY.value;
-    })
-    .onUpdate((e) => {
-      translateY.value = Math.max(0, dragOffset.value + e.translationY);
-    })
-    .onEnd((e) => {
-      if (e.translationY > DISMISS_THRESHOLD || e.velocityY > 500) {
-        runOnJS(closeSheetRef.current)();
-      } else {
-        translateY.value = withSpring(0, SPRING_CONFIG);
-      }
-    });
+  const panGesture = useMemo(
+    () => createSheetPanGesture(translateY, dragOffset, closeSheet),
+    [closeSheet, translateY, dragOffset]
+  );
 
   const showProductAddedToast = useCallback(
     (productName: string) => notify.success({ title: `${productName} agregado` }),
@@ -252,7 +224,7 @@ export default function AddProductsSheet() {
                   onProductAdded={showProductAddedToast}
                   searchSize="large"
                   showQrButton
-                  onQrPress={Platform.OS !== "web" ? () => setQrScannerVisible(true) : undefined}
+                  onQrPress={Platform.OS !== "web" ? openQrScanner : undefined}
                   listKey="mobile"
                   contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
                   keyboardDismissMode="on-drag"
@@ -266,7 +238,7 @@ export default function AddProductsSheet() {
 
       <QrScannerSheet
         visible={qrScannerVisible}
-        onClose={() => setQrScannerVisible(false)}
+        onClose={closeQrScanner}
         onProductAdded={showProductAddedToast}
       />
     </View>
