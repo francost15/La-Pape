@@ -10,7 +10,8 @@ import { useHistory } from "@/hooks/use-history";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency } from "@/lib/utils/format";
 import { useCallback, useMemo } from "react";
-import { ActivityIndicator, SectionList, Text, useWindowDimensions, View } from "react-native";
+import { SectionList, Text, useWindowDimensions, View } from "react-native";
+import { HistoryListSkeleton } from "@/components/ui/skeletons";
 import Animated, { FadeIn, ReduceMotion } from "react-native-reanimated";
 
 export default function HistoryScreen() {
@@ -129,12 +130,14 @@ export default function HistoryScreen() {
   );
 
   if (loading) {
+    // Skeleton con el mismo padding que la SectionList real para que el swap
+    // a datos no produzca salto de layout
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
-        <ActivityIndicator size="large" color={AppColors.primary} />
-        <Text className="text-sm text-[#6B7280] dark:text-[#8B95A5]">
-          {Strings.history.loadingHistory}
-        </Text>
+      <View
+        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        style={{ paddingHorizontal: isTablet ? 32 : 16, paddingTop: 16 }}
+      >
+        <HistoryListSkeleton groups={2} cardsPerGroup={3} />
       </View>
     );
   }

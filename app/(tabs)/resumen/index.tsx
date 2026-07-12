@@ -9,8 +9,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useResumen } from "@/hooks/use-resumen";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import { ResumenSkeleton } from "@/components/ui/skeletons";
 import React from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 export default function ResumenScreen() {
   const {
@@ -45,11 +46,18 @@ export default function ResumenScreen() {
   }
 
   if (loading) {
+    // Skeleton con el mismo padding que el ScrollView real: el contenido llega
+    // exactamente donde estaban los placeholders, sin salto de layout
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center gap-4 bg-[#FAFAF9] dark:bg-[#0C0F14]">
-          <ActivityIndicator size="large" color={AppColors.primary} />
-          <Text className="text-sm text-[#6B7280] dark:text-[#8B95A5]">Cargando resumen...</Text>
+        <View
+          className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+          style={{
+            paddingHorizontal: isMobile ? 20 : 48,
+            paddingVertical: isMobile ? 16 : 40,
+          }}
+        >
+          <ResumenSkeleton isMobile={isMobile} />
         </View>
       </AnimatedScreen>
     );

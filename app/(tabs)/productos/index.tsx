@@ -4,6 +4,7 @@ import SearchProducts from "@/components/search/SearchProducts";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import CircleIconButton from "@/components/ui/CircleIconButton";
 import EmptyState from "@/components/ui/EmptyState";
+import { Bone, ProductListSkeleton } from "@/components/ui/skeletons";
 import { Product } from "@/interface";
 import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
@@ -27,7 +28,7 @@ import {
 export default function ProductosScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
-  const { products, categories, error, retry, refresh } = useProductosScreen();
+  const { products, categories, loading, error, retry, refresh } = useProductosScreen();
   const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } =
     useProductSearch("productos");
   const [refreshing, setRefreshing] = useState(false);
@@ -222,6 +223,42 @@ export default function ProductosScreen() {
     ),
     [products.length, goToCreateProduct]
   );
+
+  // Carga inicial: skeleton que espeja el grid/lista real (antes se mostraba
+  // brevemente el empty state, que se leía como "no hay productos")
+  if (loading && products.length === 0) {
+    return (
+      <AnimatedScreen className="bg-[#FAFAF9] dark:bg-[#0C0F14]">
+        <View
+          style={
+            isDesktop
+              ? { flex: 1, paddingHorizontal: 26, paddingTop: 20 }
+              : { flex: 1, paddingTop: 8 }
+          }
+        >
+          {/* Placeholder de la fila búsqueda + botón crear */}
+          <View
+            className="flex-row items-center gap-3"
+            style={{
+              marginBottom: 16,
+              marginTop: isDesktop ? 8 : 4,
+              paddingHorizontal: isDesktop ? 0 : 16,
+            }}
+          >
+            <View className="flex-1">
+              <Bone width="100%" height={isDesktop ? 48 : 40} borderRadius={12} />
+            </View>
+            <Bone
+              width={isDesktop ? 48 : 40}
+              height={isDesktop ? 48 : 40}
+              borderRadius={isDesktop ? 24 : 20}
+            />
+          </View>
+          <ProductListSkeleton numColumns={numColumns} count={isDesktop ? numColumns * 2 : 8} />
+        </View>
+      </AnimatedScreen>
+    );
+  }
 
   if (error) {
     return (

@@ -1,7 +1,7 @@
 import { ProductoDetailView } from "@/components/products/detail/ProductoDetailView";
-import { AppColors } from "@/constants/colors";
+import { DetailSkeleton } from "@/components/ui/skeletons";
 import { useProductoDetail } from "@/hooks/use-producto-detail";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 export default function ProductoById() {
   const {
@@ -16,14 +16,7 @@ export default function ProductoById() {
   } = useProductoDetail();
 
   if (loading && !product) {
-    return (
-      <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
-        <ActivityIndicator size="large" color={AppColors.primary} />
-        <View className="mt-4">
-          <Text className="text-[#6B7280] dark:text-[#9CA3AF]">Cargando producto...</Text>
-        </View>
-      </View>
-    );
+    return <DetailSkeleton variant="detail" />;
   }
 
   if (!product) {
