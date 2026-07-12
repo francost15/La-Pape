@@ -1,10 +1,10 @@
-import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
+import AppTextInput from "@/components/ui/AppTextInput";
+import Button from "@/components/ui/Button";
 import type { AuthFormProps } from "@/interface/session";
 import { Image } from "expo-image";
 import * as React from "react";
 import { Controller } from "react-hook-form";
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 
 export default function AuthForm({
   control,
@@ -15,8 +15,6 @@ export default function AuthForm({
   loading,
   isSignUp,
   onToggleSignUp,
-  isDark = false,
-  isWeb = false,
 }: AuthFormProps) {
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
@@ -29,153 +27,63 @@ export default function AuthForm({
     }
   };
 
-  const inputBg = isDark ? AppColors.dark.surface : "#FFFFFF";
-  const inputBorder = isDark ? AppColors.dark.border : "rgba(0,0,0,0.08)";
-  const textColor = isDark ? AppColors.dark.textPrimary : AppColors.light.textPrimary;
-  const placeholderColor = isDark ? AppColors.dark.textMuted : AppColors.light.textSecondary;
+  const submitLabel = isSignUp ? "Registrarse" : "Iniciar Sesión";
+  const googleLabel = isSignUp ? "Registrarme con Google" : "Iniciar con Google";
+  const toggleLabel = isSignUp
+    ? "¿Ya tienes cuenta? Inicia sesión"
+    : "¿No tienes cuenta? Regístrate";
 
   return (
-    <View style={isWeb ? { width: "100%", maxWidth: 420, alignSelf: "center" } : { width: "100%" }}>
-      {/* Email */}
-      <View style={{ marginBottom: 12 }}>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              placeholder="Email"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={{
-                backgroundColor: inputBg,
-                padding: 16,
-                borderRadius: 14,
-                borderWidth: 1.5,
-                borderColor: errors.email ? AppColors.error : inputBorder,
-                color: textColor,
-                fontSize: 15,
-                fontFamily: AppFonts.body,
-              }}
-              placeholderTextColor={placeholderColor}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          )}
-        />
-        {errors.email && (
-          <Text
-            style={{
-              color: AppColors.error,
-              fontSize: 13,
-              marginTop: 6,
-              paddingHorizontal: 4,
-              fontFamily: AppFonts.body,
-            }}
-          >
-            {errors.email.message}
-          </Text>
+    <View className="w-full">
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppTextInput
+            placeholder="Email"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.email?.message}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            containerStyle={{ marginBottom: 12 }}
+          />
         )}
-      </View>
+      />
 
-      {/* Password */}
-      <View style={{ marginBottom: 20 }}>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              placeholder="Contraseña"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              secureTextEntry
-              style={{
-                backgroundColor: inputBg,
-                padding: 16,
-                borderRadius: 14,
-                borderWidth: 1.5,
-                borderColor: errors.password ? AppColors.error : inputBorder,
-                color: textColor,
-                fontSize: 15,
-                fontFamily: AppFonts.body,
-              }}
-              placeholderTextColor={placeholderColor}
-            />
-          )}
-        />
-        {errors.password && (
-          <Text
-            style={{
-              color: AppColors.error,
-              fontSize: 13,
-              marginTop: 6,
-              paddingHorizontal: 4,
-              fontFamily: AppFonts.body,
-            }}
-          >
-            {errors.password.message}
-          </Text>
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppTextInput
+            placeholder="Contraseña"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.password?.message}
+            secureTextEntry
+            containerStyle={{ marginBottom: 20 }}
+          />
         )}
-      </View>
+      />
 
-      {/* Primary submit */}
-      <TouchableOpacity
+      <Button
+        title={submitLabel}
         onPress={handleSubmit(onSubmit)}
-        disabled={loading}
-        style={{
-          backgroundColor: AppColors.primary,
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderRadius: 14,
-          marginBottom: 10,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={isSignUp ? "Registrarse" : "Iniciar sesión"}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "700",
-              fontSize: 15,
-              fontFamily: AppFonts.bodyStrong,
-              letterSpacing: -0.2,
-            }}
-          >
-            {isSignUp ? "Registrarse" : "Iniciar Sesión"}
-          </Text>
-        )}
-      </TouchableOpacity>
+        loading={loading}
+        disabled={googleLoading}
+        style={{ marginBottom: 10 }}
+      />
 
-      {/* Google sign in */}
-      <TouchableOpacity
+      <Button
+        title={googleLabel}
+        variant="secondary"
         onPress={handleGooglePress}
-        disabled={loading || googleLoading}
-        style={{
-          backgroundColor: inputBg,
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderRadius: 14,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          marginBottom: 10,
-          borderWidth: 1.5,
-          borderColor: inputBorder,
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={isSignUp ? "Registrarse con Google" : "Iniciar sesión con Google"}
-      >
-        {googleLoading ? (
-          <ActivityIndicator size="small" color={placeholderColor} />
-        ) : (
+        loading={googleLoading}
+        disabled={loading}
+        icon={
           <Image
             source={require("@/assets/images/google.webp")}
             style={{ width: 18, height: 18 }}
@@ -183,37 +91,20 @@ export default function AuthForm({
             accessibilityLabel="Logo de Google"
             accessibilityRole="image"
           />
-        )}
-        <Text
-          style={{
-            color: textColor,
-            fontWeight: "600",
-            fontSize: 15,
-            fontFamily: AppFonts.bodyStrong,
-          }}
-        >
-          {isSignUp ? "Registrarme con Google" : "Iniciar con Google"}
-        </Text>
-      </TouchableOpacity>
+        }
+        style={{ marginBottom: 10 }}
+      />
 
-      {/* Toggle signup */}
-      <TouchableOpacity
+      <Button
+        title={toggleLabel}
+        variant="ghost"
+        size="sm"
+        fullWidth
+        haptics={false}
         onPress={onToggleSignUp}
-        style={{ marginTop: 12, paddingVertical: 8 }}
-        accessibilityRole="button"
+        style={{ marginTop: 12 }}
         accessibilityLabel={isSignUp ? "Cambiar a iniciar sesión" : "Cambiar a registro"}
-      >
-        <Text
-          style={{
-            color: AppColors.primary,
-            fontSize: 14,
-            textAlign: "center",
-            fontFamily: AppFonts.body,
-          }}
-        >
-          {isSignUp ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
-        </Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 }

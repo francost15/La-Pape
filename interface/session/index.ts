@@ -28,8 +28,6 @@ export interface AuthFormProps {
   loading: boolean;
   isSignUp: boolean;
   onToggleSignUp: () => void;
-  isDark?: boolean;
-  isWeb?: boolean;
 }
 
 export interface ConfigTabPerfilProps {

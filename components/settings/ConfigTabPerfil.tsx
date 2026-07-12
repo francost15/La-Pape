@@ -154,7 +154,7 @@ export default function ConfigTabPerfil() {
       <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="envelope.fill" size={16} color={AppColors.light.textMuted} />
-          <Text className="w-20 text-sm text-gray-500">Email</Text>
+          <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Email</Text>
           <Text
             className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
             numberOfLines={1}
@@ -165,7 +165,7 @@ export default function ConfigTabPerfil() {
         <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="building.2.fill" size={16} color={AppColors.light.textMuted} />
-          <Text className="w-20 text-sm text-gray-500">Negocio</Text>
+          <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Negocio</Text>
           <Text
             className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
             numberOfLines={1}

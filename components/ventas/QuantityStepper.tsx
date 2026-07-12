@@ -8,6 +8,9 @@ import { Text, View } from "react-native";
 /**
  * QuantityStepper — Digital Atelier style.
  */
+// El círculo de 36px es intencional (stepper compacto en filas del carrito);
+// CircleIconButton añade hitSlop automático para que el área táctil efectiva
+// sea ≥44pt sin alterar el diseño. El gap de 12 + texto de 28 evita solapes.
 export default function QuantityStepper({
   quantity,
   onMinus,

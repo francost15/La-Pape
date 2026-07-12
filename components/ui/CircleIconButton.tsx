@@ -11,11 +11,14 @@ import React from "react";
 import { Pressable, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
+// Mínimo de área táctil accesible: 44pt (iOS HIG) / ~48dp (Material).
+const MIN_TOUCH_TARGET = 44;
+
 export default function CircleIconButton({
   icon,
   variant = "primary",
   onPress,
-  size = 36,
+  size = MIN_TOUCH_TARGET,
   interactive = true,
   accessibilityLabel,
 }: CircleIconButtonProps) {
@@ -44,6 +47,10 @@ export default function CircleIconButton({
   };
 
   const buttonStyle = { width: size, height: size };
+  // Cuando el círculo visual es menor al mínimo accesible, expandimos el área
+  // táctil con hitSlop en lugar de agrandar el botón: preserva el diseño
+  // compacto pero garantiza un objetivo efectivo de ≥44pt.
+  const touchSlop = size < MIN_TOUCH_TARGET ? Math.ceil((MIN_TOUCH_TARGET - size) / 2) : undefined;
   const content = <IconSymbol name={icon} size={size * 0.56} color={iconColor} />;
 
   if (!interactive) {
@@ -58,6 +65,7 @@ export default function CircleIconButton({
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={handlePress}
+        hitSlop={touchSlop}
         onPressIn={() => {
           if (!reduceMotion) animateCircleButtonPressIn(scale);
         }}

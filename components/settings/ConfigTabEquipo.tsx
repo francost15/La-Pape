@@ -63,7 +63,7 @@ export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
               style={{ marginBottom: 8 }}
             />
             <Text className="text-sm text-gray-500 dark:text-gray-400">No hay empleados aún</Text>
-            <Text className="mt-1 text-xs text-gray-400">
+            <Text className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               Invita o crea usuarios para añadirlos
             </Text>
           </View>

@@ -16,6 +16,55 @@ import { useVentasStore } from "@/store/ventas-store";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, View } from "react-native";
 
+interface CartHeaderProps {
+  variant: "mobile" | "desktop";
+  itemCount: number;
+}
+
+// Encabezado del carrito compartido entre el layout móvil y el sidebar desktop:
+// mismo contenido, solo cambian paddings y escala tipográfica.
+// El pt-12 es ritmo visual bajo el Navbar (que ya consume el safe-area inset),
+// no compensación de status bar.
+function CartHeader({ variant, itemCount }: CartHeaderProps) {
+  const { colors } = useThemeColors();
+  const isMobile = variant === "mobile";
+
+  return (
+    <View className={`${isMobile ? "px-5" : "px-6"} pt-12 pb-6`}>
+      <Text
+        className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
+        style={{
+          fontFamily: AppFonts.bodyStrong,
+          // textLabel (no textMuted): el eyebrow es contenido legible y debe
+          // cumplir contraste AA; textMuted queda para adornos decorativos.
+          color: colors.textLabel,
+        }}
+      >
+        ORDEN ACTUAL
+      </Text>
+      <View className="flex-row items-center gap-2.5">
+        <Text
+          className={`${isMobile ? "text-3xl" : "text-2xl"} tracking-tight`}
+          style={{
+            fontFamily: AppFonts.display,
+            color: colors.textPrimary,
+          }}
+        >
+          Carrito
+        </Text>
+        {itemCount > 0 && (
+          <View
+            className="rounded-full px-2.5 py-0.5"
+            style={{ backgroundColor: AppColors.primary }}
+          >
+            <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
 export default function VentasScreen() {
   const { isDesktop } = useResponsive();
   const { isDark, colors } = useThemeColors();
@@ -77,38 +126,7 @@ export default function VentasScreen() {
             />
           ) : (
             <View className="flex-1">
-              <View className="px-5 pt-12 pb-6">
-                <Text
-                  className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
-                  style={{
-                    fontFamily: AppFonts.bodyStrong,
-                    color: colors.textMuted,
-                  }}
-                >
-                  ORDEN ACTUAL
-                </Text>
-                <View className="flex-row items-center gap-2.5">
-                  <Text
-                    className="text-3xl tracking-tight"
-                    style={{
-                      fontFamily: AppFonts.display,
-                      color: colors.textPrimary,
-                    }}
-                  >
-                    Carrito
-                  </Text>
-                  {itemCount > 0 && (
-                    <View
-                      className="rounded-full px-2.5 py-0.5"
-                      style={{ backgroundColor: AppColors.primary }}
-                    >
-                      <Text className="text-[12px] leading-none font-bold text-white">
-                        {itemCount}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
+              <CartHeader variant="mobile" itemCount={itemCount} />
               <CartPanel />
             </View>
           )}
@@ -125,36 +143,7 @@ export default function VentasScreen() {
             backgroundColor: colors.surface,
           }}
         >
-          <View className="px-6 pt-12 pb-6">
-            <Text
-              className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
-              style={{
-                fontFamily: AppFonts.bodyStrong,
-                color: colors.textMuted,
-              }}
-            >
-              ORDEN ACTUAL
-            </Text>
-            <View className="flex-row items-center gap-2.5">
-              <Text
-                className="text-2xl tracking-tight"
-                style={{
-                  fontFamily: AppFonts.display,
-                  color: colors.textPrimary,
-                }}
-              >
-                Carrito
-              </Text>
-              {itemCount > 0 && (
-                <View
-                  className="rounded-full px-2.5 py-0.5"
-                  style={{ backgroundColor: AppColors.primary }}
-                >
-                  <Text className="text-[12px] leading-none font-bold text-white">{itemCount}</Text>
-                </View>
-              )}
-            </View>
-          </View>
+          <CartHeader variant="desktop" itemCount={itemCount} />
           <CartPanel />
         </View>
       )}

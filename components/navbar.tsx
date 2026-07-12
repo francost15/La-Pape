@@ -6,11 +6,13 @@ import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Modal, Platform, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSessionStore } from "@/store/session-store";
 
 const isWeb = Platform.OS === "web";
 
 export default function Navbar() {
+  const insets = useSafeAreaInsets();
   const userId = useSessionStore((s) => s.userId);
   const displayName = useSessionStore((s) => s.displayName);
   const userEmail = useSessionStore((s) => s.userEmail);
@@ -33,10 +35,12 @@ export default function Navbar() {
   return (
     <View
       className="flex-row items-center justify-between bg-[#FAFAF9] px-4 dark:bg-[#0C0F14]"
+      // insets.top en lugar de paddings fijos por plataforma: respeta notch,
+      // Dynamic Island y variaciones de status bar en Android. La barra visible
+      // conserva sus 56pt de alto por debajo del área segura.
       style={{
-        height: 56,
-        ...(Platform.OS === "ios" ? { paddingTop: 48 } : {}),
-        ...(Platform.OS === "android" ? { paddingTop: 36 } : {}),
+        height: 56 + insets.top,
+        paddingTop: insets.top,
       }}
     >
       <Link

@@ -13,7 +13,7 @@ import { Platform, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthScreen() {
-  const { isDark, colors } = useThemeColors();
+  const { colors } = useThemeColors();
   const isWeb = Platform.OS === "web";
 
   const [loading, setLoading] = useState(false);
@@ -128,8 +128,6 @@ export default function AuthScreen() {
             setIsSignUp(!isSignUp);
             reset();
           }}
-          isDark={isDark}
-          isWeb={isWeb}
         />
       </View>
     </SafeAreaView>

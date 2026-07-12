@@ -60,7 +60,7 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
             <Text className="text-sm font-semibold text-gray-900 dark:text-white">
               {miembro.nombre}
             </Text>
-            {isMe && <Text className="text-xs text-gray-400">(tú)</Text>}
+            {isMe && <Text className="text-xs text-gray-400 dark:text-gray-500">(tú)</Text>}
           </View>
           <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
             {miembro.email}

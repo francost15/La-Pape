@@ -90,7 +90,7 @@ export function EditProductView({
                   <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]">
                     Guas de Edición
                   </Text>
-                  <Text className="text-xs leading-4 text-gray-400">
+                  <Text className="text-xs leading-4 text-gray-400 dark:text-gray-500">
                     Actualiza la imagen del producto cargando un archivo o ingresando una URL
                     directa.
                   </Text>
