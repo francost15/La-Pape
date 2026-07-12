@@ -7,7 +7,7 @@ import type {
   ResumenStore,
   VentasPorUsuario,
 } from "@/interface/resumen";
-import { createVentasDetallesListener } from "@/lib/services/ventas/ventas-listener";
+import { subscribeVentasData } from "@/store/ventas-data-store";
 import { create } from "zustand";
 
 const INITIAL_STATE: ResumenState = {
@@ -20,8 +20,9 @@ const INITIAL_STATE: ResumenState = {
 export const useResumenStore = create<ResumenStore>((set, get) => ({
   ...INITIAL_STATE,
 
+  // Comparte el listener de Firestore con history vía subscribeVentasData.
   subscribe: (negocioId: string) => {
-    return createVentasDetallesListener(negocioId, {
+    return subscribeVentasData(negocioId, {
       onLoading: () => set({ loading: true, error: null }),
       onData: (ventasFromDb, detallesMap) =>
         set({ ventas: ventasFromDb, detallesMap, loading: false }),

@@ -1,0 +1,53 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "ventas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "negocio_id", "order": "ASCENDING" },
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "productos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "negocio_id", "order": "ASCENDING" },
+        { "fieldPath": "activo", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "categorias",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "negocio_id", "order": "ASCENDING" },
+        { "fieldPath": "activo", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sucursales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "negocio_id", "order": "ASCENDING" },
+        { "fieldPath": "activo", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "usuarios-negocios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "usuario_id", "order": "ASCENDING" },
+        { "fieldPath": "activo", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "usuarios-negocios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "negocio_id", "order": "ASCENDING" },
+        { "fieldPath": "activo", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

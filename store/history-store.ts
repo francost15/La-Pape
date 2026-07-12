@@ -3,9 +3,9 @@ import type { HistoryState, HistoryStore } from "@/interface/ventas";
 import { notify } from "@/lib/notify";
 import { generateAndShareRecibo } from "@/lib/pdf/generate-recibo";
 import type { ReciboData } from "@/lib/pdf/recibo-template";
-import { createVentasDetallesListener } from "@/lib/services/ventas/ventas-listener";
 import { refundVentaFlow } from "@/lib/services/ventas/refund-venta";
 import { useProductosStore } from "@/store/productos-store";
+import { subscribeVentasData } from "@/store/ventas-data-store";
 import { create } from "zustand";
 
 const INITIAL_STATE: HistoryState = {
@@ -23,8 +23,9 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
 
   // Escucha ventas en tiempo real e hidrata los detalles (con reintento para
   // los que aún no están replicados en Firestore). Devuelve el unsubscribe.
+  // El listener de Firestore se comparte con resumen vía subscribeVentasData.
   subscribe: (negocioId: string) => {
-    return createVentasDetallesListener(negocioId, {
+    return subscribeVentasData(negocioId, {
       onLoading: () => set({ loading: true, error: null }),
       onData: (ventasFromDb, detallesMap) =>
         set({ ventas: ventasFromDb, detallesMap, loading: false }),
