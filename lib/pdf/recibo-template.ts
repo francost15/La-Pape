@@ -1,12 +1,9 @@
+import type { LineaVentaDisplay } from "@/interface/shared";
+
 export interface ReciboData {
   ventaId: string;
   fecha: Date;
-  items: {
-    nombre: string;
-    cantidad: number;
-    precioUnitario: number;
-    totalLinea: number;
-  }[];
+  items: LineaVentaDisplay[];
   subtotal: number;
   descuento: number;
   total: number;

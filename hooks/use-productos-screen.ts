@@ -22,9 +22,12 @@ export function useProductosScreen() {
   } = useProductosStore();
 
   const loadData = useCallback(
-    async (uid: string, email: string) => {
+    // showSpinner=false revalida en segundo plano sin pasar por el estado de
+    // carga: evita el flash de skeleton sobre datos ya cacheados (p. ej. cada
+    // vez que se reabre el sheet de agregar productos en una venta).
+    async (uid: string, email: string, showSpinner = true) => {
       try {
-        setLoading(true);
+        if (showSpinner) setLoading(true);
         setError(null);
 
         const data = await getProductosScreenData(uid, email);
@@ -38,7 +41,7 @@ export function useProductosScreen() {
         const message = e instanceof Error ? e.message : "Error al cargar los productos";
         setError(message);
       } finally {
-        setLoading(false);
+        if (showSpinner) setLoading(false);
       }
     },
     [negocioIdFromSession, setCategories, setError, setLoading, setNegocioId, setProducts]
@@ -53,7 +56,13 @@ export function useProductosScreen() {
       return;
     }
 
-    loadData(userId, userEmail);
+    // El catálogo ya está en memoria (store compartido entre la pantalla de
+    // productos y el sheet de ventas): revalidamos en segundo plano en vez de
+    // volver a mostrar el skeleton y re-descargar todo desde cero.
+    loadData(userId, userEmail, products.length === 0);
+    // products.length se lee de forma intencional solo para decidir el modo de
+    // carga inicial; no queremos re-ejecutar en cada cambio del catálogo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionReady, userId, userEmail, loadData, setError, setLoading]);
 
   const refresh = useCallback(async () => {

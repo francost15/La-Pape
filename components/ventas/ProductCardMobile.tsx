@@ -4,7 +4,7 @@ import type { ProductCardMobileProps } from "@/interface/ventas";
 import { useCartProductActions } from "@/hooks/use-cart-product-actions";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { formatCurrency } from "@/lib/utils/format";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { IconSymbol } from "../ui/icon-symbol";
@@ -22,8 +22,14 @@ export default React.memo(function ProductCardMobile({
 }: ProductCardMobileProps) {
   const { isDark, colors } = useThemeColors();
   const [imageError, setImageError] = useState(false);
+  // El padre pasa un handler estable que recibe el nombre; lo invocamos con el
+  // propio product.nombre para no romper el React.memo con una prop nueva por render.
+  const handleProductAdded = useCallback(
+    () => onProductAdded?.(product.nombre),
+    [onProductAdded, product.nombre]
+  );
   const { quantity, inCart, handleAdd, handlePlus, handleMinus } = useCartProductActions(product, {
-    onProductAdded,
+    onProductAdded: handleProductAdded,
   });
 
   const hasImage = product.imagen?.trim();
@@ -61,6 +67,7 @@ export default React.memo(function ProductCardMobile({
             source={{ uri: product.imagen }}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
+            recyclingKey={product.id}
             onError={() => setImageError(true)}
           />
         ) : (

@@ -13,15 +13,13 @@ import {
 import { useSessionStore } from "@/store/session-store";
 
 export function OnboardingHint() {
-  const {
-    isVisible,
-    currentStepIndex,
-    isLoading,
-    hide,
-    nextStep,
-    setCompletedSteps,
-    getCurrentStep,
-  } = useOnboardingStore();
+  const isVisible = useOnboardingStore((s) => s.isVisible);
+  const currentStepIndex = useOnboardingStore((s) => s.currentStepIndex);
+  const isLoading = useOnboardingStore((s) => s.isLoading);
+  const hide = useOnboardingStore((s) => s.hide);
+  const nextStep = useOnboardingStore((s) => s.nextStep);
+  const setCompletedSteps = useOnboardingStore((s) => s.setCompletedSteps);
+  const getCurrentStep = useOnboardingStore((s) => s.getCurrentStep);
   const isDark = useColorScheme() === "dark";
   const reduceMotion = useReducedMotion();
   const fadeAnim = useSharedValue(0);
@@ -92,8 +90,9 @@ export function OnboardingHint() {
 }
 
 export function useOnboardingAfterLogin() {
-  const { userId } = useSessionStore();
-  const { show, isLoading } = useOnboardingStore();
+  const userId = useSessionStore((s) => s.userId);
+  const show = useOnboardingStore((s) => s.show);
+  const isLoading = useOnboardingStore((s) => s.isLoading);
   const hasShownRef = useRef(false);
 
   useEffect(() => {

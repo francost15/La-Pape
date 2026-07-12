@@ -4,6 +4,7 @@ import { deleteProduct, getProductById } from "@/lib/services/productos";
 import { useProductosStore } from "@/store/productos-store";
 import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Alert } from "react-native";
 
 /**
@@ -24,7 +25,18 @@ export function useProductoDetail() {
     setProductImageError,
     categories,
     setProducts,
-  } = useProductosStore();
+  } = useProductosStore(
+    useShallow((s) => ({
+      currentProduct: s.currentProduct,
+      productLoading: s.productLoading,
+      productImageError: s.productImageError,
+      setCurrentProduct: s.setCurrentProduct,
+      setProductLoading: s.setProductLoading,
+      setProductImageError: s.setProductImageError,
+      categories: s.categories,
+      setProducts: s.setProducts,
+    }))
+  );
   const [deleting, setDeleting] = useState(false);
 
   useFocusEffect(
@@ -86,7 +98,7 @@ export function useProductoDetail() {
   }, [product?.nombre, navigation]);
 
   const handleEdit = () => {
-    if (product) router.push(`/productos/producto/${product.id}/edit` as any);
+    if (product) router.push(`/productos/producto/${product.id}/edit`);
   };
 
   const handleDelete = () => {
@@ -110,7 +122,7 @@ export function useProductoDetail() {
               }
               setCurrentProduct(null);
               notify.success({ title: `${product.nombre} eliminado` });
-              router.replace("/productos" as any);
+              router.replace("/productos");
             } catch (error: unknown) {
               const message = error instanceof Error ? error.message : "No se pudo eliminar";
               notify.error({ title: "Error", description: message });

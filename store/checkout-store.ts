@@ -1,4 +1,4 @@
-import type { CheckoutStore } from "@/interface/checkout";
+import type { CheckoutStore } from "@/interface/ventas";
 import { create } from "zustand";
 
 export const useCheckoutStore = create<CheckoutStore>((set) => ({

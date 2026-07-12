@@ -4,8 +4,9 @@ import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Text, View } from "react-native";
 import type { EmptyStateIcon, EmptyStateProps } from "@/interface/ui";
+import type { IconSymbolName } from "@/interface/ui/icons";
 
-const ICON_MAP: Record<EmptyStateIcon, string> = {
+const ICON_MAP: Record<EmptyStateIcon, IconSymbolName> = {
   cart: "cart.fill",
   clock: "clock.fill",
   search: "magnifyingglass",
@@ -45,7 +46,7 @@ export default function EmptyState({
             marginBottom: 16,
           }}
         >
-          <IconSymbol name={resolvedIconName as any} size={32} color={resolvedIconColor} />
+          <IconSymbol name={resolvedIconName} size={32} color={resolvedIconColor} />
         </View>
       )}
       <Text

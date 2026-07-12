@@ -30,7 +30,7 @@ export interface VentasPorUsuario {
   foto?: string;
 }
 
-export interface ResumenState extends VentasDetallesBaseState {}
+export type ResumenState = VentasDetallesBaseState;
 
 export interface ResumenActions {
   subscribe: (negocioId: string) => () => void;

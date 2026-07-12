@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 import { Modal, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function CampoMarca({ control, errors }: ProductFormFieldProps) {
-  const { products } = useProductosStore();
+  const products = useProductosStore((s) => s.products);
   const [showModal, setShowModal] = useState(false);
   const isWeb = Platform.OS === "web";
 

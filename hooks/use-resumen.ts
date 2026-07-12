@@ -4,6 +4,7 @@ import { useUsuariosMap } from "@/hooks/use-usuarios-map";
 import { usePeriodoFilter } from "@/hooks/use-periodo-filter";
 import {
   selectCategorias,
+  selectDetallesPagados,
   selectMetricas,
   selectProductosBajoStock,
   selectProductosRanking,
@@ -68,19 +69,37 @@ export function useResumen() {
     sessionReady && !negocioId ? (sessionError ?? Strings.history.noNegocioAssigned) : dataError;
   const noNegocio = sessionReady && !negocioId;
 
+  // Índices y particiones derivadas una sola vez, compartidos por los tres
+  // selectores de abajo (antes cada uno reconstruía el filtro de pagadas, el
+  // aplanado de detalles y hacía búsquedas lineales sobre products/categories).
+  const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+  const categoriasById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const pagadas = useMemo(
+    () => ventasFiltradas.filter((v) => v.estado === "PAGADA"),
+    [ventasFiltradas]
+  );
+  const reembolsos = useMemo(
+    () => ventasFiltradas.filter((v) => v.estado === "REEMBOLSO"),
+    [ventasFiltradas]
+  );
+  const detallesPagados = useMemo(
+    () => selectDetallesPagados(pagadas, detallesMap),
+    [pagadas, detallesMap]
+  );
+
   const metricas = useMemo(
-    () => selectMetricas(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products]
+    () => selectMetricas(pagadas, reembolsos, detallesPagados, productsById),
+    [pagadas, reembolsos, detallesPagados, productsById]
   );
 
   const ranking = useMemo(
-    () => selectProductosRanking(ventasFiltradas, detallesMap, products),
-    [ventasFiltradas, detallesMap, products]
+    () => selectProductosRanking(detallesPagados, productsById),
+    [detallesPagados, productsById]
   );
 
   const categorias = useMemo(
-    () => selectCategorias(ventasFiltradas, detallesMap, products, categories),
-    [ventasFiltradas, detallesMap, products, categories]
+    () => selectCategorias(detallesPagados, productsById, categoriasById),
+    [detallesPagados, productsById, categoriasById]
   );
 
   const ventasPorUsuario = useMemo(

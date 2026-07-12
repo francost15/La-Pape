@@ -1,6 +1,6 @@
 import { AppColors } from "@/constants/colors";
 import { DesignSystem } from "@/constants/design-system";
-import { TAB_BAR_THEME } from "@/interface/layout";
+import { TAB_BAR_THEME } from "@/constants/tab-bar-theme";
 import type { IconSymbolName } from "@/interface/ui/icons";
 import { Platform } from "react-native";
 import { Easing } from "react-native-reanimated";

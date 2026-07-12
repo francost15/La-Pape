@@ -25,6 +25,7 @@ export function CardProductCompact({
   const thumb = (
     <ProductThumb
       uri={product.imagen}
+      recyclingKey={product.id}
       hasImage={hasImage}
       imageError={imageError}
       onError={onImageError}

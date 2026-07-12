@@ -154,6 +154,8 @@ export interface ProductThumbProps {
   fallbackColor: string;
   className?: string;
   style?: StyleProp<ViewStyle>;
+  /** Identidad estable de la imagen para evitar el glitch de reciclaje en listas FlashList */
+  recyclingKey?: string;
 }
 
 export interface CardProductDesktopProps {

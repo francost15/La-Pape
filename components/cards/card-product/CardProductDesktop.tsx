@@ -33,6 +33,7 @@ export function CardProductDesktop({
     >
       <ProductThumb
         uri={product.imagen}
+        recyclingKey={product.id}
         hasImage={hasImage}
         imageError={imageError}
         onError={onImageError}

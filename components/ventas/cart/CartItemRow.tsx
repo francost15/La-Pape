@@ -3,11 +3,18 @@ import { AppFonts } from "@/constants/typography";
 import { formatCurrency } from "@/lib/utils/format";
 import type { CartItemRowProps } from "@/interface/ventas";
 import { Image } from "expo-image";
+import React from "react";
 import { Platform, Text, View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";
 import QuantityStepper from "../QuantityStepper";
 
-export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemRowProps) {
+export const CartItemRow = React.memo(function CartItemRow({
+  item,
+  isDark,
+  colors,
+  onMinus,
+  onPlus,
+}: CartItemRowProps) {
   return (
     <View
       style={{
@@ -35,6 +42,7 @@ export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemR
             source={{ uri: item.product.imagen }}
             style={{ width: "100%", height: "100%" }}
             contentFit="cover"
+            recyclingKey={item.product.id}
           />
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -89,4 +97,4 @@ export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemR
       </View>
     </View>
   );
-}
+});

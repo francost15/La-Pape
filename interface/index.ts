@@ -1,5 +1,4 @@
 export * from "./categorias";
-export * from "./checkout";
 export * from "./equipo";
 export * from "./filtros";
 export * from "./layout";

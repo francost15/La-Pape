@@ -35,10 +35,10 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
             u?.email?.split("@")[0] ||
             "Usuario";
           const email = u?.email ?? "";
-          const rol: UserRole = (u as { rol?: UserRole })?.rol ?? "VENDEDOR";
+          const rol: UserRole = u?.rol ?? "VENDEDOR";
           const inicial = (nombre[0] ?? "?").toUpperCase();
           const foto =
-            (u as { foto?: string })?.foto ??
+            u?.foto ??
             (isCurrentUser && authOverride?.photoURL ? authOverride.photoURL : undefined);
           return {
             relacion: rel,

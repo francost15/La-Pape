@@ -36,37 +36,41 @@ export const useResumenStore = create<ResumenStore>((set, get) => ({
   reset: () => set(INITIAL_STATE),
 }));
 
-function getDetallesForVentas(
-  ventaIds: string[],
+/**
+ * Detalles de las ventas pagadas del período, aplanados una sola vez.
+ * Se comparte entre métricas, ranking y categorías (antes cada selector
+ * repetía este filtro + aplanado).
+ */
+export function selectDetallesPagados(
+  pagadas: Venta[],
   detallesMap: Record<string, VentaDetalle[]>
 ): VentaDetalle[] {
   const result: VentaDetalle[] = [];
-  for (const id of ventaIds) {
-    const dets = detallesMap[id];
+  for (const v of pagadas) {
+    const dets = detallesMap[v.id];
     if (dets) result.push(...dets);
   }
   return result;
 }
 
+// Los selectores reciben `productsById`/`categoriasById` como Map en vez de
+// arrays: antes hacían `products.find()` por cada línea de detalle, lo que era
+// O(ventas × productos) y trababa el resumen en negocios con catálogo grande.
 export function selectMetricas(
-  ventasFiltradas: Venta[],
-  detallesMap: Record<string, VentaDetalle[]>,
-  products: Product[]
+  pagadas: Venta[],
+  reembolsos: Venta[],
+  detallesPagados: VentaDetalle[],
+  productsById: Map<string, Product>
 ): Metricas {
-  const pagadas = ventasFiltradas.filter((v) => v.estado === "PAGADA");
   const ventasTotales = pagadas.reduce((s, v) => s + v.total, 0);
   const transacciones = pagadas.length;
 
-  const reembolsos = ventasFiltradas.filter((v) => v.estado === "REEMBOLSO");
   const devoluciones = reembolsos.length;
   const totalDevoluciones = reembolsos.reduce((s, v) => s + v.total, 0);
 
-  const pagadasIds = pagadas.map((v) => v.id);
-  const detallesFiltrados = getDetallesForVentas(pagadasIds, detallesMap);
-
   let costoTotal = 0;
-  for (const det of detallesFiltrados) {
-    const prod = products.find((p) => p.id === det.producto_id);
+  for (const det of detallesPagados) {
+    const prod = productsById.get(det.producto_id);
     if (prod?.costo_promedio) {
       costoTotal += det.cantidad * prod.costo_promedio;
     }
@@ -88,17 +92,13 @@ export function selectMetricas(
 }
 
 export function selectProductosRanking(
-  ventasFiltradas: Venta[],
-  detallesMap: Record<string, VentaDetalle[]>,
-  products: Product[]
+  detallesPagados: VentaDetalle[],
+  productsById: Map<string, Product>
 ): { top: ProductoRanking[]; bottom: ProductoRanking[] } {
-  const pagadasIds = ventasFiltradas.filter((v) => v.estado === "PAGADA").map((v) => v.id);
-  const detallesFiltrados = getDetallesForVentas(pagadasIds, detallesMap);
-
   const map = new Map<string, ProductoRanking>();
 
-  for (const det of detallesFiltrados) {
-    const prod = products.find((p) => p.id === det.producto_id);
+  for (const det of detallesPagados) {
+    const prod = productsById.get(det.producto_id);
     if (!prod) continue;
 
     const existing = map.get(prod.id);
@@ -123,21 +123,17 @@ export function selectProductosRanking(
 }
 
 export function selectCategorias(
-  ventasFiltradas: Venta[],
-  detallesMap: Record<string, VentaDetalle[]>,
-  products: Product[],
-  categories: Categoria[]
+  detallesPagados: VentaDetalle[],
+  productsById: Map<string, Product>,
+  categoriasById: Map<string, Categoria>
 ): CategoriaVenta[] {
-  const pagadasIds = ventasFiltradas.filter((v) => v.estado === "PAGADA").map((v) => v.id);
-  const detallesFiltrados = getDetallesForVentas(pagadasIds, detallesMap);
-
   const catMap = new Map<string, number>();
 
-  for (const det of detallesFiltrados) {
-    const prod = products.find((p) => p.id === det.producto_id);
+  for (const det of detallesPagados) {
+    const prod = productsById.get(det.producto_id);
     if (!prod?.categoria_id) continue;
 
-    const cat = categories.find((c) => c.id === prod.categoria_id);
+    const cat = categoriasById.get(prod.categoria_id);
     if (!cat) continue;
 
     catMap.set(cat.nombre, (catMap.get(cat.nombre) ?? 0) + det.total_linea);

@@ -9,7 +9,8 @@ import { useMemo } from "react";
  * mantiene su propio estado de búsqueda independiente.
  */
 export const useProductSearch = (contextId: SearchContextId) => {
-  const { products, categories } = useProductosStore();
+  const products = useProductosStore((s) => s.products);
+  const categories = useProductosStore((s) => s.categories);
   const { searchText, selectedCategoryId } = useProductSearchStore(
     (s) => s.contexts[contextId] ?? { searchText: "", selectedCategoryId: null }
   );

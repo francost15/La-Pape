@@ -1,5 +1,5 @@
 import type { ErrorInfo, ReactNode } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { DimensionValue, StyleProp, ViewStyle } from "react-native";
 import type { IconSymbolName } from "@/interface/ui/icons";
 
 export * from "./icons";
@@ -9,7 +9,7 @@ export interface EmptyStateProps {
   /** Ícono predefinido (uso habitual) */
   icon?: EmptyStateIcon;
   /** SF Symbol raw para casos que no están en el mapa predefinido */
-  iconName?: string;
+  iconName?: IconSymbolName;
   title: string;
   description?: string;
   iconColor?: string;
@@ -50,8 +50,8 @@ export interface AnimatedScreenProps {
 export interface SkeletonProps {
   style?: ViewStyle;
   className?: string;
-  width?: number | string;
-  height?: number | string;
+  width?: DimensionValue;
+  height?: DimensionValue;
   borderRadius?: number;
 }
 

@@ -51,8 +51,8 @@ export function Bone({ style, className, width, height, borderRadius = 8 }: Skel
       className={className}
       style={[
         {
-          width: width as any,
-          height: height as any,
+          width,
+          height,
           borderRadius,
           backgroundColor,
         },

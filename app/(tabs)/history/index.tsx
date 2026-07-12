@@ -88,7 +88,7 @@ export default function HistoryScreen() {
           isReembolso={item.venta.estado === "REEMBOLSO"}
           expandido={expandedIds.includes(item.venta.id)}
           productNames={productNames}
-          onToggle={() => toggleCard(item.venta.id)}
+          onToggle={toggleCard}
           onVerRecibo={handleVerRecibo}
           onReembolso={handleReembolso}
         />

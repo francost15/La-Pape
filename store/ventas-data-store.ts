@@ -1,6 +1,9 @@
 import type { Venta } from "@/interface/ventas";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
-import { createVentasDetallesListener } from "@/lib/services/ventas/ventas-listener";
+import {
+  createVentasDetallesListener,
+  type VentasListenerCallbacks,
+} from "@/lib/services/ventas/ventas-listener";
 import { getRangoConsulta, useFiltrosStore } from "@/store/filtros-store";
 
 /**
@@ -14,11 +17,9 @@ import { getRangoConsulta, useFiltrosStore } from "@/store/filtros-store";
  * cambia el período del filtro (la consulta al servidor está acotada por fecha).
  */
 
-export interface VentasDataListener {
-  onData: (ventas: Venta[], detallesMap: Record<string, VentaDetalle[]>) => void;
-  onError: (error: unknown) => void;
-  onLoading?: () => void;
-}
+// Mismo contrato que el listener del servicio: se reexporta con el nombre local
+// para no romper a los consumidores del store.
+export type VentasDataListener = VentasListenerCallbacks;
 
 const subscribers = new Set<VentasDataListener>();
 

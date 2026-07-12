@@ -1,8 +1,7 @@
 import type { Product } from "@/interface/products";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
-import type { VentaCompletada } from "@/interface/checkout";
+import type { LineaVentaDisplay, VentasDetallesBaseState } from "@/interface/shared";
 import type { SearchContextId } from "@/interface/product-search";
-import type { VentasDetallesBaseState } from "@/interface/shared";
 import type { ThemeColors } from "@/interface/theme";
 import type { RefObject } from "react";
 import type { TextInput } from "react-native";
@@ -10,6 +9,31 @@ import type { SharedValue } from "react-native-reanimated";
 
 export type VentaEstado = "PENDIENTE" | "PAGADA" | "CANCELADA" | "REEMBOLSO" | "EN_PROCESO";
 export type TipoVenta = "CONTADO" | "CREDITO";
+
+// ── Flujo de checkout (antes en interface/checkout, fusionado aquí para
+// eliminar la dependencia cruzada ventas ↔ checkout) ──────────────────────
+
+/** Venta recién completada, tal como la consume el modal de éxito. */
+export interface VentaCompletada {
+  id: string;
+  fecha: string; // preformateada para display (no es la fecha cruda de Firestore)
+  total: number;
+  subtotal: number;
+  descuento: number;
+  items: LineaVentaDisplay[];
+}
+
+export interface CheckoutStore {
+  confirmVisible: boolean;
+  processing: boolean;
+  successVenta: VentaCompletada | null;
+
+  openConfirm: () => void;
+  closeConfirm: () => void;
+  setProcessing: (v: boolean) => void;
+  setSuccessVenta: (venta: VentaCompletada) => void;
+  closeSuccess: () => void;
+}
 
 export interface Venta {
   id: string;
@@ -99,7 +123,7 @@ export interface VentaCardProps {
   isReembolso: boolean;
   expandido: boolean;
   productNames: Record<string, string>;
-  onToggle: () => void;
+  onToggle: (ventaId: string) => void;
   onVerRecibo: (v: Venta) => void;
   onReembolso: (v: Venta) => void;
 }
@@ -166,7 +190,7 @@ export interface CartConfirmDialogsProps {
 export interface ProductItemVentaProps {
   product: Product;
   compact?: boolean;
-  onProductAdded?: () => void;
+  onProductAdded?: (nombre: string) => void;
 }
 
 export interface VentaExitosaModalProps {
@@ -179,7 +203,7 @@ export interface VentaExitosaModalProps {
 
 export interface ProductCardMobileProps {
   product: Product;
-  onProductAdded?: () => void;
+  onProductAdded?: (nombre: string) => void;
 }
 
 export interface SuccessActionsProps {

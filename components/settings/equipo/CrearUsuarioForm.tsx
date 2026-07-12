@@ -1,6 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
-import type { CrearUsuarioFormProps, FormState } from "@/interface/equipo";
+import type { CrearUsuarioFormProps, CrearUsuarioFormState } from "@/interface/equipo";
 import { notify } from "@/lib/notify";
 import { createUserWithAuthAndLink } from "@/lib/services/usuarios";
 import { useCallback, useState } from "react";
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { ROL_CLASSES, ROL_LABELS, ROLES } from "./roles";
 
-const EMPTY_FORM: FormState = {
+const EMPTY_FORM: CrearUsuarioFormState = {
   nombre: "",
   email: "",
   password: "",
@@ -25,11 +25,11 @@ const EMPTY_FORM: FormState = {
 };
 
 export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<CrearUsuarioFormState>(EMPTY_FORM);
   const [showPass, setShowPass] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const set = (k: keyof FormState, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof CrearUsuarioFormState, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
   const handleCrear = useCallback(async () => {
     if (!form.nombre.trim()) {

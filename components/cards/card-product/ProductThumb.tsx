@@ -16,11 +16,18 @@ export function ProductThumb({
   fallbackColor,
   className,
   style,
+  recyclingKey,
 }: ProductThumbProps) {
   return (
     <View className={className} style={style}>
       {hasImage && !imageError ? (
-        <Image source={{ uri }} contentFit="cover" className="h-full w-full" onError={onError} />
+        <Image
+          source={{ uri }}
+          contentFit="cover"
+          className="h-full w-full"
+          recyclingKey={recyclingKey}
+          onError={onError}
+        />
       ) : (
         <View className="h-full w-full items-center justify-center">
           <IconSymbol name="photo.fill" size={iconSize} color={fallbackColor} />

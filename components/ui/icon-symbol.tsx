@@ -1,8 +1,8 @@
 // Fallback for using MaterialIcons on Android and web.
 
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { SF_SYMBOL_MAPPING } from "@/constants/sf-symbol-mapping";
 import type { IconSymbolProps } from "@/interface/ui/icons";
-import { SF_SYMBOL_MAPPING } from "@/interface/ui/icons";
 
 export type { IconSymbolName } from "@/interface/ui/icons";
 

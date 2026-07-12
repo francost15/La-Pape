@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
+import { useShallow } from "zustand/react/shallow";
 
 /**
  * Carga el producto a editar (params → store → Firestore), prepara el form con
@@ -37,7 +38,21 @@ export function useEditProduct() {
     productLoading,
     setLoading,
     setProductLoading,
-  } = useProductosStore();
+  } = useProductosStore(
+    useShallow((s) => ({
+      negocioId: s.negocioId,
+      categories: s.categories,
+      setNegocioId: s.setNegocioId,
+      setCategories: s.setCategories,
+      setProducts: s.setProducts,
+      currentProduct: s.currentProduct,
+      setCurrentProduct: s.setCurrentProduct,
+      loading: s.loading,
+      productLoading: s.productLoading,
+      setLoading: s.setLoading,
+      setProductLoading: s.setProductLoading,
+    }))
+  );
 
   const negocioId = sessionNegocioId ?? storeNegocioId;
 

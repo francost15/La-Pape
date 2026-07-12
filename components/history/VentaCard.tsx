@@ -60,7 +60,7 @@ export default React.memo(function VentaCard({
         <Pressable
           onPress={() => {
             haptic();
-            onToggle();
+            onToggle(venta.id);
           }}
           className="flex-row items-center justify-between px-5 py-5"
           style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}

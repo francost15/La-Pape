@@ -6,6 +6,7 @@ export interface Usuario {
   password: string; // varchar(80) - hash en Firebase Auth
   nombre: string; // varchar(80)
   telefono?: string; // varchar(30)
+  foto?: string; // URL de avatar
   rol: UserRole;
   activo: boolean;
   createdAt?: Date;

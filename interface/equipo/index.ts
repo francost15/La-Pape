@@ -38,7 +38,7 @@ export interface ConfigTabEquipoProps {
   onRefresh: () => void;
 }
 
-export interface FormState {
+export interface CrearUsuarioFormState {
   nombre: string;
   email: string;
   password: string;

@@ -14,6 +14,10 @@ import { FlatList, RefreshControl, Text, useWindowDimensions, View } from "react
 import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
+import type { Product } from "@/interface/products";
+
+// keyExtractor module-level: identidad estable sin recrearse por render
+const keyExtractor = (item: Product) => item.id;
 
 /**
  * ProductListContent — Digital Atelier style.
@@ -47,6 +51,19 @@ export default function ProductListContent({
   }, [refresh]);
 
   const productCount = filteredProducts.length;
+
+  // renderItem estable: pasa el handler `onProductAdded` (que recibe el nombre)
+  // tal cual al hijo, que lo invoca con su propio product.nombre. Así no se crea
+  // una función nueva por fila y el React.memo de los items sí puede cortar renders.
+  const renderItem = React.useCallback(
+    ({ item }: { item: Product }) =>
+      isDesktop ? (
+        <ProductItemVenta product={item} compact onProductAdded={onProductAdded} />
+      ) : (
+        <ProductCardMobile product={item} onProductAdded={onProductAdded} />
+      ),
+    [isDesktop, onProductAdded]
+  );
 
   return (
     <View style={{ flex: 1, minHeight: 0 }}>
@@ -114,7 +131,7 @@ export default function ProductListContent({
       ) : (
         <FlatList
           data={filteredProducts}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           key={listKey}
           style={{ flex: 1 }}
           contentContainerStyle={[
@@ -176,20 +193,7 @@ export default function ProductListContent({
           }
           keyboardDismissMode={keyboardDismissMode}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-          renderItem={({ item }) =>
-            isDesktop ? (
-              <ProductItemVenta
-                product={item}
-                compact
-                onProductAdded={() => onProductAdded?.(item.nombre)}
-              />
-            ) : (
-              <ProductCardMobile
-                product={item}
-                onProductAdded={() => onProductAdded?.(item.nombre)}
-              />
-            )
-          }
+          renderItem={renderItem}
         />
       )}
     </View>
