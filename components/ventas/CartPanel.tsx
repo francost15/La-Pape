@@ -1,4 +1,4 @@
-import { DesignSystem, DESKTOP_MIN_WIDTH } from "@/constants/design-system";
+import { DesignSystem } from "@/constants/design-system";
 import { Strings } from "@/constants/strings";
 import { useCompleteVenta } from "@/hooks/use-complete-venta";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -17,8 +17,9 @@ import type { CartItem } from "@/interface/ventas";
 import { useVentasStore } from "@/store/ventas-store";
 import { useVentasUIStore } from "@/store/ventas-ui-store";
 import { FlashList } from "@shopify/flash-list";
+import { useResponsive } from "@/hooks/use-responsive";
 import { useCallback, useEffect, useRef } from "react";
-import { useWindowDimensions, View } from "react-native";
+import { View } from "react-native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import EmptyState from "../ui/EmptyState";
 import { CartConfirmDialogs } from "./cart/CartConfirmDialogs";
@@ -26,8 +27,7 @@ import { CartFooter } from "./cart/CartFooter";
 import { CartItemRow } from "./cart/CartItemRow";
 
 export default function CartPanel() {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDesktop } = useResponsive();
   const { isDark, colors } = useThemeColors();
 
   const items = useVentasStore((s) => s.items);

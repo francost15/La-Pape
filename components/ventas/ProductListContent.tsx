@@ -8,9 +8,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/skeletons";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
+import { useResponsive } from "@/hooks/use-responsive";
 import React from "react";
-import { FlatList, RefreshControl, Text, useWindowDimensions, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
@@ -37,8 +37,7 @@ export default function ProductListContent({
   keyboardShouldPersistTaps,
   searchInputRef,
 }: ProductListContentProps) {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= DESKTOP_MIN_WIDTH;
+  const { isDesktop } = useResponsive();
   const { colors } = useThemeColors();
   const { products, error, retry, refresh, loading } = useProductosScreen();
   const { searchText, setSearchText, filteredProducts } = useProductSearch(searchContextId);

@@ -1,8 +1,9 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import type { ProductStockCardProps } from "@/interface/products";
-import { Platform, Text, View } from "react-native";
-import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
+import { AppFonts } from "@/constants/typography";
+import type { ProductStockCardProps } from "@/interface/products";
+import { shadows } from "@/lib/utils/shadows";
+import { Text, View } from "react-native";
 
 /**
  * Card de inventario: muestra stock disponible con semáforo visual y stock mínimo.
@@ -16,20 +17,14 @@ export default function ProductStockCard({
   const statusColor = isCritical ? AppColors.error : AppColors.success;
 
   return (
-    <View
-      className="overflow-hidden rounded-3xl bg-surface-elevated p-6"
-      style={{
-        boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
-        elevation: Platform.OS !== "web" ? 4 : undefined,
-      }}
-    >
+    <View className="overflow-hidden rounded-3xl bg-surface-elevated p-6" style={shadows.card}>
       <View className="flex-row items-end justify-between">
         <View>
           <Text
             className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
-            EXISTENCIAS
+            Existencias
           </Text>
           <Text
             className="text-4xl tracking-tighter"
@@ -41,7 +36,7 @@ export default function ProductStockCard({
           >
             {cantidad}{" "}
             <Text className="text-xl" style={{ fontFamily: AppFonts.heading }}>
-              UNIDADES
+              Unidades
             </Text>
           </Text>
         </View>
@@ -50,7 +45,7 @@ export default function ProductStockCard({
           <View className="mb-1.5 flex-row items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 dark:bg-red-900/20">
             <IconSymbol name="exclamationmark.triangle.fill" size={12} color={AppColors.error} />
             <Text className="text-[10px] font-bold tracking-widest text-red-600 uppercase dark:text-red-400">
-              CRÍTICO
+              Crítico
             </Text>
           </View>
         )}
@@ -69,10 +64,10 @@ export default function ProductStockCard({
       {stockMinimo != null && (
         <View className="mt-3 flex-row items-center justify-between">
           <Text className="text-[11px] font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-            STOCK MÍNIMO REQUERIDO
+            Stock Mínimo
           </Text>
           <Text className="text-[11px] font-bold text-gray-700 tabular-nums dark:text-gray-300">
-            {stockMinimo} UD.
+            {stockMinimo} Unidades
           </Text>
         </View>
       )}

@@ -4,18 +4,12 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
+import { useResponsive } from "@/hooks/use-responsive";
 import type { EditProductViewProps } from "@/interface/products";
+import { shadow } from "@/lib/utils/shadows";
 import { useBottomTabBarHeight } from "expo-router/tabs";
 import { useRouter } from "expo-router";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { EditProductActions } from "./EditProductActions";
 
 // A nivel de módulo para no recrear el componente en cada render (lint react-hooks).
@@ -50,8 +44,7 @@ export function EditProductView({
   onCancel,
 }: EditProductViewProps) {
   const isWeb = Platform.OS === "web";
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 768;
+  const { isDesktop } = useResponsive();
   const tabBarHeight = useBottomTabBarHeight();
 
   const actions = <EditProductActions loading={loading} onCancel={onCancel} onSave={onSave} />;
@@ -75,9 +68,7 @@ export function EditProductView({
               <View className="flex-1 gap-6">
                 <View
                   className="overflow-hidden rounded-[32px] bg-white dark:bg-neutral-800"
-                  style={{
-                    boxShadow: Platform.OS === "web" ? "0 24px 48px rgba(0,0,0,0.06)" : undefined,
-                  }}
+                  style={shadow("0 24px 48px rgba(0,0,0,0.06)", 0)}
                 >
                   <CampoImagen
                     control={control}

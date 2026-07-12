@@ -1,5 +1,6 @@
+import { useResponsive } from "@/hooks/use-responsive";
 import React from "react";
-import { ScrollView, useWindowDimensions, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { Bone } from "./Bone";
 
 /** Fila de campo (label + input), como los campos del formulario de edición */
@@ -26,8 +27,7 @@ interface DetailSkeletonProps {
  * stack mobile (imagen cuadrada arriba, secciones abajo) para evitar saltos.
  */
 export function DetailSkeleton({ variant = "detail" }: DetailSkeletonProps) {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 768;
+  const { isDesktop } = useResponsive();
 
   const rightColumn =
     variant === "form" ? (

@@ -1,7 +1,8 @@
-import { formatCurrency } from "@/lib/utils/format";
-import type { ProductPriceCardProps } from "@/interface/products";
-import { Platform, Text, View } from "react-native";
 import { AppFonts } from "@/constants/typography";
+import type { ProductPriceCardProps } from "@/interface/products";
+import { formatCurrency } from "@/lib/utils/format";
+import { shadows } from "@/lib/utils/shadows";
+import { Text, View } from "react-native";
 
 /**
  * Card de precios del producto: venta destacado en grande, mayoreo y costo en fila compacta.
@@ -13,19 +14,13 @@ export default function ProductPriceCard({
   costoPromedio,
 }: ProductPriceCardProps) {
   return (
-    <View
-      className="overflow-hidden rounded-3xl bg-surface-elevated p-6"
-      style={{
-        boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
-        elevation: Platform.OS !== "web" ? 4 : undefined,
-      }}
-    >
+    <View className="overflow-hidden rounded-3xl bg-surface-elevated p-6" style={shadows.card}>
       <View>
         <Text
           className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
           style={{ fontFamily: AppFonts.bodyStrong }}
         >
-          PRECIO PÚBLICO
+          Precio Publico
         </Text>
         <Text
           className="text-4xl tracking-tighter text-[#EA580C] dark:text-[#FB923C]"
@@ -41,7 +36,7 @@ export default function ProductPriceCard({
             className="mb-1 text-[10px] font-bold tracking-widest text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
-            MAYOREO
+            Precio Mayoreo
           </Text>
           <Text
             className="text-lg tracking-tight text-[#111827] dark:text-[#F9FAFB]"
@@ -58,7 +53,7 @@ export default function ProductPriceCard({
             className="mb-1 text-[10px] font-bold tracking-widest text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
-            COSTO ADQ.
+            Costo Adquisición
           </Text>
           <Text
             className="text-lg tracking-tight text-[#6B7280] dark:text-[#9CA3AF]"

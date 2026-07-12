@@ -123,7 +123,7 @@ export interface VentaCardProps {
   isReembolso: boolean;
   expandido: boolean;
   productNames: Record<string, string>;
-  onToggle: (ventaId: string) => void;
+  onToggle: () => void;
   onVerRecibo: (v: Venta) => void;
   onReembolso: (v: Venta) => void;
 }

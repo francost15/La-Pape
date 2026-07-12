@@ -12,6 +12,7 @@ import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
 import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
+import { useResponsive } from "@/hooks/use-responsive";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
@@ -23,13 +24,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useWindowDimensions,
   View,
 } from "react-native";
 
 export default function ProductosScreen() {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 768;
+  const { width, isDesktop } = useResponsive();
   const { products, categories, loading, error, retry, refresh } = useProductosScreen();
   const { searchText, setSearchText, selectedCategoryId, setSelectedCategoryId, filteredProducts } =
     useProductSearch("productos");

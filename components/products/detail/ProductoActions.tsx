@@ -2,7 +2,8 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import type { ProductoActionsProps } from "@/interface/products";
-import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from "react-native";
+import { shadow } from "@/lib/utils/shadows";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 export function ProductoActions({ deleting, onEdit, onDelete }: ProductoActionsProps) {
   return (
@@ -15,8 +16,7 @@ export function ProductoActions({ deleting, onEdit, onDelete }: ProductoActionsP
           backgroundColor: "rgba(239, 68, 68, 0.08)",
           borderWidth: 1,
           borderColor: "rgba(239, 68, 68, 0.1)",
-          boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(239, 68, 68, 0.1)" : undefined,
-          elevation: Platform.OS !== "web" ? 3 : undefined,
+          ...shadow("0 4px 12px rgba(239, 68, 68, 0.1)", 3),
         }}
         accessibilityRole="button"
         accessibilityLabel="Eliminar producto"
@@ -32,10 +32,7 @@ export function ProductoActions({ deleting, onEdit, onDelete }: ProductoActionsP
         onPress={onEdit}
         disabled={deleting}
         className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-[#EA580C] active:opacity-90"
-        style={{
-          boxShadow: Platform.OS === "web" ? "0 8px 24px rgba(234, 88, 12, 0.3)" : undefined,
-          elevation: Platform.OS !== "web" ? 6 : undefined,
-        }}
+        style={shadow("0 8px 24px rgba(234, 88, 12, 0.3)", 6)}
         accessibilityRole="button"
         accessibilityLabel="Editar producto"
       >

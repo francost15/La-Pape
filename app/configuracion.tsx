@@ -7,7 +7,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useEquipoStore } from "@/store/equipo-store";
-import { useLayoutStore } from "@/store/layout-store";
+import { useResponsive } from "@/hooks/use-responsive";
 import { useSessionStore } from "@/store/session-store";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -78,7 +78,7 @@ export default function ConfiguracionScreen() {
   const photoURL = useSessionStore((s) => s.photoURL);
   const negocioId = useSessionStore((s) => s.negocioId);
   const loadMiembros = useEquipoStore((s) => s.loadMiembros);
-  const isTablet = useLayoutStore((s) => s.viewportWidth) >= 768;
+  const { isDesktop: isTablet } = useResponsive();
 
   const refreshEquipo = useCallback(() => {
     loadMiembros(

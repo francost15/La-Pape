@@ -6,8 +6,9 @@ import { useHaptic } from "@/hooks/use-haptic";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import type { VentaCardProps } from "@/interface/ventas";
 import { formatCurrency, formatTime, pluralize } from "@/lib/utils/format";
+import { shadows } from "@/lib/utils/shadows";
 import React, { useEffect } from "react";
-import { Platform, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
   FadeInDown,
   ReduceMotion,
@@ -52,15 +53,14 @@ export default React.memo(function VentaCard({
       className="overflow-hidden rounded-2xl"
       style={{
         backgroundColor: colors.surfaceElevated,
-        boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.02)" : undefined,
-        elevation: Platform.OS !== "web" ? 2 : undefined,
+        ...shadows.subtle,
       }}
     >
       <View className="border-l-[3px]" style={{ borderLeftColor: accent }}>
         <Pressable
           onPress={() => {
             haptic();
-            onToggle(venta.id);
+            onToggle();
           }}
           className="flex-row items-center justify-between px-5 py-5"
           style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}

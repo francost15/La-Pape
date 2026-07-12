@@ -6,9 +6,11 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import type { ProductoDetailViewProps } from "@/interface/products";
 import { useHaptic } from "@/hooks/use-haptic";
+import { useResponsive } from "@/hooks/use-responsive";
+import { shadow } from "@/lib/utils/shadows";
 import { useBottomTabBarHeight } from "expo-router/tabs";
 import { useRouter } from "expo-router";
-import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { ProductoActions } from "./ProductoActions";
 import { ProductoInfo } from "./ProductoInfo";
@@ -49,8 +51,7 @@ export function ProductoDetailView({
   onEdit,
   onDelete,
 }: ProductoDetailViewProps) {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 768;
+  const { isDesktop } = useResponsive();
   const tabBarHeight = useBottomTabBarHeight();
 
   if (isDesktop) {
@@ -69,8 +70,7 @@ export function ProductoDetailView({
                 className="overflow-hidden rounded-[32px] bg-surface-elevated"
                 style={{
                   aspectRatio: 1,
-                  boxShadow: Platform.OS === "web" ? "0 24px 48px rgba(0,0,0,0.06)" : undefined,
-                  elevation: Platform.OS !== "web" ? 12 : undefined,
+                  ...shadow("0 24px 48px rgba(0,0,0,0.06)", 12),
                 }}
               >
                 <ProductImageDisplay
@@ -85,10 +85,7 @@ export function ProductoDetailView({
               <View className="flex-row items-center gap-4 px-2">
                 <View
                   className="rounded-2xl bg-surface-elevated p-3"
-                  style={{
-                    boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.04)" : undefined,
-                    elevation: Platform.OS !== "web" ? 3 : undefined,
-                  }}
+                  style={shadow("0 4px 12px rgba(0,0,0,0.04)", 3)}
                 >
                   <QRCode value={product.id} size={80} />
                 </View>
@@ -161,8 +158,7 @@ export function ProductoDetailView({
           className="w-full overflow-hidden rounded-[24px] bg-white dark:bg-neutral-800"
           style={{
             aspectRatio: 1,
-            boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
-            elevation: Platform.OS !== "web" ? 8 : undefined,
+            ...shadow("0 12px 24px rgba(0,0,0,0.04)", 8),
           }}
         >
           <ProductImageDisplay
@@ -202,10 +198,7 @@ export function ProductoDetailView({
 
           <View
             className="items-center rounded-3xl bg-white p-6 dark:bg-neutral-800"
-            style={{
-              boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.04)" : undefined,
-              elevation: Platform.OS !== "web" ? 4 : undefined,
-            }}
+            style={shadow("0 4px 12px rgba(0,0,0,0.04)", 4)}
           >
             <QRCode value={product.id} size={140} />
             <Text className="mt-4 text-[11px] font-medium tracking-tight text-gray-500 uppercase dark:text-gray-400">

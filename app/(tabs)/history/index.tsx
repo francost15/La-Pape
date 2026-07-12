@@ -7,16 +7,16 @@ import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
 import { AppFonts } from "@/constants/typography";
 import { useHistory } from "@/hooks/use-history";
+import { useResponsive } from "@/hooks/use-responsive";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency } from "@/lib/utils/format";
 import { useCallback, useMemo } from "react";
-import { SectionList, Text, useWindowDimensions, View } from "react-native";
+import { SectionList, Text, View } from "react-native";
 import { HistoryListSkeleton } from "@/components/ui/skeletons";
 import Animated, { FadeIn, ReduceMotion } from "react-native-reanimated";
 
 export default function HistoryScreen() {
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
+  const { isDesktop: isTablet } = useResponsive();
 
   const {
     loading,
@@ -88,7 +88,7 @@ export default function HistoryScreen() {
           isReembolso={item.venta.estado === "REEMBOLSO"}
           expandido={expandedIds.includes(item.venta.id)}
           productNames={productNames}
-          onToggle={toggleCard}
+          onToggle={() => toggleCard(item.venta.id)}
           onVerRecibo={handleVerRecibo}
           onReembolso={handleReembolso}
         />
