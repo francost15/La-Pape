@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 /**
  * Digital Atelier — Typography System
@@ -10,28 +10,20 @@ import { Platform } from 'react-native';
  * - `bodyStrong`: botones, labels, énfasis — Inter Medium/SemiBold
  */
 export const AppFonts = Platform.select({
-  ios: {
-    display: 'AvenirNextCondensed-Heavy',
-    heading: 'AvenirNext-DemiBold',
-    body: 'AvenirNext-Regular',
-    bodyStrong: 'AvenirNext-Medium',
-  },
-  android: {
-    display: 'sans-serif-condensed',
-    heading: 'sans-serif-medium',
-    body: 'sans-serif',
-    bodyStrong: 'sans-serif-medium',
-  },
+  // En web las familias llegan por CSS (@import de Google Fonts en app/global.css),
+  // por eso se usan los nombres CSS con fallbacks del sistema.
   web: {
     display: "'Space Grotesk', 'Inter', system-ui, sans-serif",
     heading: "'Space Grotesk', 'Inter', system-ui, sans-serif",
     body: "'Inter', 'Segoe UI', system-ui, sans-serif",
     bodyStrong: "'Inter', 'Segoe UI', system-ui, sans-serif",
   },
+  // En iOS/Android las fuentes se cargan con expo-font en app/_layout.tsx
+  // (@expo-google-fonts); el nombre incluye el peso porque cada archivo es estático.
   default: {
-    display: 'sans-serif',
-    heading: 'sans-serif',
-    body: 'sans-serif',
-    bodyStrong: 'sans-serif',
+    display: "SpaceGrotesk_700Bold",
+    heading: "SpaceGrotesk_600SemiBold",
+    body: "Inter_400Regular",
+    bodyStrong: "Inter_500Medium",
   },
 });
