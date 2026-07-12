@@ -1,3 +1,4 @@
+import AppTextInput from "@/components/ui/AppTextInput";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -10,15 +11,7 @@ import { resetAllTours } from "@/store/onboarding-store";
 import { useSessionStore } from "@/store/session-store";
 import { updateProfile } from "firebase/auth";
 import React, { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Keyboard,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 export default function ConfigTabPerfil() {
   const userId = useSessionStore((s) => s.userId);
@@ -77,12 +70,10 @@ export default function ConfigTabPerfil() {
           <View className="flex-1">
             {isEditing ? (
               <View className="gap-2">
-                <TextInput
+                <AppTextInput
                   value={editNombre}
                   onChangeText={setEditNombre}
                   placeholder="Tu nombre"
-                  placeholderTextColor={AppColors.light.textMuted}
-                  className="rounded-xl bg-gray-100 px-4 py-2.5 text-base text-gray-900 dark:bg-neutral-700 dark:text-white"
                   autoFocus
                   editable={!saving}
                 />

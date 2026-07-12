@@ -75,7 +75,7 @@ export function useHistory() {
   );
 
   const handleConfirmRefund = useCallback(
-    () => confirmRefund({ sucursalId: sucursalId ?? "", userId: userId ?? "" }),
+    () => confirmRefund({ sucursalId, userId: userId ?? "" }),
     [confirmRefund, sucursalId, userId]
   );
 

@@ -38,15 +38,6 @@ export interface ConfigTabEquipoProps {
   onRefresh: () => void;
 }
 
-export interface CrearUsuarioFormState {
-  nombre: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  telefono: string;
-  rol: UserRole;
-}
-
 export interface CrearUsuarioFormProps {
   negocioId: string | null;
   onCreated?: () => void;

@@ -249,6 +249,6 @@ export interface HistoryStore extends HistoryState {
   toggleCard: (ventaId: string) => void;
   openRefund: (venta: Venta) => void;
   cancelRefund: () => void;
-  confirmRefund: (args: { sucursalId: string; userId: string }) => Promise<void>;
+  confirmRefund: (args: { sucursalId?: string | null; userId: string }) => Promise<void>;
   verRecibo: (venta: Venta, productNames: Record<string, string>) => Promise<void>;
 }

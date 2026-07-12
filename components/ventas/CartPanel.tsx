@@ -65,8 +65,15 @@ export default function CartPanel() {
   const successOpacity = useSharedValue(0);
   const listOpacity = useSharedValue(1);
   const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => () => clearTimeout(resetTimeoutRef.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(resetTimeoutRef.current);
+      clearTimeout(clearTimeoutRef.current);
+    },
+    []
+  );
 
   const playSuccessAnimation = useCallback(() => {
     playCartSuccessAnimation(successOpacity, successScale, reduceMotion);
@@ -91,7 +98,8 @@ export default function CartPanel() {
   const handleConfirmClearCart = useCallback(() => {
     setIsClearing(true);
     fadeCartListOut(listOpacity);
-    setTimeout(() => {
+    clearTimeout(clearTimeoutRef.current);
+    clearTimeoutRef.current = setTimeout(() => {
       clearCart();
       setIsClearing(false);
       showCartList(listOpacity);

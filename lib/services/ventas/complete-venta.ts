@@ -11,7 +11,8 @@ import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 export interface CompleteVentaParams {
   items: CartItem[];
   negocioId: string;
-  sucursalId: string;
+  /** Null/omitido cuando el negocio no tiene sucursales; no se escribe el campo. */
+  sucursalId?: string | null;
   userId: string;
   total: number;
   subtotal: number;
@@ -53,6 +54,10 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     throw new VentaError("No hay productos en el carrito");
   }
 
+  // Solo incluir sucursal_id cuando existe: evita escribir "" (dato corrupto
+  // que rompe filtros por sucursal). Firestore rechaza `undefined` en set().
+  const sucursalField = sucursalId ? { sucursal_id: sucursalId } : {};
+
   const fecha = new Date();
   const now = Timestamp.now();
 
@@ -86,7 +91,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     const ventaRef = doc(collection(db, "ventas"));
     transaction.set(ventaRef, {
       negocio_id: negocioId,
-      sucursal_id: sucursalId,
+      ...sucursalField,
       usuario_id: userId,
       fecha: Timestamp.fromDate(fecha),
       subtotal,
@@ -136,7 +141,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       transaction.set(movimientoRef, {
         producto_id: item.productId,
         negocio_id: negocioId,
-        sucursal_id: sucursalId,
+        ...sucursalField,
         tipo: "SALIDA",
         cantidad: item.quantity,
         motivo: `Venta #${ventaRef.id}`,

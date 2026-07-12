@@ -61,18 +61,31 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
     }
   },
 
+  // NOTA(modelo): el rol se guarda en el doc global `usuarios`, no en la relación
+  // `usuarios_negocios`. Contradice el modelo multi-tenant (un usuario podría
+  // tener roles distintos por negocio). Migrar el rol a la relación requiere la
+  // migración de Firestore pendiente (ver firestore.rules) — decisión abierta.
   updateRol: async (relId, userId, email, rol) => {
-    await updateUsuario(userId, { rol }, email);
-    set((state) => ({
-      miembros: state.miembros.map((m) => (m.relacion.id === relId ? { ...m, rol } : m)),
-    }));
+    try {
+      await updateUsuario(userId, { rol }, email);
+      // Solo mutar el estado local si la escritura remota tuvo éxito.
+      set((state) => ({
+        miembros: state.miembros.map((m) => (m.relacion.id === relId ? { ...m, rol } : m)),
+      }));
+    } catch {
+      notify.error({ title: "No se pudo cambiar el rol" });
+    }
   },
 
   removeMiembro: async (relId) => {
-    await updateUsuarioNegocio(relId, { activo: false });
-    set((state) => ({
-      miembros: state.miembros.filter((m) => m.relacion.id !== relId),
-    }));
+    try {
+      await updateUsuarioNegocio(relId, { activo: false });
+      set((state) => ({
+        miembros: state.miembros.filter((m) => m.relacion.id !== relId),
+      }));
+    } catch {
+      notify.error({ title: "No se pudo quitar al miembro" });
+    }
   },
 
   addMiembro: (miembro) => {

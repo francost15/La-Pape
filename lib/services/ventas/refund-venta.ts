@@ -5,7 +5,8 @@ import { getDetallesByVenta } from "../ventas-detalle";
 
 export interface RefundVentaParams {
   ventaId: string;
-  sucursalId: string;
+  /** Null/omitido cuando el negocio no tiene sucursales; no se escribe el campo. */
+  sucursalId?: string | null;
   userId: string;
 }
 
@@ -24,6 +25,8 @@ export interface RefundVentaResult {
 export async function refundVentaFlow(params: RefundVentaParams): Promise<RefundVentaResult> {
   const { ventaId, sucursalId, userId } = params;
   const now = Timestamp.now();
+  // Solo incluir sucursal_id cuando existe: evita escribir "" (dato corrupto).
+  const sucursalField = sucursalId ? { sucursal_id: sucursalId } : {};
   const detalles = await getDetallesByVenta(ventaId);
   if (!detalles.length) {
     throw new Error("La venta no tiene detalles para reembolso");
@@ -83,7 +86,7 @@ export async function refundVentaFlow(params: RefundVentaParams): Promise<Refund
       transaction.set(movimientoRef, {
         producto_id: detalle.producto_id,
         negocio_id: negocioId ?? null,
-        sucursal_id: sucursalId,
+        ...sucursalField,
         tipo: "ENTRADA",
         cantidad: detalle.cantidad,
         motivo: `Reembolso venta #${ventaId}`,

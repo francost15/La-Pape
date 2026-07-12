@@ -52,6 +52,11 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
   confirmRefund: async ({ sucursalId, userId }) => {
     const { refundTarget, refunding, detallesMap } = get();
     if (!refundTarget || refunding) return;
+    // Sin usuario no se puede atribuir el reembolso; evita usuario_id "" corrupto.
+    if (!userId) {
+      notify.error({ title: Strings.errors.session });
+      return;
+    }
     set({ refunding: true });
     try {
       await refundVentaFlow({ ventaId: refundTarget.id, sucursalId, userId });

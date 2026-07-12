@@ -5,7 +5,7 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import type { ProductListContentProps } from "@/interface/ventas";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
-import { Skeleton } from "@/components/ui/skeletons";
+import { Bone } from "@/components/ui/skeletons";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useResponsive } from "@/hooks/use-responsive";
@@ -154,17 +154,17 @@ export default function ProductListContent({
                       borderBottomColor: colors.border,
                     }}
                   >
-                    <Skeleton
+                    <Bone
                       width={isDesktop ? 64 : 48}
                       height={isDesktop ? 64 : 48}
                       borderRadius={10}
                     />
                     <View style={{ flex: 1, gap: 8, justifyContent: "center" }}>
-                      <Skeleton width="65%" height={16} />
-                      <Skeleton width="40%" height={14} />
-                      <Skeleton width="25%" height={18} />
+                      <Bone width="65%" height={16} />
+                      <Bone width="40%" height={14} />
+                      <Bone width="25%" height={18} />
                     </View>
-                    <Skeleton width={38} height={38} borderRadius={19} />
+                    <Bone width={38} height={38} borderRadius={19} />
                   </View>
                 ))}
               </Animated.View>

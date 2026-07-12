@@ -1,3 +1,4 @@
+import AppText from "@/components/ui/AppText";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
@@ -20,12 +21,9 @@ export default function ProductStockCard({
     <View className="overflow-hidden rounded-3xl bg-surface-elevated p-6" style={shadows.card}>
       <View className="flex-row items-end justify-between">
         <View>
-          <Text
-            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
-            style={{ fontFamily: AppFonts.bodyStrong }}
-          >
+          <AppText variant="eyebrow" style={{ marginBottom: 4 }}>
             Existencias
-          </Text>
+          </AppText>
           <Text
             className="text-4xl tracking-tighter"
             style={{

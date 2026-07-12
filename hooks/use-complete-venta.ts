@@ -6,7 +6,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /**
  * Encapsula la lógica de completar una venta:
@@ -25,6 +25,10 @@ export function useCompleteVenta(onSuccess?: () => void) {
   const closeConfirm = useCheckoutStore((s) => s.closeConfirm);
   const setProcessing = useCheckoutStore((s) => s.setProcessing);
   const setSuccessVenta = useCheckoutStore((s) => s.setSuccessVenta);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Limpia el timer de 800ms si el componente se desmonta antes de que dispare.
+  useEffect(() => () => clearTimeout(successTimerRef.current), []);
 
   const completeVenta = useCallback(async () => {
     if (useCheckoutStore.getState().processing) return;
@@ -43,7 +47,7 @@ export function useCompleteVenta(onSuccess?: () => void) {
       const result = await completeVentaFlow({
         items,
         negocioId,
-        sucursalId: sucursalId ?? "",
+        sucursalId,
         userId,
         total: subtotal,
         subtotal,
@@ -59,7 +63,8 @@ export function useCompleteVenta(onSuccess?: () => void) {
 
       onSuccess?.();
 
-      setTimeout(() => {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = setTimeout(() => {
         clearCart();
 
         // Fecha + hora con los helpers centralizados (locale es-CL consistente)

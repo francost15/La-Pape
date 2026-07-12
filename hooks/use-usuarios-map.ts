@@ -96,11 +96,17 @@ export function useUsuariosMap(negocioId: string | null, ventasFiltradas: Venta[
 
     let cancelled = false;
 
-    Promise.all(missingIds.map(resolveUsuario)).then((entries) => {
-      if (!cancelled) {
-        setUsuariosMap((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
-      }
-    });
+    Promise.all(missingIds.map(resolveUsuario))
+      .then((entries) => {
+        if (!cancelled) {
+          setUsuariosMap((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+        }
+      })
+      .catch((err) => {
+        // Sin catch, un fallo de red dejaba una unhandled rejection y el mapa a
+        // medias sin señal. Logueamos; el siguiente cambio de filtros reintenta.
+        if (!cancelled) console.error("Error al resolver usuarios de ventas:", err);
+      });
 
     return () => {
       cancelled = true;

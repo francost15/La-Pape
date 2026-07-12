@@ -103,8 +103,10 @@ export const getNegocioIdByUsuario = async (
     let negociosUsuario = await getNegociosByUsuario(userId);
 
     if (!negociosUsuario.length) {
+      // Los docs guardan email en minúsculas: normalizar evita que un email
+      // con mayúsculas de Auth no resuelva su negocio.
       const usuariosSnapshot = await getDocs(
-        query(collection(db, "usuarios"), where("email", "==", userEmail))
+        query(collection(db, "usuarios"), where("email", "==", userEmail.trim().toLowerCase()))
       );
 
       if (!usuariosSnapshot.empty) {

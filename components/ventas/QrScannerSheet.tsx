@@ -70,12 +70,16 @@ export default function QrScannerSheet({ visible, onClose, onProductAdded }: QrS
         onProductAdded?.(product.nombre);
         notify.success({ title: `${product.nombre} agregado` });
         onClose();
+        // En éxito NO reseteamos el guard: el modal se cierra y CameraView sigue
+        // montada unos frames durante la animación de salida; resetear aquí
+        // permitiría un segundo escaneo que duplica el producto. El guard se
+        // limpia solo al reabrir (efecto de `visible`).
       } catch {
         notify.error({
           title: "Error",
           description: "No se pudo agregar el producto",
         });
-      } finally {
+        // Error transitorio: permitir reintentar el escaneo.
         scannedRef.current = false;
       }
     },
