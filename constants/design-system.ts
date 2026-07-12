@@ -1,5 +1,4 @@
 import { Platform } from "react-native";
-import { AppColors } from "./colors";
 
 /**
  * Digital Atelier — Design System
@@ -105,60 +104,4 @@ export const DesignSystem = {
 /** Ancho mínimo para considerar layout de escritorio */
 export const DESKTOP_MIN_WIDTH = 768;
 
-/**
- * Component-level style tokens.
- * Cada componente usa estos tokens en lugar de valores ad-hoc.
- */
-export const ComponentStyles = {
-  card: {
-    container: {
-      borderRadius: DesignSystem.radius.xl,
-      padding: DesignSystem.spacing.md,
-    },
-  },
-
-  button: {
-    primary: {
-      backgroundColor: AppColors.primary,
-      borderRadius: DesignSystem.radius.lg,
-      paddingVertical: 14,
-      paddingHorizontal: DesignSystem.spacing.lg,
-    },
-    secondary: {
-      backgroundColor: "transparent",
-      borderRadius: DesignSystem.radius.lg,
-      borderWidth: 1.5,
-      borderColor: AppColors.primary,
-      paddingVertical: 14,
-      paddingHorizontal: DesignSystem.spacing.lg,
-    },
-    ghost: {
-      backgroundColor: "transparent",
-      borderRadius: DesignSystem.radius.md,
-      paddingVertical: 10,
-      paddingHorizontal: DesignSystem.spacing.md,
-    },
-  },
-
-  input: {
-    container: {
-      borderRadius: DesignSystem.radius.lg,
-      borderWidth: 1.5,
-      paddingVertical: 14,
-      paddingHorizontal: DesignSystem.spacing.md,
-    },
-    focus: {
-      borderColor: AppColors.primary,
-      ringWidth: 3,
-      ringColor: "rgba(234, 88, 12, 0.15)",
-    },
-  },
-
-  /** Separator for list items */
-  separator: {
-    height: 1,
-  },
-} as const;
-
 export type DesignSystemType = typeof DesignSystem;
-export type ComponentStylesType = typeof ComponentStyles;
