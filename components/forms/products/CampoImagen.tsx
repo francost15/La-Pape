@@ -1,3 +1,4 @@
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import type { CampoImagenProps } from "@/interface/products";
@@ -5,7 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { Image } from "expo-image";
-import { Alert, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function CampoImagen({
   control,
@@ -131,43 +132,40 @@ export default function CampoImagen({
             />
 
             {!isWeb && (
-              <Modal
+              <BottomSheetModal
                 visible={showImageModal}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setShowImageModal(false)}
+                onClose={() => setShowImageModal(false)}
+                closeLabel="Cerrar selector de imagen"
               >
-                <View className="flex-1 justify-end bg-black/50">
-                  <View className="rounded-t-3xl bg-white p-6 dark:bg-neutral-800">
-                    <View className="mb-4 flex-row items-center justify-between">
-                      <Text className="text-xl font-bold text-black dark:text-white">
-                        Seleccionar Imagen
+                <View className="px-6 pt-2 pb-6">
+                  <View className="mb-4 flex-row items-center justify-between">
+                    <Text className="text-xl font-bold text-black dark:text-white">
+                      Seleccionar Imagen
+                    </Text>
+                    <TouchableOpacity onPress={() => setShowImageModal(false)}>
+                      <Text className="text-lg font-semibold text-orange-600">Cerrar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View className="gap-3">
+                    <TouchableOpacity
+                      className="flex-row items-center justify-center gap-3 rounded-lg bg-orange-600 px-6 py-4"
+                      onPress={() => pickImageFromCamera(onChange)}
+                    >
+                      <IconSymbol name="camera.fill" size={24} color="white" />
+                      <Text className="text-lg font-semibold text-white">Tomar Foto</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="flex-row items-center justify-center gap-3 rounded-lg bg-blue-600 px-6 py-4"
+                      onPress={() => pickImageFromLibrary(onChange)}
+                    >
+                      <IconSymbol name="photo.fill" size={24} color="white" />
+                      <Text className="text-lg font-semibold text-white">
+                        Seleccionar de Galería
                       </Text>
-                      <TouchableOpacity onPress={() => setShowImageModal(false)}>
-                        <Text className="text-lg font-semibold text-orange-600">Cerrar</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View className="gap-3">
-                      <TouchableOpacity
-                        className="flex-row items-center justify-center gap-3 rounded-lg bg-orange-600 px-6 py-4"
-                        onPress={() => pickImageFromCamera(onChange)}
-                      >
-                        <IconSymbol name="camera.fill" size={24} color="white" />
-                        <Text className="text-lg font-semibold text-white">Tomar Foto</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        className="flex-row items-center justify-center gap-3 rounded-lg bg-blue-600 px-6 py-4"
-                        onPress={() => pickImageFromLibrary(onChange)}
-                      >
-                        <IconSymbol name="photo.fill" size={24} color="white" />
-                        <Text className="text-lg font-semibold text-white">
-                          Seleccionar de Galería
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </Modal>
+              </BottomSheetModal>
             )}
           </View>
         )}

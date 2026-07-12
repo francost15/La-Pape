@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { AppFonts } from "@/constants/typography";
 import { AppColors } from "@/constants/colors";
 import { useSignOut } from "@/hooks/use-sign-out";
@@ -20,12 +21,10 @@ export default function Navbar() {
   const usuarioDoc = useSessionStore((s) => s.usuarioDoc);
 
   const [menuVisible, setMenuVisible] = useState(false);
-  const [photoLoadFailed, setPhotoLoadFailed] = useState(false);
   const handleSignOut = useSignOut();
 
   const nombre = usuarioDoc?.nombre ?? displayName ?? null;
   const email = userEmail ?? usuarioDoc?.email ?? "";
-  const inicial = (nombre?.[0] ?? displayName?.[0] ?? email?.[0] ?? "?").toUpperCase();
 
   const onSignOut = async () => {
     setMenuVisible(false);
@@ -70,34 +69,7 @@ export default function Navbar() {
             accessibilityLabel="Abrir menú de usuario"
             accessibilityHint="Muestra opciones de perfil y cierre de sesión"
           >
-            {photoURL && !photoLoadFailed ? (
-              <Image
-                source={{ uri: photoURL }}
-                style={{ width: 36, height: 36, borderRadius: 18 }}
-                contentFit="cover"
-                onError={() => setPhotoLoadFailed(true)}
-              />
-            ) : (
-              <View
-                className="flex-1 items-center justify-center rounded-full"
-                style={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: AppColors.primaryGhost,
-                }}
-              >
-                <Text
-                  className="font-bold"
-                  style={{
-                    fontSize: 14,
-                    fontFamily: AppFonts.heading,
-                    color: AppColors.primary,
-                  }}
-                >
-                  {inicial}
-                </Text>
-              </View>
-            )}
+            <UserAvatar name={nombre ?? email} photoUri={photoURL} size={36} />
           </TouchableOpacity>
 
           <Modal
@@ -138,33 +110,7 @@ export default function Navbar() {
                 />
 
                 <View className="mb-5 flex-row items-center gap-3">
-                  {photoURL && !photoLoadFailed ? (
-                    <Image
-                      source={{ uri: photoURL }}
-                      style={{ width: 48, height: 48, borderRadius: 24 }}
-                      contentFit="cover"
-                      onError={() => setPhotoLoadFailed(true)}
-                    />
-                  ) : (
-                    <View
-                      className="items-center justify-center rounded-full"
-                      style={{
-                        width: 48,
-                        height: 48,
-                        backgroundColor: AppColors.primaryGhost,
-                      }}
-                    >
-                      <Text
-                        className="text-xl font-bold"
-                        style={{
-                          fontFamily: AppFonts.heading,
-                          color: AppColors.primary,
-                        }}
-                      >
-                        {inicial}
-                      </Text>
-                    </View>
-                  )}
+                  <UserAvatar name={nombre ?? email} photoUri={photoURL} size={48} />
                   <View className="flex-1">
                     <Text
                       className="text-lg font-semibold text-content-primary"

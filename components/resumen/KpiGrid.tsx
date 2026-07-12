@@ -1,16 +1,11 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useStaggeredEntrance } from "@/hooks/use-staggered-entrance";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
 import type { KpiCardConfig, KpiCardProps, KpiGridProps } from "@/interface/resumen";
-import React, { memo, useEffect } from "react";
+import React, { memo } from "react";
 import { Text, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 // ─── Card individual ─────────────────────────────────────────────────────────
 
@@ -28,26 +23,7 @@ const KpiCard = memo(function KpiCard({
   accentColor,
   index,
 }: KpiCardProps) {
-  const reduceMotion = useReducedMotion();
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(15);
-
-  useEffect(() => {
-    // Reduced motion: conservamos la card visible sin desplazarla (sin animar el movimiento)
-    if (reduceMotion) {
-      opacity.value = 1;
-      translateY.value = 0;
-      return;
-    }
-    const delay = index * 50;
-    opacity.value = withDelay(delay, withTiming(1, { duration: 260 }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 260 }));
-  }, [index, opacity, translateY, reduceMotion]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
+  const animatedStyle = useStaggeredEntrance(index, { distance: 15, duration: 260 });
 
   return (
     <AnimatedKpiWrapper

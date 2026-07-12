@@ -1,135 +1,48 @@
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
+import { CenteredModal } from "@/components/ui/CenteredModal";
 import type { Periodo, RangoFechas } from "@/interface";
 import type { PeriodFilterProps } from "@/interface/product-search";
 import { formatDate as formatDateUtil } from "@/lib/utils/format";
 import { useLayoutStore } from "@/store/layout-store";
 import React, { useCallback, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  ReduceMotion,
-  SlideInDown,
-  SlideOutDown,
-  ZoomIn,
-  ZoomOut,
-} from "react-native-reanimated";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import Animated, { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import CustomRangeContent from "./CustomRangeContent";
 import PeriodBadges from "./PeriodBadges";
 
 // Dos variantes de modal: mobile usa slide-up desde abajo (UX móvil nativa);
-// desktop usa zoom centrado para no ocupar toda la pantalla
+// desktop usa zoom centrado para no ocupar toda la pantalla. Ambos son los
+// shells compartidos BottomSheetModal/CenteredModal.
 
-function MobileModal({
+function PeriodModal({
+  isMobile,
   visible,
   onClose,
   children,
 }: {
+  isMobile: boolean;
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-      statusBarTranslucent
-      accessibilityViewIsModal
+  const content = (
+    <ScrollView
+      bounces={false}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ padding: isMobile ? 20 : 24, paddingTop: isMobile ? 12 : 24 }}
     >
-      <Animated.View
-        entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
-        exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
-        className="flex-1 justify-end"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
-        <Pressable
-          className="flex-1"
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel="Cerrar selector de período"
-          accessibilityHint="Cierra el modal de selección de rango"
-        />
-        <Animated.View
-          entering={SlideInDown.springify()
-            .damping(20)
-            .stiffness(180)
-            .reduceMotion(ReduceMotion.System)}
-          exiting={SlideOutDown.duration(200).reduceMotion(ReduceMotion.System)}
-        >
-          <View className="rounded-t-3xl bg-white dark:bg-neutral-800">
-            <View className="mt-3 mb-1 h-1 w-10 self-center rounded-full bg-gray-300 dark:bg-neutral-600" />
-            <ScrollView
-              bounces={false}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ padding: 20, paddingTop: 12 }}
-              style={{ maxHeight: 560 }}
-            >
-              {children}
-            </ScrollView>
-          </View>
-        </Animated.View>
-      </Animated.View>
-    </Modal>
+      {children}
+    </ScrollView>
   );
-}
 
-function DesktopModal({
-  visible,
-  onClose,
-  children,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-      statusBarTranslucent
-      accessibilityViewIsModal
-    >
-      <Animated.View
-        entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
-        exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
-        className="flex-1 items-center justify-center"
-        style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
-      >
-        <Pressable
-          className="absolute top-0 right-0 bottom-0 left-0"
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel="Cerrar selector de período"
-          accessibilityHint="Cierra el modal de selección de rango"
-        />
-        <Animated.View
-          entering={ZoomIn.duration(250).springify().damping(18).reduceMotion(ReduceMotion.System)}
-          exiting={ZoomOut.duration(150).reduceMotion(ReduceMotion.System)}
-          className="w-full max-w-md"
-        >
-          <View
-            className="mx-4 overflow-hidden rounded-3xl bg-white dark:bg-neutral-800"
-            style={
-              Platform.OS === "web"
-                ? { boxShadow: "0 24px 48px rgba(0,0,0,0.2)" }
-                : { elevation: 24 }
-            }
-          >
-            <ScrollView
-              bounces={false}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ padding: 24 }}
-              style={{ maxHeight: 560 }}
-            >
-              {children}
-            </ScrollView>
-          </View>
-        </Animated.View>
-      </Animated.View>
-    </Modal>
+  return isMobile ? (
+    <BottomSheetModal visible={visible} onClose={onClose} closeLabel="Cerrar selector de período">
+      {content}
+    </BottomSheetModal>
+  ) : (
+    <CenteredModal visible={visible} onClose={onClose} closeLabel="Cerrar selector de período">
+      {content}
+    </CenteredModal>
   );
 }
 
@@ -177,8 +90,6 @@ export default function PeriodFilter({
     periodo === "personalizado" && rangoPersonalizado?.inicio && rangoPersonalizado?.fin
   );
 
-  const ModalWrapper = isMobile ? MobileModal : DesktopModal;
-
   return (
     <>
       <View className="mb-4 items-center" style={!isMobile ? { alignSelf: "center" } : undefined}>
@@ -197,14 +108,14 @@ export default function PeriodFilter({
               accessibilityHint="Abre el modal para cambiar fecha de inicio y fin"
             >
               <Text className="text-[12px] font-medium text-orange-600 dark:text-orange-400">
-                {formatDate(rangoPersonalizado.inicio)} — {formatDate(rangoPersonalizado.fin)}
+                {formatDate(rangoPersonalizado!.inicio)} — {formatDate(rangoPersonalizado!.fin)}
               </Text>
             </Pressable>
           </Animated.View>
         ) : null}
       </View>
 
-      <ModalWrapper visible={showModal} onClose={handleCloseModal}>
+      <PeriodModal isMobile={isMobile} visible={showModal} onClose={handleCloseModal}>
         <CustomRangeContent
           rangoTemporal={rangoTemporal}
           onRangoChange={setRangoTemporal}
@@ -212,7 +123,7 @@ export default function PeriodFilter({
           onCancel={handleCloseModal}
           isMobile={isMobile}
         />
-      </ModalWrapper>
+      </PeriodModal>
     </>
   );
 }

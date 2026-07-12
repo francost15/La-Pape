@@ -37,7 +37,7 @@ export function Thumb({
   recyclingKey,
   iconName = "photo.fill",
   iconSize = 20,
-  iconColor,
+  iconColor = "#C7C7CC",
   fallback,
 }: ThumbProps) {
   const [imageError, setImageError] = useState(false);

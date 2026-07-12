@@ -1,5 +1,21 @@
+import type { ReactNode } from "react";
 import type { Product } from "@/interface/products";
 import type { ListRowDividerProps, VentasDetallesBaseState } from "@/interface/shared";
+
+// ─── ResumenRow (fila compartida de listas de resumen) ─────────────────────
+export interface ResumenRowProps extends ListRowDividerProps {
+  /** Contenido a la izquierda (thumbnail o avatar). */
+  leading?: ReactNode;
+  /** Número de posición mostrado antes del leading (rankings). */
+  rank?: number;
+  title: string;
+  subtitle?: string;
+  /** Contenido alineado a la derecha (monto, badge de stock…). */
+  trailing?: ReactNode;
+  onPress?: () => void;
+  /** Contenido extra debajo de la fila (p. ej. barra de participación). */
+  children?: ReactNode;
+}
 
 export interface Metricas {
   ventasTotales: number;

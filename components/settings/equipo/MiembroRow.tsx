@@ -1,8 +1,8 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { AppColors } from "@/constants/colors";
 import type { UserRole } from "@/interface";
 import type { MiembroRowProps } from "@/interface/equipo";
-import { Image } from "expo-image";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { RolBadge } from "./RolBadge";
@@ -42,19 +42,7 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
         onPress={() => setExpanded((v) => !v)}
         className="flex-row items-center gap-3 px-4 py-3.5 active:opacity-80"
       >
-        {miembro.foto ? (
-          <Image
-            source={{ uri: miembro.foto }}
-            style={{ width: 44, height: 44, borderRadius: 22 }}
-            contentFit="cover"
-          />
-        ) : (
-          <View className="h-11 w-11 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
-            <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
-              {miembro.inicial}
-            </Text>
-          </View>
-        )}
+        <UserAvatar name={miembro.nombre} photoUri={miembro.foto} size={44} />
         <View className="min-w-0 flex-1">
           <View className="flex-row flex-wrap items-center gap-2">
             <Text className="text-sm font-semibold text-gray-900 dark:text-white">

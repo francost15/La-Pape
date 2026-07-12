@@ -12,8 +12,7 @@ import { useResponsive } from "@/hooks/use-responsive";
 import React from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import ProductCardMobile from "./ProductCardMobile";
-import ProductItemVenta from "./ProductItemVenta";
+import ProductRow from "./ProductRow";
 import type { Product } from "@/interface/products";
 
 // keyExtractor module-level: identidad estable sin recrearse por render
@@ -55,13 +54,8 @@ export default function ProductListContent({
   // tal cual al hijo, que lo invoca con su propio product.nombre. Así no se crea
   // una función nueva por fila y el React.memo de los items sí puede cortar renders.
   const renderItem = React.useCallback(
-    ({ item }: { item: Product }) =>
-      isDesktop ? (
-        <ProductItemVenta product={item} compact onProductAdded={onProductAdded} />
-      ) : (
-        <ProductCardMobile product={item} onProductAdded={onProductAdded} />
-      ),
-    [isDesktop, onProductAdded]
+    ({ item }: { item: Product }) => <ProductRow product={item} onProductAdded={onProductAdded} />,
+    [onProductAdded]
   );
 
   return (

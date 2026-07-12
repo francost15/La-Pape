@@ -1,5 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { AppColors } from "@/constants/colors";
 import { auth } from "@/lib/firebase";
 import { updateUsuario } from "@/lib/services/usuarios";
@@ -7,7 +8,6 @@ import { notify } from "@/lib/notify";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { resetAllTours } from "@/store/onboarding-store";
 import { useSessionStore } from "@/store/session-store";
-import { Image } from "expo-image";
 import { updateProfile } from "firebase/auth";
 import React, { useCallback, useState } from "react";
 import {
@@ -29,7 +29,6 @@ export default function ConfigTabPerfil() {
   const negocioId = useSessionStore((s) => s.negocioId);
   const patchProfile = useSessionStore((s) => s.patchProfile);
 
-  const [photoFailed, setPhotoFailed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editNombre, setEditNombre] = useState("");
   const [saving, setSaving] = useState(false);
@@ -69,26 +68,12 @@ export default function ConfigTabPerfil() {
 
   const nombre = nombreBase;
   const email = userEmail ?? usuarioDoc?.email ?? "";
-  const inicial = (nombre[0] ?? "?").toUpperCase();
 
   return (
     <View className="gap-4">
       <View className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
         <View className="flex-row items-center gap-4">
-          {photoURL && !photoFailed ? (
-            <Image
-              source={{ uri: photoURL }}
-              style={{ width: 72, height: 72, borderRadius: 36 }}
-              contentFit="cover"
-              onError={() => setPhotoFailed(true)}
-            />
-          ) : (
-            <View className="h-[72px] w-[72px] items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
-              <Text className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {inicial}
-              </Text>
-            </View>
-          )}
+          <UserAvatar name={nombre} photoUri={photoURL} size={72} />
           <View className="flex-1">
             {isEditing ? (
               <View className="gap-2">

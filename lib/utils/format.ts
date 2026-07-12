@@ -49,3 +49,17 @@ export function formatDateHeader(fecha: Date): string {
 export function pluralize(count: number, singular: string, plural: string): string {
   return count === 1 ? singular : plural;
 }
+
+/**
+ * Iniciales para avatares: primera + última palabra cuando hay dos o más,
+ * si no las dos primeras letras. Devuelve "U" (Usuario) para nombres vacíos.
+ */
+export function getInitials(nombre?: string | null): string {
+  const limpio = nombre?.trim();
+  if (!limpio) return "U";
+  const parts = limpio.split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return limpio.slice(0, 2).toUpperCase();
+}

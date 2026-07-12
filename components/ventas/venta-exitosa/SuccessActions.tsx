@@ -1,11 +1,11 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
-import { usePressScaleHandlers } from "@/hooks/use-press-scale";
+import { usePressScale } from "@/hooks/use-press-scale";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import type { SuccessActionsProps } from "@/interface/ventas";
 import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { IconSymbol } from "../../ui/icon-symbol";
 
 export function SuccessActions({
@@ -17,27 +17,19 @@ export function SuccessActions({
 }: SuccessActionsProps) {
   const haptic = useHaptic();
   const reduceMotion = useReducedMotion();
-  const { onPressIn, onPressOut } = usePressScaleHandlers(reduceMotion);
-
-  const descargarScale = useSharedValue(1);
-  const enviarScale = useSharedValue(1);
-  const descargarStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: descargarScale.value }],
-  }));
-  const enviarStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: enviarScale.value }],
-  }));
+  const descargar = usePressScale(reduceMotion);
+  const enviar = usePressScale(reduceMotion);
 
   return (
     <View style={{ padding: 20, gap: 10 }}>
-      <Animated.View style={descargarStyle}>
+      <Animated.View style={descargar.animatedStyle}>
         <Pressable
           onPress={() => {
             haptic();
             onDescargarRecibo?.();
           }}
-          onPressIn={() => onPressIn(descargarScale)}
-          onPressOut={() => onPressOut(descargarScale)}
+          onPressIn={descargar.onPressIn}
+          onPressOut={descargar.onPressOut}
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -66,14 +58,14 @@ export function SuccessActions({
       </Animated.View>
 
       {onEnviarRecibo && (
-        <Animated.View style={enviarStyle}>
+        <Animated.View style={enviar.animatedStyle}>
           <Pressable
             onPress={() => {
               haptic();
               onEnviarRecibo();
             }}
-            onPressIn={() => onPressIn(enviarScale)}
-            onPressOut={() => onPressOut(enviarScale)}
+            onPressIn={enviar.onPressIn}
+            onPressOut={enviar.onPressOut}
             style={{
               flexDirection: "row",
               alignItems: "center",

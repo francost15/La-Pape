@@ -187,10 +187,13 @@ export interface CartConfirmDialogsProps {
   onCancelClear: () => void;
 }
 
-export interface ProductItemVentaProps {
+export interface ProductRowProps {
   product: Product;
-  compact?: boolean;
   onProductAdded?: (nombre: string) => void;
+  /** Muestra la marca bajo el nombre. Default: solo en mobile. */
+  showBrand?: boolean;
+  /** Dibuja el divisor inferior. Default: solo en mobile. */
+  divider?: boolean;
 }
 
 export interface VentaExitosaModalProps {
@@ -199,11 +202,6 @@ export interface VentaExitosaModalProps {
   onClose: () => void;
   onDescargarRecibo?: () => void;
   onEnviarRecibo?: () => void;
-}
-
-export interface ProductCardMobileProps {
-  product: Product;
-  onProductAdded?: (nombre: string) => void;
 }
 
 export interface SuccessActionsProps {
