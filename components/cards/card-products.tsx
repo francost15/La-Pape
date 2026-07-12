@@ -1,9 +1,9 @@
 import { useHaptic } from "@/hooks/use-haptic";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { CardProductsProps } from "@/interface/products";
+import { goToProductDetail } from "@/lib/navigation/go-to-product";
 import { useLayoutStore } from "@/store/layout-store";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
 import React, { useState } from "react";
 import { CardProductCompact } from "./card-product/CardProductCompact";
 import { CardProductDesktop } from "./card-product/CardProductDesktop";
@@ -25,19 +25,9 @@ export default React.memo(function CardProducts({
   const haptic = useHaptic();
   const hapticMedium = useHaptic(Haptics.ImpactFeedbackStyle.Medium);
 
-  const handlePress = () => {
-    router.push({
-      pathname: "/productos/producto/[id]" as never,
-      params: {
-        id: product.id,
-        product: JSON.stringify(product),
-      },
-    });
-  };
-
   const handleCardPress = () => {
     haptic();
-    handlePress();
+    goToProductDetail(product);
   };
 
   const hasImage = Boolean(product.imagen?.trim());
@@ -77,5 +67,11 @@ export default React.memo(function CardProducts({
   if (isMobile) {
     return <CardProductCompact mode="mobile" {...shared} onPress={handleCardPress} />;
   }
-  return <CardProductDesktop {...shared} onPress={handlePress} onPressIn={hapticMedium} />;
+  return (
+    <CardProductDesktop
+      {...shared}
+      onPress={() => goToProductDetail(product)}
+      onPressIn={hapticMedium}
+    />
+  );
 });

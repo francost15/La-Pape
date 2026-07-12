@@ -1,10 +1,8 @@
-import { CreateVentaInput, UpdateVentaInput, Venta } from "@/interface";
+import { Venta } from "@/interface";
 import { db } from "@/lib/firebase";
 import { createConverter } from "@/lib/utils/firestore-converter";
 import {
-  addDoc,
   collection,
-  doc,
   limit,
   onSnapshot,
   orderBy,
@@ -12,7 +10,6 @@ import {
   QueryConstraint,
   Timestamp,
   Unsubscribe,
-  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -31,59 +28,6 @@ export interface VentasQueryOptions {
 // Tope por defecto: evita descargar el historial completo de negocios con años
 // de ventas cuando el consumidor no acota por fechas.
 const DEFAULT_VENTAS_LIMIT = 200;
-
-/**
- * Creates a new base sale document in Firestore.
- * This is typically the first step before adding sale details (items) and payments.
- *
- * @param ventaData - The required data to initialize a sale
- * @returns The ID of the newly created sale document
- * @throws Error if the insertion into Firestore fails
- */
-export const createVenta = async (ventaData: CreateVentaInput): Promise<string> => {
-  try {
-    const cleanData = {
-      ...ventaData,
-      fecha: ventaData.fecha ? Timestamp.fromDate(ventaData.fecha) : Timestamp.now(),
-      estado: ventaData.estado ?? "PENDIENTE",
-      tipo_venta: ventaData.tipo_venta ?? "CONTADO",
-      descuento: ventaData.descuento ?? 0,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    };
-
-    // Casting to 'any' is required to bypass the ID requirement on creation while using converters
-    const docRef = await addDoc(
-      collection(db, "ventas").withConverter(ventaConverter),
-      cleanData as any
-    );
-    return docRef.id;
-  } catch (error) {
-    console.error("Error al crear venta:", error);
-    throw new Error("No se pudo crear la venta");
-  }
-};
-
-/**
- * Updates an existing sale document.
- * Often used to change the sale status (e.g., from PENDIENTE to PAGADA or CANCELADA).
- *
- * @param id - The Firestore document ID of the sale
- * @param ventaData - Partial data to update
- * @throws Error if the update operation fails
- */
-export const updateVenta = async (id: string, ventaData: UpdateVentaInput): Promise<void> => {
-  try {
-    const docRef = doc(db, "ventas", id).withConverter(ventaConverter);
-    await updateDoc(docRef, {
-      ...ventaData,
-      updatedAt: Timestamp.now(),
-    });
-  } catch (error) {
-    console.error("Error al actualizar venta:", error);
-    throw new Error("No se pudo actualizar la venta");
-  }
-};
 
 /**
  * Sets up a real-time listener for the sales of a specific business, ordered

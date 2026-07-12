@@ -1,12 +1,5 @@
-import type { ThemeColors } from "@/interface/theme";
 import type { Venta } from "@/interface/ventas";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
-
-/** Props temáticos compartidos por componentes que reciben paleta y modo oscuro. */
-export interface ThemedProps {
-  isDark: boolean;
-  colors: ThemeColors;
-}
 
 /** Separador opcional en filas de lista (resumen, rankings, stock). */
 export interface ListRowDividerProps {

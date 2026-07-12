@@ -47,10 +47,12 @@ export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemR
         <Text
           style={{
             fontSize: 14,
-            fontWeight: "700",
             color: colors.textPrimary,
             fontFamily: AppFonts.bodyStrong,
             lineHeight: 20,
+            // En native el peso va codificado en el archivo de fuente; un
+            // fontWeight explícito fuerza bold sintético. En web sí se declara.
+            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
           }}
           numberOfLines={2}
         >
@@ -72,9 +74,9 @@ export function CartItemRow({ item, isDark, colors, onMinus, onPlus }: CartItemR
         <Text
           style={{
             fontSize: 14,
-            fontWeight: "700",
             color: colors.textPrimary,
             fontFamily: AppFonts.bodyStrong,
+            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
           }}
         >
           {formatCurrency(item.unitPrice * item.quantity)}

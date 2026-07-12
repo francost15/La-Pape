@@ -1,9 +1,6 @@
 import { useHaptic } from "@/hooks/use-haptic";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import {
-  BottomTabBarHeightCallbackContext,
-  type BottomTabBarProps,
-} from "@react-navigation/bottom-tabs";
+import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from "expo-router/tabs";
 import { BlurView } from "expo-blur";
 import React, { useEffect, useMemo } from "react";
 import { useWindowDimensions, View } from "react-native";

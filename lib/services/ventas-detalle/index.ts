@@ -1,19 +1,6 @@
-import { CreateVentaDetalleInput, VentaDetalle } from "@/interface";
+import { VentaDetalle } from "@/interface";
 import { db } from "@/lib/firebase";
-import { addDoc, collection, getDocs, query, Timestamp, where } from "firebase/firestore";
-
-export const createVentaDetalle = async (detalleData: CreateVentaDetalleInput): Promise<string> => {
-  try {
-    const docRef = await addDoc(collection(db, "ventas_detalle"), {
-      ...detalleData,
-      createdAt: Timestamp.now(),
-    });
-    return docRef.id;
-  } catch (error) {
-    console.error("Error al crear detalle de venta:", error);
-    throw new Error("No se pudo crear el detalle de venta");
-  }
-};
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 // Firestore limita los operadores 'in' a 10 valores por consulta.
 const IN_QUERY_MAX = 10;

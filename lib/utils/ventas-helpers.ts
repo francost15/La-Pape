@@ -4,9 +4,6 @@ import { formatDateHeader, getDateKey } from "./format";
 
 export type { VentaListItem, HistorySection };
 
-/** @deprecated Usar HistorySection desde @/interface/ventas */
-export interface VentaGroup extends HistorySection {}
-
 export function groupVentasByDate(
   ventas: Venta[],
   detallesMap: Record<string, VentaDetalle[]>

@@ -110,7 +110,7 @@ export const getUsuarioById = async (id: string): Promise<Usuario | null> => {
  * Resuelve el ID real del documento en usuarios.
  * Primero intenta por id; si no existe y hay email, busca por email.
  */
-export const resolveUsuarioDocId = async (
+const resolveUsuarioDocId = async (
   id: string,
   email?: string
 ): Promise<string | null> => {

@@ -5,13 +5,13 @@ import TopProductsList from "@/components/resumen/TopProductsList";
 import VentasPorUsuario from "@/components/resumen/VentasPorUsuario";
 import PeriodFilter from "@/components/search/PeriodFilter";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
+import AppText from "@/components/ui/AppText";
 import EmptyState from "@/components/ui/EmptyState";
 import { useResumen } from "@/hooks/use-resumen";
 import { AppColors } from "@/constants/colors";
-import { AppFonts } from "@/constants/typography";
 import { ResumenSkeleton } from "@/components/ui/skeletons";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 export default function ResumenScreen() {
   const {
@@ -33,7 +33,7 @@ export default function ResumenScreen() {
   if (noNegocio) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
+        <View className="flex-1 items-center justify-center bg-canvas px-8">
           <EmptyState
             icon="error"
             title={error ?? "No tienes un negocio asignado"}
@@ -51,7 +51,7 @@ export default function ResumenScreen() {
     return (
       <AnimatedScreen>
         <View
-          className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+          className="flex-1 bg-canvas"
           style={{
             paddingHorizontal: isMobile ? 20 : 48,
             paddingVertical: isMobile ? 16 : 40,
@@ -66,7 +66,7 @@ export default function ResumenScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
+        <View className="flex-1 items-center justify-center bg-canvas px-8">
           <EmptyState
             icon="error"
             title={error}
@@ -81,7 +81,7 @@ export default function ResumenScreen() {
   return (
     <AnimatedScreen>
       <ScrollView
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
         contentContainerStyle={{
           paddingHorizontal: isMobile ? 20 : 48,
           paddingVertical: isMobile ? 16 : 40,
@@ -146,13 +146,11 @@ export default function ResumenScreen() {
 function SectionTitle({ title }: { title: string }) {
   return (
     <View className="mt-4 mb-4 flex-row items-center gap-3">
-      <View className="h-4 w-[2px] bg-[#E5E7EB] dark:bg-[#374151]" />
-      <Text
-        className="text-[10px] font-bold tracking-[0.25em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
-        style={{ fontFamily: AppFonts.bodyStrong }}
-      >
+      <View className="h-4 w-[2px] bg-line-strong" />
+      {/* Se conserva el tracking original (0.25em @10px) sobre el eyebrow canónico */}
+      <AppText variant="eyebrow" style={{ letterSpacing: 2.5 }}>
         {title}
-      </Text>
+      </AppText>
     </View>
   );
 }

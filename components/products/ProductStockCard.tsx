@@ -17,7 +17,7 @@ export default function ProductStockCard({
 
   return (
     <View
-      className="overflow-hidden rounded-3xl bg-white p-6 dark:bg-[#1A1F2B]"
+      className="overflow-hidden rounded-3xl bg-surface-elevated p-6"
       style={{
         boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
         elevation: Platform.OS !== "web" ? 4 : undefined,
@@ -26,7 +26,7 @@ export default function ProductStockCard({
       <View className="flex-row items-end justify-between">
         <View>
           <Text
-            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
+            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             EXISTENCIAS

@@ -21,8 +21,8 @@ export default function ProductoById() {
 
   if (!product) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
-        <Text className="text-lg text-[#6B7280] dark:text-[#9CA3AF]">Producto no encontrado</Text>
+      <View className="flex-1 items-center justify-center bg-canvas">
+        <Text className="text-lg text-content-secondary">Producto no encontrado</Text>
       </View>
     );
   }

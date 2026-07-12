@@ -34,7 +34,7 @@ export default function Navbar() {
 
   return (
     <View
-      className="flex-row items-center justify-between bg-[#FAFAF9] px-4 dark:bg-[#0C0F14]"
+      className="flex-row items-center justify-between bg-canvas px-4"
       // insets.top en lugar de paddings fijos por plataforma: respeta notch,
       // Dynamic Island y variaciones de status bar en Android. La barra visible
       // conserva sus 56pt de alto por debajo del área segura.
@@ -123,7 +123,7 @@ export default function Navbar() {
                   paddingBottom: 40,
                   backgroundColor: isWeb ? "var(--bg-surface)" : undefined,
                 }}
-                className="bg-white dark:bg-[#141820]"
+                className="bg-surface"
               >
                 <View
                   style={{
@@ -167,14 +167,14 @@ export default function Navbar() {
                   )}
                   <View className="flex-1">
                     <Text
-                      className="text-lg font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                      className="text-lg font-semibold text-content-primary"
                       style={{ fontFamily: AppFonts.heading }}
                     >
                       {nombre ?? "Usuario"}
                     </Text>
                     {email ? (
                       <Text
-                        className="text-sm text-[#6B7280] dark:text-[#8B95A5]"
+                        className="text-sm text-content-secondary"
                         style={{ fontFamily: AppFonts.body }}
                       >
                         {email}
@@ -199,7 +199,7 @@ export default function Navbar() {
                     color={AppColors.light.textSecondary}
                   />
                   <Text
-                    className="text-sm font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                    className="text-sm font-semibold text-content-primary"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Configuración

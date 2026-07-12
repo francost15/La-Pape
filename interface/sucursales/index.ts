@@ -10,19 +10,3 @@ export interface Sucursal {
   updatedAt?: Date;
 }
 
-export interface CreateSucursalInput {
-  negocio_id: string;
-  nombre: string;
-  direccion?: string;
-  telefono?: string;
-  email?: string;
-  activo?: boolean;
-}
-
-export interface UpdateSucursalInput {
-  nombre?: string;
-  direccion?: string;
-  telefono?: string;
-  email?: string;
-  activo?: boolean;
-}

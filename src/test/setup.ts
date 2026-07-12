@@ -1,5 +1,3 @@
-// @testing-library/jest-native has compatibility issues - removed temporarily
-// import "@testing-library/jest-native";
 import { vi } from "vitest";
 // import * as asyncStorageMock from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 

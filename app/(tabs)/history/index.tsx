@@ -59,9 +59,7 @@ export default function HistoryScreen() {
             />
             <Text
               className={`text-[12px] font-bold tracking-[0.2em] uppercase ${
-                isTodayOrYesterday
-                  ? "text-[#ea580c] dark:text-[#FB923C]"
-                  : "text-[#6B7280] dark:text-[#8B95A5]"
+                isTodayOrYesterday ? "text-accent" : "text-content-secondary"
               }`}
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
@@ -69,7 +67,7 @@ export default function HistoryScreen() {
             </Text>
           </View>
           <Text
-            className="text-[14px] font-bold text-[#111827] tabular-nums dark:text-[#F9FAFB]"
+            className="text-[14px] font-bold text-content-primary tabular-nums"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             {formatCurrency(section.total)}
@@ -134,7 +132,7 @@ export default function HistoryScreen() {
     // a datos no produzca salto de layout
     return (
       <View
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
         style={{ paddingHorizontal: isTablet ? 32 : 16, paddingTop: 16 }}
       >
         <HistoryListSkeleton groups={2} cardsPerGroup={3} />
@@ -145,7 +143,7 @@ export default function HistoryScreen() {
   if (error) {
     return (
       <AnimatedScreen>
-        <View className="flex-1 items-center justify-center bg-[#FAFAF9] px-8 dark:bg-[#0C0F14]">
+        <View className="flex-1 items-center justify-center bg-canvas px-8">
           <EmptyState
             icon="error"
             title={error}
@@ -166,7 +164,7 @@ export default function HistoryScreen() {
         renderSectionHeader={renderSectionHeader}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ventasFiltradas.length === 0 ? ListEmptyComponent : undefined}
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
         contentContainerStyle={{
           paddingHorizontal: isTablet ? 32 : 16,
           paddingTop: 16,

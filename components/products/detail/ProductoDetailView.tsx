@@ -6,7 +6,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import type { ProductoDetailViewProps } from "@/interface/products";
 import { useHaptic } from "@/hooks/use-haptic";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from "expo-router/tabs";
 import { useRouter } from "expo-router";
 import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
@@ -30,7 +30,7 @@ function BackButton() {
     >
       <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
       <Text
-        className="text-xs font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+        className="text-xs font-bold tracking-widest text-content-secondary uppercase"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         VOLVER
@@ -56,7 +56,7 @@ export function ProductoDetailView({
   if (isDesktop) {
     return (
       <ScrollView
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ alignItems: "center", padding: 48 }}
       >
@@ -66,7 +66,7 @@ export function ProductoDetailView({
             {/* Split Izquierdo: Hero del Producto */}
             <View className="flex-1 gap-8">
               <View
-                className="overflow-hidden rounded-[32px] bg-white dark:bg-[#1A1F2B]"
+                className="overflow-hidden rounded-[32px] bg-surface-elevated"
                 style={{
                   aspectRatio: 1,
                   boxShadow: Platform.OS === "web" ? "0 24px 48px rgba(0,0,0,0.06)" : undefined,
@@ -84,7 +84,7 @@ export function ProductoDetailView({
               {/* QR expandido en desktop editorial */}
               <View className="flex-row items-center gap-4 px-2">
                 <View
-                  className="rounded-2xl bg-white p-3 dark:bg-[#1A1F2B]"
+                  className="rounded-2xl bg-surface-elevated p-3"
                   style={{
                     boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.04)" : undefined,
                     elevation: Platform.OS !== "web" ? 3 : undefined,
@@ -93,7 +93,7 @@ export function ProductoDetailView({
                   <QRCode value={product.id} size={80} />
                 </View>
                 <View>
-                  <Text className="text-xs font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]">
+                  <Text className="text-xs font-bold tracking-widest text-content-secondary uppercase">
                     Identifier
                   </Text>
                   <Text className="mt-0.5 font-mono text-sm text-[#6B7280]">
@@ -112,7 +112,7 @@ export function ProductoDetailView({
               <View className="gap-6">
                 <View>
                   <Text
-                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
+                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Valuación Comercial
@@ -126,7 +126,7 @@ export function ProductoDetailView({
 
                 <View>
                   <Text
-                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
+                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Estado de Inventario
@@ -150,7 +150,7 @@ export function ProductoDetailView({
   }
 
   return (
-    <View className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]">
+    <View className="flex-1 bg-canvas">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
@@ -179,7 +179,7 @@ export function ProductoDetailView({
 
         <View className="mt-4 gap-6">
           <View>
-            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]">
+            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
               COMERCIAL
             </Text>
             <ProductPriceCard
@@ -190,7 +190,7 @@ export function ProductoDetailView({
           </View>
 
           <View>
-            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]">
+            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
               INVENTARIO
             </Text>
             <ProductStockCard
@@ -216,7 +216,7 @@ export function ProductoDetailView({
       </ScrollView>
 
       <View
-        className="border-t border-gray-100 bg-[#FAFAF9] px-6 py-4 dark:border-neutral-800 dark:bg-[#0C0F14]"
+        className="border-t border-gray-100 bg-canvas px-6 py-4 dark:border-neutral-800"
         style={{ paddingBottom: 16 + tabBarHeight }}
       >
         <ProductoActions deleting={deleting} onEdit={onEdit} onDelete={onDelete} />

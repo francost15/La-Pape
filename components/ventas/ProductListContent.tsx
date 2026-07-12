@@ -3,20 +3,14 @@ import { useProductSearch } from "@/hooks/use-product-search";
 import { useProductosScreen } from "@/hooks/use-productos-screen";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import type { ProductListContentProps } from "@/interface/ventas";
+import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { Skeleton } from "@/components/ui/skeletons";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { DESKTOP_MIN_WIDTH } from "@/constants/design-system";
 import React from "react";
-import {
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { FlatList, RefreshControl, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import ProductCardMobile from "./ProductCardMobile";
 import ProductItemVenta from "./ProductItemVenta";
@@ -111,26 +105,11 @@ export default function ProductListContent({
           >
             {error}
           </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: AppColors.primary,
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-              borderRadius: 14,
-            }}
-            onPress={retry}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "700",
-                fontSize: 15,
-                fontFamily: AppFonts.bodyStrong,
-              }}
-            >
-              Reintentar
-            </Text>
-          </TouchableOpacity>
+          {/* Wrapper: Button con fullWidth=false usa alignSelf flex-start, que
+              anularía el centrado del contenedor de error */}
+          <View>
+            <Button title="Reintentar" onPress={retry} fullWidth={false} />
+          </View>
         </View>
       ) : (
         <FlatList

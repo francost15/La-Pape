@@ -55,14 +55,6 @@ export interface SkeletonProps {
   borderRadius?: number;
 }
 
-// ── PerformanceMonitor ──
-export interface PerformanceMetrics {
-  fps: number;
-  memory?: number;
-  jsThreadTime?: number;
-  timestamp: number;
-}
-
 // ── CircleIconButton ──
 export type CircleIconButtonVariant = "primary" | "secondary" | "success";
 

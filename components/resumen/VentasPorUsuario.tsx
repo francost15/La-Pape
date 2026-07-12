@@ -81,32 +81,27 @@ function VentasPorUsuarioRow({
             />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <Text className="text-[11px] font-bold text-[#ea580c] dark:text-[#F97316]">
-                {getInitials(item.nombre)}
-              </Text>
+              <Text className="text-[11px] font-bold text-accent">{getInitials(item.nombre)}</Text>
             </View>
           )}
         </View>
 
         {/* Nombre y subtítulo */}
         <View className="min-w-0 flex-1">
-          <Text
-            className="text-[13px] font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
-            numberOfLines={1}
-          >
+          <Text className="text-[13px] font-semibold text-content-primary" numberOfLines={1}>
             {item.nombre}
           </Text>
-          <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]">
+          <Text className="text-[10px] text-content-secondary">
             {item.transacciones} {pluralize(item.transacciones, "venta", "ventas")}
           </Text>
         </View>
 
         {/* Monto + porcentaje */}
         <View className="shrink-0 items-end">
-          <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
+          <Text className="text-[13px] font-bold text-content-primary tabular-nums">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
+          <Text className="text-[10px] text-content-secondary tabular-nums">
             {porcentajeDelTotal.toFixed(0)}%
           </Text>
         </View>

@@ -55,11 +55,3 @@ export async function isOnboardingComplete(): Promise<boolean> {
   const completed = await getCompletedSteps();
   return completed.length >= ONBOARDING_STEPS.length;
 }
-
-export async function resetOnboarding(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Silent fail
-  }
-}

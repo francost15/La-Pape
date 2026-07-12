@@ -71,20 +71,10 @@ export interface ProductFormFieldProps {
   errors: FieldErrors<CreateProductFormData>;
 }
 
-export interface CampoNombreProps extends ProductFormFieldProps {}
-
-export interface CampoPreciosProps extends ProductFormFieldProps {}
-
-export interface CampoDescripcionProps extends ProductFormFieldProps {}
-
 export interface CampoCategoriaProps extends ProductFormFieldProps {
   categories: Categoria[];
   isWeb?: boolean;
 }
-
-export interface CampoMarcaProps extends ProductFormFieldProps {}
-
-export interface CampoCostosProps extends ProductFormFieldProps {}
 
 export interface CampoImagenProps extends ProductFormFieldProps {
   isWeb?: boolean;

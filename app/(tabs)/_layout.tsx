@@ -11,7 +11,7 @@ export default function TabLayout() {
 
   if (!ready) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#FAFAF9] dark:bg-[#0C0F14]">
+      <View className="flex-1 items-center justify-center bg-canvas">
         <ActivityIndicator size="large" color={AppColors.primary} />
       </View>
     );
@@ -24,6 +24,11 @@ export default function TabLayout() {
         tabBar={(props) => <DynamicIslandTabBar {...props} />}
         screenOptions={{
           headerShown: false,
+          // lazy + freezeOnBlur: las pantallas ocultas no se montan hasta visitarlas
+          // ni se re-renderizan con los updates en tiempo real de Firestore,
+          // que era lo que trababa el cambio de tab
+          lazy: true,
+          freezeOnBlur: true,
           tabBarShowLabel: true,
           tabBarActiveTintColor: AppColors.primary,
           tabBarInactiveTintColor: AppColors.light.textMuted,

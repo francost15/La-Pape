@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { AppColors } from "@/constants/colors";
@@ -116,11 +116,15 @@ const styles = StyleSheet.create({
     width: 280,
     maxHeight: 200,
     borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 4px 8px rgba(0,0,0,0.15)" }
+      : {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          elevation: 8,
+        }),
   },
   containerLight: {
     backgroundColor: "#ffffff",

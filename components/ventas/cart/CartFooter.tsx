@@ -68,12 +68,14 @@ export function CartFooter({
         <Text
           style={{
             fontSize: 10,
-            fontWeight: "700",
             letterSpacing: 2,
             textTransform: "uppercase",
             color: colors.textMuted,
             fontFamily: AppFonts.bodyStrong,
             marginBottom: 4,
+            // En native el peso va codificado en el archivo de fuente; un
+            // fontWeight explícito fuerza bold sintético. En web sí se declara.
+            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
           }}
         >
           TOTAL A PAGAR
@@ -118,11 +120,11 @@ export function CartFooter({
               <Text
                 style={{
                   fontSize: 16,
-                  fontWeight: "700",
                   letterSpacing: 1.5,
                   color: "#ffffff",
                   textTransform: "uppercase",
                   fontFamily: AppFonts.bodyStrong,
+                  ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
                 }}
               >
                 {Strings.ventas.completeSale}
@@ -149,11 +151,11 @@ export function CartFooter({
             <Text
               style={{
                 fontSize: 13,
-                fontWeight: "700",
                 letterSpacing: 2,
                 textTransform: "uppercase",
                 color: AppColors.primary,
                 fontFamily: AppFonts.bodyStrong,
+                ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
               }}
             >
               {Strings.ventas.clearCart}

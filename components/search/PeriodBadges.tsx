@@ -5,8 +5,14 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHaptic } from "@/hooks/use-haptic";
 import { syncSlidingIndicator } from "@/lib/animations/sliding-indicator";
 import React, { useCallback, useEffect, useRef } from "react";
-import { LayoutChangeEvent, Platform, Pressable, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { LayoutChangeEvent, Platform, Pressable, View } from "react-native";
+import Animated, {
+  Easing,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const PERIODOS: Periodo[] = ["semana", "mes", "año", "personalizado"];
 
@@ -16,6 +22,36 @@ const LABELS: Record<Periodo, string> = {
   año: "Año",
   personalizado: "Personalizado",
 };
+
+// Mismo timing que la píldora (syncSlidingIndicator) para que el color del
+// label acompañe su llegada en vez de saltar de golpe antes que ella
+const LABEL_TIMING = { duration: 220, easing: Easing.bezier(0.25, 1, 0.5, 1) };
+
+const BadgeLabel = React.memo(function BadgeLabel({
+  label,
+  selected,
+  isDark,
+}: {
+  label: string;
+  selected: boolean;
+  isDark: boolean;
+}) {
+  const progress = useSharedValue(selected ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(selected ? 1 : 0, LABEL_TIMING);
+  }, [selected, progress]);
+
+  const colorStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(progress.value, [0, 1], [isDark ? "#9ca3af" : "#6b7280", "#ffffff"]),
+  }));
+
+  return (
+    <Animated.Text className="text-[13px] font-semibold" style={colorStyle}>
+      {label}
+    </Animated.Text>
+  );
+});
 
 function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   const colorScheme = useColorScheme();
@@ -28,11 +64,14 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   const layoutsRef = useRef<Record<string, { x: number; width: number }>>({});
   const initializedRef = useRef(false);
 
-  const syncIndicator = useCallback((p: Periodo, animate: boolean) => {
-    const layout = layoutsRef.current[p];
-    if (!layout) return;
-    syncSlidingIndicator(indicatorX, indicatorW, layout, animate);
-  }, []);
+  const syncIndicator = useCallback(
+    (p: Periodo, animate: boolean) => {
+      const layout = layoutsRef.current[p];
+      if (!layout) return;
+      syncSlidingIndicator(indicatorX, indicatorW, layout, animate);
+    },
+    [indicatorX, indicatorW]
+  );
 
   const handleLayout = useCallback(
     (p: Periodo) => (e: LayoutChangeEvent) => {
@@ -71,7 +110,7 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
   );
 
   return (
-    <View className="relative flex-row rounded-xl bg-[#FAFAF9] p-1 dark:bg-[#0C0F14]">
+    <View className="relative flex-row rounded-xl bg-canvas p-1">
       <Animated.View
         style={[
           indicatorStyle,
@@ -107,13 +146,7 @@ function PeriodBadges({ periodo, onSelect, isMobile }: PeriodBadgesProps) {
             accessibilityHint="Aplica este período al resumen"
             accessibilityState={{ selected: isSelected }}
           >
-            <Text
-              className={`text-[13px] font-semibold ${
-                isSelected ? "text-white" : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {LABELS[p]}
-            </Text>
+            <BadgeLabel label={LABELS[p]} selected={isSelected} isDark={isDark} />
           </Pressable>
         );
       })}

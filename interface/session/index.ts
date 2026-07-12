@@ -30,6 +30,3 @@ export interface AuthFormProps {
   onToggleSignUp: () => void;
 }
 
-export interface ConfigTabPerfilProps {
-  /** Reservado; el componente lee session-store directamente. */
-}

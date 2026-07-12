@@ -79,13 +79,13 @@ function LegendItem({ color, label, value, percentage }: LegendItemProps) {
     <View className="gap-1 py-1.5">
       <View className="flex-row items-center gap-2">
         <View className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-        <Text className="flex-1 text-[12px] text-[#1A1A1A] dark:text-[#F0F0F0]" numberOfLines={1}>
+        <Text className="flex-1 text-[12px] text-content-primary" numberOfLines={1}>
           {label}
         </Text>
-        <Text className="mr-1.5 text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
+        <Text className="mr-1.5 text-[10px] text-content-secondary tabular-nums">
           {percentage.toFixed(0)}%
         </Text>
-        <Text className="min-w-[58px] text-right text-[12px] font-semibold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
+        <Text className="min-w-[58px] text-right text-[12px] font-semibold text-content-primary tabular-nums">
           {formatCurrency(value)}
         </Text>
       </View>

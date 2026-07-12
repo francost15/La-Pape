@@ -5,7 +5,7 @@ import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useHaptic } from "@/hooks/use-haptic";
 import type { EditProductViewProps } from "@/interface/products";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from "expo-router/tabs";
 import { useRouter } from "expo-router";
 import {
   KeyboardAvoidingView,
@@ -32,7 +32,7 @@ function BackButton() {
     >
       <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
       <Text
-        className="text-xs font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+        className="text-xs font-bold tracking-widest text-content-secondary uppercase"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         VOLVER
@@ -60,7 +60,7 @@ export function EditProductView({
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
       >
         <ScrollView
           className="flex-1"
@@ -87,7 +87,7 @@ export function EditProductView({
                   />
                 </View>
                 <View className="px-2">
-                  <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]">
+                  <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
                     Guas de Edición
                   </Text>
                   <Text className="text-xs leading-4 text-gray-400 dark:text-gray-500">
@@ -131,7 +131,7 @@ export function EditProductView({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+      className="flex-1 bg-canvas"
     >
       <ScrollView
         className="flex-1"
@@ -156,7 +156,7 @@ export function EditProductView({
       </ScrollView>
 
       <View
-        className="border-t border-gray-100 bg-[#FAFAF9] px-6 py-4 dark:border-neutral-800 dark:bg-[#0C0F14]"
+        className="border-t border-gray-100 bg-canvas px-6 py-4 dark:border-neutral-800"
         style={{ paddingBottom: 16 + tabBarHeight }}
       >
         {actions}

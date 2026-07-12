@@ -2,6 +2,8 @@ import BadgeCategoryProducts from "@/components/badges/BadgeCategoryProducts";
 import CardProducts from "@/components/cards/card-products";
 import SearchProducts from "@/components/search/SearchProducts";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
+import AppText from "@/components/ui/AppText";
+import Button from "@/components/ui/Button";
 import CircleIconButton from "@/components/ui/CircleIconButton";
 import EmptyState from "@/components/ui/EmptyState";
 import { Bone, ProductListSkeleton } from "@/components/ui/skeletons";
@@ -150,12 +152,12 @@ export default function ProductosScreen() {
 
         {/* Dynamic products count */}
         {filteredProducts.length > 0 && (
-          <Text
-            className="text-[11px] font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+          <AppText
+            variant="eyebrow"
             style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
           >
             {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
-          </Text>
+          </AppText>
         )}
       </View>
     ),
@@ -177,13 +179,11 @@ export default function ProductosScreen() {
         {loadingMore ? (
           <ActivityIndicator color={AppColors.primary} />
         ) : hasMore ? (
-          <TouchableOpacity
-            className="rounded-xl px-6 py-3"
-            style={{ backgroundColor: AppColors.primary }}
-            onPress={loadMore}
-          >
-            <Text className="font-semibold text-white">{Strings.productos.loadMore}</Text>
-          </TouchableOpacity>
+          // View intermedio: el wrapper interno de Button usa alignSelf flex-start
+          // con fullWidth={false}; sin este View el botón se pegaría a la izquierda
+          <View>
+            <Button title={Strings.productos.loadMore} fullWidth={false} onPress={loadMore} />
+          </View>
         ) : null}
       </View>
     ),
@@ -201,15 +201,13 @@ export default function ProductosScreen() {
               description={Strings.productos.emptyProductsHint}
               iconColor={AppColors.primary}
             />
-            <TouchableOpacity
-              className="mt-4 rounded-xl px-5 py-3.5"
-              style={{ backgroundColor: AppColors.primary }}
-              onPress={goToCreateProduct}
-            >
-              <Text className="font-semibold text-white">
-                {Strings.productos.createFirstProduct}
-              </Text>
-            </TouchableOpacity>
+            <View className="mt-4">
+              <Button
+                title={Strings.productos.createFirstProduct}
+                fullWidth={false}
+                onPress={goToCreateProduct}
+              />
+            </View>
           </>
         ) : (
           <EmptyState
@@ -228,7 +226,7 @@ export default function ProductosScreen() {
   // brevemente el empty state, que se leía como "no hay productos")
   if (loading && products.length === 0) {
     return (
-      <AnimatedScreen className="bg-[#FAFAF9] dark:bg-[#0C0F14]">
+      <AnimatedScreen className="bg-canvas">
         <View
           style={
             isDesktop
@@ -262,21 +260,17 @@ export default function ProductosScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#FAFAF9] p-4 dark:bg-[#0C0F14]">
-        <Text className="mb-4 text-center text-red-500">{error}</Text>
-        <TouchableOpacity
-          className="rounded-xl px-5 py-3.5"
-          style={{ backgroundColor: AppColors.primary }}
-          onPress={retry}
-        >
-          <Text className="font-semibold text-white">{Strings.common.retry}</Text>
-        </TouchableOpacity>
+      <View className="flex-1 items-center justify-center bg-canvas p-4">
+        <Text className="mb-4 text-center text-error">{error}</Text>
+        <View>
+          <Button title={Strings.common.retry} fullWidth={false} onPress={retry} />
+        </View>
       </View>
     );
   }
 
   return (
-    <AnimatedScreen className="bg-[#FAFAF9] dark:bg-[#0C0F14]">
+    <AnimatedScreen className="bg-canvas">
       <FlashList
         key={`products-grid-${numColumns}`}
         data={visibleProducts}

@@ -8,15 +8,3 @@ export interface Categoria {
   updatedAt?: Date;
 }
 
-export interface CreateCategoriaInput {
-  negocio_id: string;
-  nombre: string;
-  descripcion?: string;
-  activo?: boolean;
-}
-
-export interface UpdateCategoriaInput {
-  nombre?: string;
-  descripcion?: string;
-  activo?: boolean;
-}

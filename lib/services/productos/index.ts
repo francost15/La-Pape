@@ -89,7 +89,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
  * @returns An array of active Product objects
  * @throws AppError if the query fails
  */
-export const getProductsByNegocio = async (negocio_id: string): Promise<Product[]> => {
+const getProductsByNegocio = async (negocio_id: string): Promise<Product[]> => {
   try {
     const q = query(
       collection(db, 'productos').withConverter(productConverter),

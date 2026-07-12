@@ -1,11 +1,13 @@
+import AppText from "@/components/ui/AppText";
+import Button from "@/components/ui/Button";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useHaptic } from "@/hooks/use-haptic";
-import type { VentaCardProps } from "@/interface/ventas";
-import { formatCurrency, formatTime } from "@/lib/utils/format";
 import { AppColors } from "@/constants/colors";
-import { AppFonts } from "@/constants/typography";
+import { useHaptic } from "@/hooks/use-haptic";
+import { useThemeColors } from "@/hooks/use-theme-colors";
+import type { VentaCardProps } from "@/interface/ventas";
+import { formatCurrency, formatTime, pluralize } from "@/lib/utils/format";
 import React, { useEffect } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import Animated, {
   FadeInDown,
   ReduceMotion,
@@ -15,11 +17,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 /**
- * VentaCard — Digital Atelier Style
- *
- * Clean row on flat surface. No card shadow, no card border.
- * Left accent bar (3px) for visual identity.
- * Expanding inline without adding a new background layer.
+ * VentaCard — fila expandible del historial.
+ * Barra de acento izquierda; detalle inline sin capa de fondo extra.
  */
 export default React.memo(function VentaCard({
   venta,
@@ -33,6 +32,7 @@ export default React.memo(function VentaCard({
   onReembolso,
 }: VentaCardProps) {
   const haptic = useHaptic();
+  const { isDark, colors } = useThemeColors();
   const opacity = useSharedValue(0);
 
   useEffect(() => {
@@ -43,20 +43,20 @@ export default React.memo(function VentaCard({
     opacity: opacity.value,
   }));
 
+  const accent = isReembolso ? AppColors.errorLight : AppColors.primary;
+  const totalColor = isReembolso ? AppColors.error : colors.textPrimary;
+
   return (
     <Animated.View
       entering={FadeInDown.duration(280).springify().damping(18).reduceMotion(ReduceMotion.System)}
-      className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1F2B]"
+      className="overflow-hidden rounded-2xl"
       style={{
+        backgroundColor: colors.surfaceElevated,
         boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.02)" : undefined,
         elevation: Platform.OS !== "web" ? 2 : undefined,
       }}
     >
-      {/* Left accent bar */}
-      <View
-        className="border-l-[3px]"
-        style={{ borderLeftColor: isReembolso ? AppColors.errorLight : AppColors.primary }}
-      >
+      <View className="border-l-[3px]" style={{ borderLeftColor: accent }}>
         <Pressable
           onPress={() => {
             haptic();
@@ -68,133 +68,93 @@ export default React.memo(function VentaCard({
           accessibilityLabel={`Venta ${formatCurrency(venta.total)}, ${detalles.length} productos`}
         >
           <View className="min-w-0 flex-1">
-            <Text
-              className="mb-0.5 text-[10px] font-bold tracking-[0.15em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
-              style={{ fontFamily: AppFonts.bodyStrong }}
-            >
+            <AppText variant="caption" color={colors.textLabel} style={{ marginBottom: 2 }}>
               {formatTime(fecha)}
-            </Text>
-            <Text
-              className="text-[13px] text-[#4B5563] dark:text-[#9CA3AF]"
-              style={{ fontFamily: AppFonts.body }}
-              numberOfLines={1}
-            >
-              {detalles.length} producto{detalles.length !== 1 ? "s" : ""}
-            </Text>
+            </AppText>
+            <AppText variant="label" numberOfLines={1}>
+              {detalles.length} {pluralize(detalles.length, "producto", "productos")}
+            </AppText>
           </View>
-          <Text
-            className={`mr-4 text-xl tracking-tight ${
-              isReembolso ? "text-red-500" : "text-[#111827] dark:text-[#F9FAFB]"
-            }`}
-            style={{ fontFamily: AppFonts.heading }}
-          >
+
+          <AppText variant="heading" color={totalColor} style={{ marginRight: 16, fontSize: 20 }}>
             {formatCurrency(venta.total)}
-          </Text>
+          </AppText>
+
           <View
             className="h-8 w-8 items-center justify-center rounded-full"
             style={{
-              backgroundColor: expandido ? "rgba(234,88,12,0.1)" : "rgba(0,0,0,0.03)",
+              backgroundColor: expandido
+                ? isDark
+                  ? AppColors.primaryGhostDark
+                  : AppColors.primaryGhost
+                : colors.surfaceHover,
             }}
           >
             <IconSymbol
               name={expandido ? "chevron.up" : "chevron.down"}
               size={12}
-              color={expandido ? AppColors.primary : AppColors.light.textMuted}
+              color={expandido ? AppColors.primary : colors.textMuted}
             />
           </View>
         </Pressable>
       </View>
 
-      {/* ── Expanded Details ────────────────────── */}
       {expandido ? (
         <Animated.View style={animatedStyle}>
           <View
             className="px-5 pt-4 pb-5"
-            style={{
-              borderTopWidth: 1,
-              borderTopColor: "rgba(0,0,0,0.04)",
-            }}
+            style={{ borderTopWidth: 1, borderTopColor: colors.border }}
           >
-            <Text
-              className="mb-3 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
-              style={{ fontFamily: AppFonts.bodyStrong }}
-            >
-              DETALLE DE PRODUCTOS
-            </Text>
+            <AppText variant="label" style={{ marginBottom: 12 }}>
+              Detalle de productos
+            </AppText>
+
             <View className="mb-6 gap-2">
               {detalles.map((d) => {
                 const nombre = productNames[d.producto_id] ?? "Producto";
                 return (
                   <View key={d.id} className="flex-row items-baseline justify-between py-1">
-                    <Text
-                      className="mr-2 flex-1 text-[13px] text-[#6B7280] dark:text-[#9CA3AF]"
-                      style={{ fontFamily: AppFonts.body }}
-                      numberOfLines={1}
-                    >
+                    <AppText variant="label" style={{ flex: 1, marginRight: 8 }} numberOfLines={1}>
                       {d.cantidad} × {nombre}
-                    </Text>
-                    <Text
-                      className="text-[13px] font-bold text-[#111827] tabular-nums dark:text-[#F9FAFB]"
-                      style={{ fontFamily: AppFonts.bodyStrong }}
-                    >
+                    </AppText>
+                    <AppText variant="bodyStrong" style={{ fontVariant: ["tabular-nums"] }}>
                       {formatCurrency(d.total_linea)}
-                    </Text>
+                    </AppText>
                   </View>
                 );
               })}
             </View>
 
             <View className="flex-row gap-2.5">
-              <Pressable
-                onPress={() => {
-                  haptic();
-                  onVerRecibo(venta);
-                }}
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
-                style={{
-                  backgroundColor: AppColors.primary,
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Ver recibo"
-              >
-                <IconSymbol name="eye.fill" size={16} color="white" />
-                <Text
-                  className="text-[14px] font-bold tracking-wider text-white uppercase"
-                  style={{ fontFamily: AppFonts.bodyStrong }}
-                >
-                  Ver Recibo
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  haptic();
-                  onReembolso(venta);
-                }}
-                disabled={isReembolso}
-                style={({ pressed }) => ({
-                  opacity: isReembolso ? 0.3 : pressed ? 0.8 : 1,
-                  borderWidth: 1.5,
-                  borderColor: isReembolso ? "rgba(0,0,0,0.05)" : "rgba(220, 38, 38, 0.2)",
-                  backgroundColor: "transparent",
-                })}
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-4"
-                accessibilityRole="button"
-                accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
-              >
-                <IconSymbol
-                  name="arrow.uturn.backward"
-                  size={14}
-                  color={isReembolso ? AppColors.light.textMuted : AppColors.error}
+              <View style={{ flex: 1 }}>
+                <Button
+                  title="Ver recibo"
+                  icon={<IconSymbol name="eye.fill" size={16} color="white" />}
+                  onPress={() => onVerRecibo(venta)}
                 />
-                <Text
-                  className={`text-[13px] font-bold tracking-wider uppercase ${
-                    isReembolso ? "text-[#9CA3AF]" : "text-red-600 dark:text-red-400"
-                  }`}
-                  style={{ fontFamily: AppFonts.bodyStrong }}
-                >
-                  Reembolso
-                </Text>
-              </Pressable>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button
+                  title="Reembolso"
+                  variant="secondary"
+                  disabled={isReembolso}
+                  icon={
+                    <IconSymbol
+                      name="arrow.uturn.backward"
+                      size={14}
+                      color={isReembolso ? colors.textMuted : AppColors.error}
+                    />
+                  }
+                  onPress={() => onReembolso(venta)}
+                  style={{
+                    borderColor: isReembolso ? colors.border : "rgba(220, 38, 38, 0.2)",
+                  }}
+                  textStyle={{
+                    color: isReembolso ? colors.textMuted : AppColors.error,
+                  }}
+                  accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
+                />
+              </View>
             </View>
           </View>
         </Animated.View>

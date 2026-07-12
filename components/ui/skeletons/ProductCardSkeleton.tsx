@@ -13,7 +13,7 @@ interface ProductCardSkeletonProps {
  * al llegar los datos no haya salto de layout: mismo thumb (64px), mismos
  * paddings (px-3 py-3.5) y misma altura de imagen en desktop (h-44).
  */
-export function ProductCardSkeleton({ variant = "row" }: ProductCardSkeletonProps) {
+function ProductCardSkeleton({ variant = "row" }: ProductCardSkeletonProps) {
   const { isDark, colors } = useThemeColors();
 
   if (variant === "card") {

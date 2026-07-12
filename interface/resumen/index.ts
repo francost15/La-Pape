@@ -1,8 +1,4 @@
-import type React from "react";
-import type { ViewProps } from "react-native";
 import type { Product } from "@/interface/products";
-import type { Venta } from "@/interface/ventas";
-import type { VentaDetalle } from "@/interface/ventas-detalle";
 import type { ListRowDividerProps, VentasDetallesBaseState } from "@/interface/shared";
 
 export interface Metricas {
@@ -42,14 +38,6 @@ export interface ResumenActions {
 }
 
 export type ResumenStore = ResumenState & ResumenActions;
-
-// ─── SectionCard ───────────────────────────────────────────────────────────
-
-export interface SectionCardProps extends ViewProps {
-  /** Título visible en la parte superior de la card */
-  title?: string;
-  children: React.ReactNode;
-}
 
 // ─── ProductosBajoStockList ────────────────────────────────────────────────
 

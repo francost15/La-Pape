@@ -189,10 +189,12 @@ export default function AddProductsSheet() {
                   <Text
                     style={{
                       fontSize: 20,
-                      fontWeight: "800",
                       color: colors.textPrimary,
                       letterSpacing: -0.5,
                       fontFamily: AppFonts.heading,
+                      // En native el peso va codificado en el archivo de fuente; un
+                      // fontWeight explícito fuerza bold sintético. En web sí se declara.
+                      ...(Platform.OS === "web" ? { fontWeight: "800" as const } : null),
                     }}
                   >
                     Agregar productos

@@ -102,6 +102,9 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       const detalleRef = doc(collection(db, "ventas_detalle"));
       transaction.set(detalleRef, {
         venta_id: ventaRef.id,
+        // Denormalizado para que las reglas de seguridad puedan validar el
+        // tenant sin un get() adicional por documento
+        negocio_id: negocioId,
         producto_id: item.productId,
         cantidad: item.quantity,
         precio_unitario: item.unitPrice,
@@ -113,6 +116,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     const pagoRef = doc(collection(db, "ventas_pagos"));
     transaction.set(pagoRef, {
       venta_id: ventaRef.id,
+      negocio_id: negocioId,
       metodo_pago: "EFECTIVO",
       monto: total,
       createdAt: now,
@@ -131,6 +135,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       const movimientoRef = doc(collection(db, "inventario_movimientos"));
       transaction.set(movimientoRef, {
         producto_id: item.productId,
+        negocio_id: negocioId,
         sucursal_id: sucursalId,
         tipo: "SALIDA",
         cantidad: item.quantity,

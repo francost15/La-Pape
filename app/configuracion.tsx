@@ -39,7 +39,7 @@ function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => v
               onChange(tab.id);
             }}
             className={`flex-1 flex-row items-center justify-center gap-2 rounded-lg px-4 py-3 ${
-              isActive ? "bg-white dark:bg-[#1A1F2B]" : "active:opacity-70"
+              isActive ? "bg-surface-elevated" : "active:opacity-70"
             }`}
             style={
               isActive
@@ -53,9 +53,7 @@ function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => v
           >
             <Text
               className={`text-sm font-semibold ${
-                isActive
-                  ? "text-[#1A1A1A] dark:text-[#F0F0F0]"
-                  : "text-[#6B7280] dark:text-[#8B95A5]"
+                isActive ? "text-content-primary" : "text-content-secondary"
               }`}
               style={{ fontFamily: AppFonts.bodyStrong }}
             >
@@ -107,7 +105,7 @@ export default function ConfiguracionScreen() {
       <Navbar />
       <AnimatedScreen>
         <ScrollView
-          className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+          className="flex-1 bg-canvas"
           contentContainerStyle={{
             paddingHorizontal: isTablet ? 40 : 16,
             paddingVertical: isTablet ? 28 : 20,
@@ -122,7 +120,7 @@ export default function ConfiguracionScreen() {
             >
               <IconSymbol name="chevron.left" size={18} color={AppColors.light.textMuted} />
               <Text
-                className="text-sm font-medium text-[#6B7280] dark:text-[#8B95A5]"
+                className="text-sm font-medium text-content-secondary"
                 style={{ fontFamily: AppFonts.body }}
               >
                 Volver
@@ -130,21 +128,18 @@ export default function ConfiguracionScreen() {
             </Pressable>
 
             <View className="mb-2 flex-row items-center gap-3">
-              <View
-                className="h-10 w-10 items-center justify-center rounded-xl"
-                style={{ backgroundColor: "rgba(234,88,12,0.08)" }}
-              >
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-accent-soft">
                 <IconSymbol name="gearshape.fill" size={20} color={AppColors.primary} />
               </View>
               <Text
-                className="text-2xl font-bold text-[#1A1A1A] dark:text-[#F0F0F0]"
+                className="text-2xl font-bold text-content-primary"
                 style={{ fontFamily: AppFonts.heading }}
               >
                 Configuración
               </Text>
             </View>
             <Text
-              className="mb-6 text-sm text-[#6B7280] dark:text-[#8B95A5]"
+              className="mb-6 text-sm text-content-secondary"
               style={{ fontFamily: AppFonts.body }}
             >
               Gestiona tu perfil y el equipo del negocio

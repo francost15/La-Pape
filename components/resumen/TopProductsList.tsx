@@ -2,9 +2,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
+import { goToProductDetail } from "@/lib/navigation/go-to-product";
 import type { RankingRowProps, TopProductsListProps } from "@/interface/resumen";
 import { Image } from "expo-image";
-import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -18,11 +18,7 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
   const [imgError, setImgError] = useState(false);
   const hasImg = Boolean(item.producto.imagen?.trim()) && !imgError;
 
-  const handlePress = () =>
-    router.push({
-      pathname: "/productos/producto/[id]" as never,
-      params: { id: item.producto.id, product: JSON.stringify(item.producto) },
-    });
+  const handlePress = () => goToProductDetail(item.producto);
 
   return (
     <Pressable onPress={handlePress} className="active:opacity-60">
@@ -54,23 +50,23 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
 
         <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
+            className="text-[13px] leading-5 font-semibold text-content-primary"
             numberOfLines={1}
           >
             {item.producto.nombre}
           </Text>
           {item.producto.marca ? (
-            <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]" numberOfLines={1}>
+            <Text className="text-[10px] text-content-secondary" numberOfLines={1}>
               {item.producto.marca}
             </Text>
           ) : null}
         </View>
 
         <View className="shrink-0 items-end">
-          <Text className="text-[13px] font-bold text-[#1A1A1A] tabular-nums dark:text-[#F0F0F0]">
+          <Text className="text-[13px] font-bold text-content-primary tabular-nums">
             {formatCurrency(item.total)}
           </Text>
-          <Text className="text-[10px] text-[#6B7280] tabular-nums dark:text-[#8B95A5]">
+          <Text className="text-[10px] text-content-secondary tabular-nums">
             {item.cantidad} {pluralize(item.cantidad, "ud.", "uds.")}
           </Text>
         </View>

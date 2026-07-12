@@ -177,16 +177,6 @@ export interface VentaExitosaModalProps {
   onEnviarRecibo?: () => void;
 }
 
-export interface CartPanelProps {
-  /** Sin props externas; lee stores de ventas/checkout directamente. */
-}
-
-export interface AddProductsSheetProps {
-  visible: boolean;
-  onClose: () => void;
-  onProductAdded?: (productName: string) => void;
-}
-
 export interface ProductCardMobileProps {
   product: Product;
   onProductAdded?: () => void;

@@ -52,7 +52,7 @@ const KpiCard = memo(function KpiCard({
   return (
     <AnimatedKpiWrapper
       style={animatedStyle}
-      className="min-w-[140px] flex-1 rounded-[24px] bg-white p-6 dark:bg-[#1A1F2B]"
+      className="min-w-[140px] flex-1 rounded-[24px] bg-surface-elevated p-6"
       accessibilityRole="text"
       accessibilityLabel={`${label}: ${value}. ${subtitle}`}
     >
@@ -65,7 +65,7 @@ const KpiCard = memo(function KpiCard({
 
         <View className="flex-1">
           <Text
-            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
+            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
             numberOfLines={1}
           >

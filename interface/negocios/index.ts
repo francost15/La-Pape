@@ -10,20 +10,3 @@ export interface Negocio {
   updatedAt?: Date;
 }
 
-export interface CreateNegocioInput {
-  nombre: string;
-  telefono?: string;
-  email?: string;
-  direccion?: string;
-  rfc?: string;
-  activo?: boolean;
-}
-
-export interface UpdateNegocioInput {
-  nombre?: string;
-  telefono?: string;
-  email?: string;
-  direccion?: string;
-  rfc?: string;
-  activo?: boolean;
-}

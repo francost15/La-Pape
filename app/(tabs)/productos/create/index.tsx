@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
+import AppText from "@/components/ui/AppText";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import {
@@ -40,12 +41,9 @@ function BackButton({ isDark }: { isDark: boolean }) {
         size={18}
         color={isDark ? AppColors.dark.textSecondary : AppColors.light.textSecondary}
       />
-      <Text
-        className="text-xs font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
-        style={{ fontFamily: AppFonts.bodyStrong }}
-      >
+      <AppText variant="eyebrow" style={{ fontSize: 12, lineHeight: 16 }}>
         VOLVER
-      </Text>
+      </AppText>
     </Pressable>
   );
 }
@@ -177,15 +175,9 @@ export default function CreateProduct() {
         style={{ backgroundColor: colors.canvas }}
       >
         <ActivityIndicator size="large" color={AppColors.primary} />
-        <Text
-          className="mt-4"
-          style={{
-            color: colors.textSecondary,
-            fontFamily: AppFonts.body,
-          }}
-        >
+        <AppText variant="body" color={colors.textSecondary} className="mt-4">
           Cargando entorno...
-        </Text>
+        </AppText>
       </View>
     );
   }
@@ -207,15 +199,9 @@ export default function CreateProduct() {
       >
         <BackButton isDark={isDark} />
 
-        <Text
-          className="mb-6 text-3xl tracking-tighter"
-          style={{
-            color: colors.textPrimary,
-            fontFamily: AppFonts.display,
-          }}
-        >
+        <AppText variant="display" className="mb-6">
           Crear Producto
-        </Text>
+        </AppText>
 
         <View
           style={{

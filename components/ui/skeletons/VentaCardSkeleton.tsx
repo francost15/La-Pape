@@ -10,7 +10,7 @@ import { Bone } from "./Bone";
  * la izquierda, total y chevron circular a la derecha. Mismas alturas para que
  * el swap por datos reales no desplace el scroll.
  */
-export function VentaCardSkeleton() {
+function VentaCardSkeleton() {
   const isDark = useColorScheme() === "dark";
 
   return (

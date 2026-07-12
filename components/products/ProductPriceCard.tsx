@@ -14,7 +14,7 @@ export default function ProductPriceCard({
 }: ProductPriceCardProps) {
   return (
     <View
-      className="overflow-hidden rounded-3xl bg-white p-6 dark:bg-[#1A1F2B]"
+      className="overflow-hidden rounded-3xl bg-surface-elevated p-6"
       style={{
         boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
         elevation: Platform.OS !== "web" ? 4 : undefined,
@@ -22,7 +22,7 @@ export default function ProductPriceCard({
     >
       <View>
         <Text
-          className="mb-1 text-[10px] font-bold tracking-[0.2em] text-[#6B7280] uppercase dark:text-[#8B95A5]"
+          className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
           style={{ fontFamily: AppFonts.bodyStrong }}
         >
           PRECIO PÚBLICO
@@ -38,7 +38,7 @@ export default function ProductPriceCard({
       <View className="mt-6 flex-row items-center gap-8">
         <View>
           <Text
-            className="mb-1 text-[10px] font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+            className="mb-1 text-[10px] font-bold tracking-widest text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             MAYOREO
@@ -55,7 +55,7 @@ export default function ProductPriceCard({
 
         <View>
           <Text
-            className="mb-1 text-[10px] font-bold tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+            className="mb-1 text-[10px] font-bold tracking-widest text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             COSTO ADQ.

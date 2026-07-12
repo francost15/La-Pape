@@ -16,8 +16,3 @@ export interface CreateVentaDetalleInput {
   total_linea: number;
 }
 
-export interface UpdateVentaDetalleInput {
-  cantidad?: number;
-  precio_unitario?: number;
-  total_linea?: number;
-}

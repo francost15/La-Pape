@@ -1,9 +1,7 @@
 export * from "./categorias";
 export * from "./checkout";
-export * from "./clientes";
 export * from "./equipo";
 export * from "./filtros";
-export * from "./inventario-movimientos";
 export * from "./layout";
 export * from "./negocios";
 export * from "./onboarding";
@@ -21,4 +19,3 @@ export * from "./usuarios";
 export * from "./usuarios-negocios";
 export * from "./ventas";
 export * from "./ventas-detalle";
-export * from "./ventas-pagos";

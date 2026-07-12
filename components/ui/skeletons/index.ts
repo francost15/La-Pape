@@ -1,5 +1,7 @@
-export { Bone } from "./Bone";
+// Bone reemplazó al antiguo components/ui/Skeleton.tsx; se re-exporta como
+// Skeleton para mantener el nombre en los consumidores.
+export { Bone, Bone as Skeleton } from "./Bone";
 export { DetailSkeleton } from "./DetailSkeleton";
-export { ProductCardSkeleton, ProductListSkeleton } from "./ProductCardSkeleton";
+export { ProductListSkeleton } from "./ProductCardSkeleton";
 export { ResumenSkeleton } from "./ResumenSkeleton";
-export { HistoryListSkeleton, VentaCardSkeleton } from "./VentaCardSkeleton";
+export { HistoryListSkeleton } from "./VentaCardSkeleton";

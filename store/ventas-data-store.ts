@@ -33,7 +33,11 @@ let detallesCache: Record<string, VentaDetalle[]> = {};
 
 function startListener(negocioId: string): void {
   stopInner?.();
-  lastSnapshot = null;
+
+  // Al re-suscribir por cambio de período se conserva el snapshot anterior:
+  // las pantallas ya recortan por período client-side, y pasar por el estado
+  // de carga hacía parpadear resumen/history en cada cambio de badge.
+  const esPrimeraCarga = lastSnapshot === null;
 
   const { periodo, rangoPersonalizado } = useFiltrosStore.getState();
   const rango = getRangoConsulta(periodo, rangoPersonalizado);
@@ -41,7 +45,9 @@ function startListener(negocioId: string): void {
   stopInner = createVentasDetallesListener(
     negocioId,
     {
-      onLoading: () => subscribers.forEach((s) => s.onLoading?.()),
+      onLoading: () => {
+        if (esPrimeraCarga) subscribers.forEach((s) => s.onLoading?.());
+      },
       onData: (ventas, detallesMap) => {
         lastSnapshot = { ventas, detallesMap };
         subscribers.forEach((s) => s.onData(ventas, detallesMap));
@@ -71,8 +77,11 @@ export function subscribeVentasData(negocioId: string, listener: VentasDataListe
   subscribers.add(listener);
 
   if (activeNegocioId !== negocioId || !stopInner) {
-    // Cambio de negocio: el cache de detalles pertenece al negocio anterior.
-    if (activeNegocioId !== negocioId) detallesCache = {};
+    // Cambio de negocio: el cache y el snapshot pertenecen al negocio anterior.
+    if (activeNegocioId !== negocioId) {
+      detallesCache = {};
+      lastSnapshot = null;
+    }
     activeNegocioId = negocioId;
     startListener(negocioId);
 

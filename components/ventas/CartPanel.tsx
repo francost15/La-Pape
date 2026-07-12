@@ -33,7 +33,10 @@ export default function CartPanel() {
   const items = useVentasStore((s) => s.items);
   const removeItem = useVentasStore((s) => s.removeItem);
   const updateQuantity = useVentasStore((s) => s.updateQuantity);
-  const getTotal = useVentasStore((s) => s.getTotal);
+  // El total se deriva dentro del selector: llamar getTotal() en el cuerpo del
+  // render deja el resultado congelado por el React Compiler (la referencia a
+  // getTotal es estable, así que nunca invalida su memo) y el total quedaba en 0.
+  const total = useVentasStore((s) => s.getTotal());
   const clearCart = useVentasStore((s) => s.clearCart);
 
   const confirmVisible = useCheckoutStore((s) => s.confirmVisible);
@@ -53,7 +56,6 @@ export default function CartPanel() {
 
   const haptic = useHaptic();
   const reduceMotion = useReducedMotion();
-  const total = getTotal();
 
   // ── Animación de éxito ────────────────────────────────────────────────
   // Valor inicial 0.5 (no 0): desde scale(0) el check se "teletransporta" al

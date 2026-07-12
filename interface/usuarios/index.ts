@@ -12,15 +12,6 @@ export interface Usuario {
   last_login?: Date;
 }
 
-export interface CreateUsuarioInput {
-  email: string;
-  password: string;
-  nombre: string;
-  telefono?: string;
-  rol: UserRole;
-  activo?: boolean;
-}
-
 export interface UpdateUsuarioInput {
   email?: string;
   nombre?: string;

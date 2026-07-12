@@ -1,10 +1,10 @@
-import type { CampoMarcaProps } from "@/interface/products";
+import type { ProductFormFieldProps } from "@/interface/products";
 import { useProductosStore } from "@/store/productos-store";
 import { type ChangeEvent, createElement, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Modal, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-export default function CampoMarca({ control, errors }: CampoMarcaProps) {
+export default function CampoMarca({ control, errors }: ProductFormFieldProps) {
   const { products } = useProductosStore();
   const [showModal, setShowModal] = useState(false);
   const isWeb = Platform.OS === "web";

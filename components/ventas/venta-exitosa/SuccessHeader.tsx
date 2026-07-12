@@ -1,7 +1,7 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import type { SuccessHeaderProps } from "@/interface/ventas";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { IconSymbol } from "../../ui/icon-symbol";
 
 export function SuccessHeader({ colors }: SuccessHeaderProps) {
@@ -25,10 +25,12 @@ export function SuccessHeader({ colors }: SuccessHeaderProps) {
       <Text
         style={{
           fontSize: 22,
-          fontWeight: "700",
           color: colors.textPrimary,
           letterSpacing: -0.4,
           fontFamily: AppFonts.heading,
+          // En native el peso va codificado en el archivo de fuente; un
+          // fontWeight explícito fuerza bold sintético. En web sí se declara.
+          ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
         }}
       >
         ¡Venta Exitosa!
@@ -36,7 +38,6 @@ export function SuccessHeader({ colors }: SuccessHeaderProps) {
       <Text
         style={{
           fontSize: 14,
-          fontWeight: "400",
           color: colors.textSecondary,
           marginTop: 6,
           fontFamily: AppFonts.body,

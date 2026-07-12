@@ -1,66 +1,156 @@
 rules_version = '2';
 
+// ANTES DE DESPLEGAR ESTAS REGLAS — checklist obligatorio:
+//
+// 1. Migrar membresías: el aislamiento por tenant se valida contra el doc
+//    /usuarios_negocios/{uid}_{negocioId} (ID determinístico). Los docs
+//    creados antes de este cambio tienen ID automático: correr
+//    scripts/migrate-usuarios-negocios.ts o los usuarios existentes pierden
+//    acceso. createUsuarioNegocio ya crea los nuevos con ID determinístico.
+//
+// 2. Backfill de negocio_id en ventas_detalle (mismo script): en Firestore
+//    las reglas no filtran — una query debe PROBAR que cumple la regla. Las
+//    queries de detalles (where venta_id in [...]) necesitan además
+//    where('negocio_id','==',X), y eso solo funciona cuando todos los docs
+//    legacy tengan el campo. Tras el backfill, añadir el filtro en
+//    lib/services/ventas-detalle (getDetallesByVentaIds / getDetallesByVenta).
+//
+// 3. Probar en el emulador (firebase emulators:start --only firestore) los
+//    flujos: login/hydrate, venta, reembolso, historial, resumen y equipo.
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Funciones comunes
+    // ── Helpers ──────────────────────────────────────────────────────────
+
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function getUserData() {
-      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+
+    function membershipPath(negocioId) {
+      return /databases/$(database)/documents/usuarios_negocios/$(request.auth.uid + '_' + negocioId);
     }
 
-    // Colecciones
-    
-    match /usuarios/{userId} {
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-      allow write: if isAuthenticated() && request.auth.uid == userId; // Ajustar según roles
+    // Miembro activo del negocio (vía doc de membresía determinístico)
+    function isMember(negocioId) {
+      return isAuthenticated()
+        && negocioId is string
+        && exists(membershipPath(negocioId))
+        && get(membershipPath(negocioId)).data.activo == true;
     }
+
+    // Para docs que denormalizan negocio_id
+    function canReadTenantDoc() {
+      return isMember(resource.data.negocio_id);
+    }
+
+    function canCreateTenantDoc() {
+      return isMember(request.resource.data.negocio_id);
+    }
+
+    // En updates el negocio_id no puede cambiar (evita mover docs de tenant)
+    function tenantUnchanged() {
+      return request.resource.data.negocio_id == resource.data.negocio_id;
+    }
+
+    // ── Identidad y membresías ───────────────────────────────────────────
+
+    match /usuarios/{userId} {
+      // Lectura abierta a autenticados: la app resuelve vendedores de otros
+      // docs (resumen/equipo) y busca por email en el fallback de hydrate.
+      // El doc solo contiene datos de perfil (nombre, email, foto, rol).
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /usuarios_negocios/{relId} {
+      // El propio usuario lee sus membresías; los miembros del negocio leen
+      // el equipo completo.
+      allow read: if isAuthenticated()
+        && (resource.data.usuario_id == request.auth.uid
+          || isMember(resource.data.negocio_id));
+      // Solo un miembro existente del negocio puede agregar/editar miembros.
+      // Ajustar a rol ADMIN cuando el rol viva en esta relación.
+      allow create: if isMember(request.resource.data.negocio_id);
+      allow update: if isMember(resource.data.negocio_id) && tenantUnchanged();
+      allow delete: if false;
+    }
+
+    match /negocios/{negocioId} {
+      allow read: if isMember(negocioId);
+      allow write: if false; // Alta/edición de negocios: consola o backend
+    }
+
+    match /sucursales/{sucursalId} {
+      allow read: if canReadTenantDoc();
+      allow create: if canCreateTenantDoc();
+      allow update: if canReadTenantDoc() && tenantUnchanged();
+      allow delete: if false;
+    }
+
+    // ── Catálogo ─────────────────────────────────────────────────────────
 
     match /productos/{productId} {
-      allow read: if isAuthenticated();
-      // Solo permitir crear/actualizar si tienen campos necesarios
-      allow write: if isAuthenticated() 
+      allow read: if canReadTenantDoc();
+      allow create: if canCreateTenantDoc()
         && request.resource.data.precio_venta is number
         && request.resource.data.cantidad is number;
-      // Solo permite descontar stock o modificar si es autenticado
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated(); // Ajustar a solo admins
+      allow update: if canReadTenantDoc()
+        && tenantUnchanged()
+        && request.resource.data.precio_venta is number
+        && request.resource.data.cantidad is number;
+      allow delete: if canReadTenantDoc(); // Ajustar a solo admins
     }
 
-    match /ventas/{ventaId} {
-      allow read: if isAuthenticated();
-      // Validar que el total sea mayor a 0 y estado válido
-      allow create: if isAuthenticated() 
-        && request.resource.data.total >= 0;
-      allow update: if isAuthenticated();
+    match /categorias/{categoriaId} {
+      allow read: if canReadTenantDoc();
+      allow create: if canCreateTenantDoc();
+      allow update: if canReadTenantDoc() && tenantUnchanged();
+      allow delete: if false;
     }
-    
+
+    // ── Ventas ───────────────────────────────────────────────────────────
+
+    match /ventas/{ventaId} {
+      allow read: if canReadTenantDoc();
+      allow create: if canCreateTenantDoc()
+        && request.resource.data.total >= 0;
+      // Cambios de estado (ej. reembolso) por miembros del mismo negocio
+      allow update: if canReadTenantDoc() && tenantUnchanged();
+      allow delete: if false;
+    }
+
     match /ventas_detalle/{detalleId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated()
+      // Docs nuevos denormalizan negocio_id; los legacy se validan leyendo
+      // la venta padre (cuesta 1 get por doc — migrar legacy cuando se pueda).
+      allow read: if ('negocio_id' in resource.data)
+        ? isMember(resource.data.negocio_id)
+        : isMember(get(/databases/$(database)/documents/ventas/$(resource.data.venta_id)).data.negocio_id);
+      allow create: if isMember(request.resource.data.negocio_id)
         && request.resource.data.cantidad > 0
         && request.resource.data.precio_unitario >= 0;
+      allow update, delete: if false;
     }
 
     match /ventas_pagos/{pagoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow read: if ('negocio_id' in resource.data)
+        ? isMember(resource.data.negocio_id)
+        : isMember(get(/databases/$(database)/documents/ventas/$(resource.data.venta_id)).data.negocio_id);
+      allow create: if isMember(request.resource.data.negocio_id);
+      allow update, delete: if false;
     }
 
     match /inventario_movimientos/{movId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow read: if ('negocio_id' in resource.data)
+        && isMember(resource.data.negocio_id);
+      allow create: if isMember(request.resource.data.negocio_id);
+      allow update, delete: if false;
     }
-    
-    match /categorias/{categoriaId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // Ajustar roles
-    }
-    
-    // Por defecto todo cerrado (buena práctica)
+
+    // ── Default: todo cerrado ────────────────────────────────────────────
+
     match /{document=**} {
       allow read, write: if false;
     }

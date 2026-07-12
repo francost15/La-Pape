@@ -1,15 +1,16 @@
 import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
 import { Tour } from "@/components/onboarding/Tour";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
+import AppText from "@/components/ui/AppText";
 import CartPanel from "@/components/ventas/CartPanel";
 import FooterProducts from "@/components/ventas/FooterProducts";
 import ProductListContent from "@/components/ventas/ProductListContent";
+import { AppColors } from "@/constants/colors";
 import { VENTAS_TOUR } from "@/constants/tours";
 import { AppFonts } from "@/constants/typography";
-import { AppColors } from "@/constants/colors";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useResponsive } from "@/hooks/use-responsive";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { useVentasStore } from "@/store/ventas-store";
@@ -31,17 +32,10 @@ function CartHeader({ variant, itemCount }: CartHeaderProps) {
 
   return (
     <View className={`${isMobile ? "px-5" : "px-6"} pt-12 pb-6`}>
-      <Text
-        className="mb-2 text-[9px] font-bold tracking-[0.3em] uppercase"
-        style={{
-          fontFamily: AppFonts.bodyStrong,
-          // textLabel (no textMuted): el eyebrow es contenido legible y debe
-          // cumplir contraste AA; textMuted queda para adornos decorativos.
-          color: colors.textLabel,
-        }}
-      >
-        ORDEN ACTUAL
-      </Text>
+      {/* Eyebrow canónico (color textLabel AA); se conserva el tracking amplio original */}
+      <AppText variant="eyebrow" className="mb-2" style={{ letterSpacing: 2.7 }}>
+        Orden Actual
+      </AppText>
       <View className="flex-row items-center gap-2.5">
         <Text
           className={`${isMobile ? "text-3xl" : "text-2xl"} tracking-tight`}

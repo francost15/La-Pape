@@ -14,7 +14,7 @@ export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
       <View className="mt-2 flex-row flex-wrap items-center gap-2">
         {product.marca ? (
           <Text
-            className="text-xs tracking-widest text-[#6B7280] uppercase dark:text-[#8B95A5]"
+            className="text-xs tracking-widest text-content-secondary uppercase"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             {product.marca}

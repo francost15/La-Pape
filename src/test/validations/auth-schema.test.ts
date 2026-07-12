@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { loginSchema, signUpSchema } from "@/lib/validations/auth-schema";
+import { loginSchema } from "@/lib/validations/auth-schema";
 
 describe("loginSchema", () => {
   it("validates correct email and password", () => {
@@ -66,27 +66,5 @@ describe("loginSchema", () => {
       email: "test@example.com",
     });
     expect(result.success).toBe(false);
-  });
-});
-
-describe("signUpSchema", () => {
-  it("is the same as loginSchema", () => {
-    const loginResult = loginSchema.safeParse({
-      email: "test@example.com",
-      password: "password123",
-    });
-    const signUpResult = signUpSchema.safeParse({
-      email: "test@example.com",
-      password: "password123",
-    });
-    expect(signUpResult.success).toBe(loginResult.success);
-  });
-
-  it("validates correct email and password for signup", () => {
-    const result = signUpSchema.safeParse({
-      email: "newuser@example.com",
-      password: "newpassword",
-    });
-    expect(result.success).toBe(true);
   });
 });

@@ -1,9 +1,9 @@
 import EmptyState from "@/components/ui/EmptyState";
 import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
+import { goToProductDetail } from "@/lib/navigation/go-to-product";
 import type { ProductosBajoStockListProps, StockRowProps } from "@/interface/resumen";
 import { Image } from "expo-image";
-import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -20,11 +20,7 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
   const stockMinimo = product.stock_minimo ?? 0;
   const isCritical = product.cantidad === 0;
 
-  const handlePress = () =>
-    router.push({
-      pathname: "/productos/producto/[id]" as never,
-      params: { id: product.id, product: JSON.stringify(product) },
-    });
+  const handlePress = () => goToProductDetail(product);
 
   return (
     <Pressable onPress={handlePress} className="active:opacity-60">
@@ -51,13 +47,13 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
         {/* Nombre + marca */}
         <View className="min-w-0 flex-1">
           <Text
-            className="text-[13px] leading-5 font-semibold text-[#1A1A1A] dark:text-[#F0F0F0]"
+            className="text-[13px] leading-5 font-semibold text-content-primary"
             numberOfLines={1}
           >
             {product.nombre}
           </Text>
           {product.marca ? (
-            <Text className="text-[10px] text-[#6B7280] dark:text-[#8B95A5]" numberOfLines={1}>
+            <Text className="text-[10px] text-content-secondary" numberOfLines={1}>
               {product.marca}
             </Text>
           ) : null}

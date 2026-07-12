@@ -1,4 +1,5 @@
 import { notify } from "@/lib/notify";
+import { formatCurrency, formatDate, formatTime } from "@/lib/utils/format";
 import { Strings } from "@/constants/strings";
 import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
 import { useCheckoutStore } from "@/store/checkout-store";
@@ -61,14 +62,8 @@ export function useCompleteVenta(onSuccess?: () => void) {
       setTimeout(() => {
         clearCart();
 
-        const fechaStr = result.fecha.toLocaleString("es", {
-          day: "numeric",
-          month: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
+        // Fecha + hora con los helpers centralizados (locale es-CL consistente)
+        const fechaStr = `${formatDate(result.fecha)} ${formatTime(result.fecha)}`;
 
         const ventaItems = items.map((i) => ({
           nombre: i.product.nombre,
@@ -79,7 +74,7 @@ export function useCompleteVenta(onSuccess?: () => void) {
 
         notify.success({
           title: "Venta completada",
-          description: `Total: $${result.total.toLocaleString()}`,
+          description: `Total: ${formatCurrency(result.total)}`,
         });
 
         setSuccessVenta({

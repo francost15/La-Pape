@@ -4,7 +4,7 @@ import { useHaptic } from "@/hooks/use-haptic";
 import { usePressScaleHandlers } from "@/hooks/use-press-scale";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import type { SuccessActionsProps } from "@/interface/ventas";
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { IconSymbol } from "../../ui/icon-symbol";
 
@@ -52,10 +52,12 @@ export function SuccessActions({
           <Text
             style={{
               fontSize: 15,
-              fontWeight: "700",
               color: "#fff",
               fontFamily: AppFonts.bodyStrong,
               letterSpacing: -0.2,
+              // En native el peso va codificado en el archivo de fuente; un
+              // fontWeight explícito fuerza bold sintético. En web sí se declara.
+              ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
             }}
           >
             Descargar Recibo
@@ -86,10 +88,10 @@ export function SuccessActions({
             <Text
               style={{
                 fontSize: 15,
-                fontWeight: "700",
                 color: "#fff",
                 fontFamily: AppFonts.bodyStrong,
                 letterSpacing: -0.2,
+                ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
               }}
             >
               Enviar Recibo
@@ -112,9 +114,9 @@ export function SuccessActions({
         <Text
           style={{
             fontSize: 15,
-            fontWeight: "600",
             color: isDark ? AppColors.infoLight : AppColors.info,
             fontFamily: AppFonts.bodyStrong,
+            ...(Platform.OS === "web" ? { fontWeight: "600" as const } : null),
           }}
         >
           Continuar

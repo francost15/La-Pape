@@ -84,9 +84,11 @@ export default React.memo(function ProductItemVenta({
         <Text
           style={{
             fontSize: isDesktop ? 15 : 14,
-            fontWeight: "700",
             color: colors.textPrimary,
             fontFamily: AppFonts.bodyStrong,
+            // En native el peso va codificado en el archivo de fuente; un
+            // fontWeight explícito fuerza bold sintético. En web sí se declara.
+            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
           }}
           numberOfLines={1}
         >

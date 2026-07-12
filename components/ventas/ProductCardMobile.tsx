@@ -79,10 +79,12 @@ export default React.memo(function ProductCardMobile({
         <Text
           style={{
             fontSize: 15,
-            fontWeight: "600",
             color: colors.textPrimary,
             letterSpacing: -0.2,
             fontFamily: AppFonts.bodyStrong,
+            // En native el peso va codificado en el archivo de fuente; un
+            // fontWeight explícito fuerza bold sintético. En web sí se declara.
+            ...(Platform.OS === "web" ? { fontWeight: "600" as const } : null),
           }}
           numberOfLines={2}
         >
@@ -93,8 +95,8 @@ export default React.memo(function ProductCardMobile({
             style={{
               fontSize: 13,
               color: colors.textSecondary,
-              fontWeight: "500",
               fontFamily: AppFonts.body,
+              ...(Platform.OS === "web" ? { fontWeight: "500" as const } : null),
               marginTop: 2,
             }}
             numberOfLines={1}
@@ -105,10 +107,10 @@ export default React.memo(function ProductCardMobile({
         <Text
           style={{
             fontSize: 16,
-            fontWeight: "700",
             color: AppColors.primary,
             letterSpacing: -0.3,
             fontFamily: AppFonts.display,
+            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
             marginTop: 3,
           }}
         >
