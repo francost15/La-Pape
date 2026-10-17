@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isMetodoPago, labelMetodoPago, parseMonto, parseNumeric } from "@/constants/pagos";
+import { isMetodoPago, labelMetodoPago, parseMonto } from "@/constants/pagos";
+import { parseNumeric } from "@/lib/utils/format";
 
 describe("parseMonto", () => {
   it("devuelve NaN si el texto está vacío", () => {

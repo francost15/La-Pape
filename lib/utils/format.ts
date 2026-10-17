@@ -5,6 +5,15 @@
  * Usar es-CL como locale porque el mercado objetivo es Chile (símbolo $, punto como separador de miles).
  */
 
+import { parseMonto } from "@/constants/pagos";
+
+/** Entero con parseInt; decimal reutiliza el formato chileno de `parseMonto`. */
+export function parseNumeric(text: string, mode: "decimal" | "integer"): number {
+  if (mode === "integer") return parseInt(text, 10) || 0;
+  const value = parseMonto(text);
+  return Number.isNaN(value) ? 0 : value;
+}
+
 export function formatCurrency(value: number): string {
   return `$${value.toLocaleString("es-CL", {
     minimumFractionDigits: 2,

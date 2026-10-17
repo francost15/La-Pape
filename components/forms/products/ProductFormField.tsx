@@ -1,6 +1,6 @@
 import AppTextInput from "@/components/ui/AppTextInput";
-import { parseNumeric } from "@/constants/pagos";
 import type { ProductFormFieldProps } from "@/interface/products";
+import { parseNumeric } from "@/lib/utils/format";
 import { Controller } from "react-hook-form";
 
 /** Campo de texto/número canónico del formulario de producto (RHF + AppTextInput). */

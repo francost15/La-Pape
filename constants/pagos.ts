@@ -28,10 +28,3 @@ export function parseMonto(text: string): number {
   const value = Number(cleaned);
   return Number.isFinite(value) ? value : Number.NaN;
 }
-
-/** Entero con parseInt; decimal reutiliza el formato chileno de `parseMonto`. */
-export function parseNumeric(text: string, mode: "decimal" | "integer"): number {
-  if (mode === "integer") return parseInt(text, 10) || 0;
-  const value = parseMonto(text);
-  return Number.isNaN(value) ? 0 : value;
-}
