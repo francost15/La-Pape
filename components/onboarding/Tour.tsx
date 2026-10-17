@@ -30,14 +30,21 @@ export function Tour({ onComplete }: Pick<TourProps, "onComplete">) {
     prevTourStep();
   };
 
-  const handleSkip = () => {
-    closeTour();
+  const handleSkip = async () => {
+    await closeTour();
   };
 
   if (!isOpen || !step) return null;
 
   return (
-    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={closeTour}>
+    <Modal
+      visible={isOpen}
+      transparent
+      animationType="fade"
+      onRequestClose={async () => {
+        await closeTour();
+      }}
+    >
       <View className="flex-1 bg-black/60">
         <View
           className={`absolute right-4 bottom-8 left-4 mx-auto max-w-sm rounded-2xl p-5 ${

@@ -69,8 +69,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     }
   },
 
-  closeTour: () => {
-    set({ isTourOpen: false, tourStepIndex: 0 });
+  closeTour: async () => {
+    const { activeTourId } = get();
+    if (activeTourId) {
+      await AsyncStorage.setItem(`${TOUR_COMPLETED_KEY}_${activeTourId}`, "true");
+    }
+    set({ isTourOpen: false, tourStepIndex: 0, activeTourId: null, tourSteps: [] });
   },
 
   nextTourStep: () => {

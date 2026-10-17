@@ -45,6 +45,7 @@ describe("CheckoutStore", () => {
       total: 1000,
       subtotal: 900,
       descuento: 100,
+      metodoPago: "Efectivo",
       items: [
         {
           nombre: "Product 1",
@@ -68,6 +69,7 @@ describe("CheckoutStore", () => {
       total: 1000,
       subtotal: 900,
       descuento: 100,
+      metodoPago: "Efectivo",
       items: [],
     });
 
@@ -82,6 +84,7 @@ describe("CheckoutStore", () => {
       total: 1000,
       subtotal: 900,
       descuento: 100,
+      metodoPago: "Efectivo",
       items: [],
     });
     useCheckoutStore.getState().closeSuccess();

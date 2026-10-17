@@ -15,8 +15,23 @@ vi.mock("@/lib/services/usuarios-negocios", () => ({
   getNegocioIdByUsuario: vi.fn().mockResolvedValue("negocio-123"),
 }));
 
+vi.mock("@react-native-async-storage/async-storage", () => ({
+  default: {
+    getItem: vi.fn().mockResolvedValue(null),
+    setItem: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+vi.mock("@/lib/services/negocios", () => ({
+  getNegocioById: vi.fn().mockResolvedValue({
+    id: "negocio-123",
+    nombre: "Almacén Centro",
+    activo: true,
+  }),
+}));
+
 vi.mock("@/lib/services/sucursales", () => ({
-  getSucursalesByNegocio: vi.fn().mockResolvedValue([{ id: "sucursal-1" }]),
+  getSucursalesByNegocio: vi.fn().mockResolvedValue([{ id: "sucursal-1", nombre: "Local 1" }]),
 }));
 
 describe("SessionStore", () => {
@@ -27,7 +42,10 @@ describe("SessionStore", () => {
       displayName: null,
       photoURL: null,
       negocioId: null,
+      negocioNombre: null,
+      sucursales: [],
       sucursalId: null,
+      sucursalNombre: null,
       ready: false,
       error: null,
     });
@@ -70,7 +88,9 @@ describe("SessionStore", () => {
     expect(state.displayName).toBe("Test User");
     expect(state.photoURL).toBe("https://example.com/photo.jpg");
     expect(state.negocioId).toBe("negocio-123");
+    expect(state.negocioNombre).toBe("Almacén Centro");
     expect(state.sucursalId).toBe("sucursal-1");
+    expect(state.sucursalNombre).toBe("Local 1");
     expect(state.ready).toBe(true);
   });
 

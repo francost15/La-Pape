@@ -20,6 +20,11 @@ export default function ConfigTabPerfil() {
   const photoURL = useSessionStore((s) => s.photoURL);
   const usuarioDoc = useSessionStore((s) => s.usuarioDoc);
   const negocioId = useSessionStore((s) => s.negocioId);
+  const negocioNombre = useSessionStore((s) => s.negocioNombre);
+  const sucursales = useSessionStore((s) => s.sucursales);
+  const sucursalId = useSessionStore((s) => s.sucursalId);
+  const sucursalNombre = useSessionStore((s) => s.sucursalNombre);
+  const setSucursal = useSessionStore((s) => s.setSucursal);
   const patchProfile = useSessionStore((s) => s.patchProfile);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -146,8 +151,46 @@ export default function ConfigTabPerfil() {
             className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
             numberOfLines={1}
           >
-            {negocioId ? `${negocioId.slice(0, 12)}…` : "Sin negocio"}
+            {negocioNombre || (negocioId ? "Negocio sin nombre" : "Sin negocio")}
           </Text>
+        </View>
+        <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
+        <View className="gap-3 px-4 py-3.5">
+          <View className="flex-row items-center gap-3">
+            <IconSymbol name="building.2.fill" size={16} color={AppColors.light.textMuted} />
+            <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Sucursal</Text>
+            <Text
+              className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
+              numberOfLines={1}
+            >
+              {sucursalNombre || "Sin sucursal"}
+            </Text>
+          </View>
+          {sucursales.length > 1 ? (
+            <View className="flex-row flex-wrap gap-2">
+              {sucursales.map((sucursal) => {
+                const selected = sucursal.id === sucursalId;
+                return (
+                  <Pressable
+                    key={sucursal.id}
+                    onPress={() => setSucursal(sucursal.id)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={sucursal.nombre}
+                    className={`min-h-11 items-center justify-center rounded-xl border px-3 ${
+                      selected
+                        ? "border-orange-600 bg-orange-50 dark:bg-orange-950"
+                        : "border-gray-200 dark:border-neutral-600"
+                    }`}
+                  >
+                    <Text className="text-sm text-gray-800 dark:text-gray-200">
+                      {sucursal.nombre}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
         </View>
       </View>
 

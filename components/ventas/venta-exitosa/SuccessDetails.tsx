@@ -46,6 +46,23 @@ export function SuccessDetails({ venta, isDark, colors }: SuccessDetailsProps) {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+          paddingVertical: 14,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <Text style={{ fontSize: 14, color: colors.textSecondary, fontFamily: AppFonts.body }}>
+          Pago
+        </Text>
+        <Text style={{ fontSize: 14, color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}>
+          {venta.metodoPago}
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingVertical: 18,
         }}
       >

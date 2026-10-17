@@ -17,7 +17,7 @@ export interface OnboardingStore {
   tourSteps: TourStep[];
   tourStepIndex: number;
   startTour: (tourId: string, steps: TourStep[]) => Promise<void>;
-  closeTour: () => void;
+  closeTour: () => Promise<void>;
   nextTourStep: () => void;
   prevTourStep: () => void;
   completeTour: () => Promise<void>;

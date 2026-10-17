@@ -1,8 +1,10 @@
-import type { SessionStore } from "@/interface/session";
+import type { SessionStore, SucursalSesion } from "@/interface/session";
 import { auth, db } from "@/lib/firebase";
+import { getNegocioById } from "@/lib/services/negocios";
 import { getUsuarioById, getUsuarioByEmail } from "@/lib/services/usuarios";
 import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
 import { getSucursalesByNegocio } from "@/lib/services/sucursales";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { create } from "zustand";
@@ -15,7 +17,10 @@ const initialState = {
   photoURL: null,
   usuarioDoc: null,
   negocioId: null,
+  negocioNombre: null,
+  sucursales: [] as SucursalSesion[],
   sucursalId: null,
+  sucursalNombre: null,
   ready: false,
   error: null,
 };
@@ -48,15 +53,32 @@ async function resolveUsuarioDoc(uid: string, email: string, displayName: string
   return usuarioDoc;
 }
 
-/** Primera sucursal del negocio, o null si no hay o falla. */
-async function resolveSucursalId(negocioId: string): Promise<string | null> {
-  try {
-    const sucursales = await getSucursalesByNegocio(negocioId);
-    return sucursales.length > 0 ? sucursales[0].id : null;
-  } catch {
-    console.warn("No se pudieron obtener sucursales, continuando sin sucursal");
-    return null;
-  }
+function sucursalKey(negocioId: string): string {
+  return `sucursal_activa_${negocioId}`;
+}
+
+async function resolveTenant(negocioId: string): Promise<{
+  negocioNombre: string | null;
+  sucursales: SucursalSesion[];
+  sucursalId: string | null;
+  sucursalNombre: string | null;
+}> {
+  const [negocio, sucursalesRaw, storedId] = await Promise.all([
+    getNegocioById(negocioId).catch(() => null),
+    getSucursalesByNegocio(negocioId).catch(() => []),
+    AsyncStorage.getItem(sucursalKey(negocioId)).catch(() => null),
+  ]);
+  const sucursales = sucursalesRaw.map((sucursal) => ({
+    id: sucursal.id,
+    nombre: sucursal.nombre,
+  }));
+  const picked = sucursales.find((sucursal) => sucursal.id === storedId) ?? sucursales[0] ?? null;
+  return {
+    negocioNombre: negocio?.nombre || null,
+    sucursales,
+    sucursalId: picked?.id ?? null,
+    sucursalNombre: picked?.nombre ?? null,
+  };
 }
 
 export const useSessionStore = create<SessionStore>((set, get) => ({
@@ -76,23 +98,39 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       if (gen !== hydrateGen) return;
 
       if (!negocioId) {
-        set({ ready: true, error: "No tienes un negocio asignado" });
+        set({
+          ready: true,
+          error: "No tienes un negocio asignado",
+          negocioId: null,
+          negocioNombre: null,
+          sucursales: [],
+          sucursalId: null,
+          sucursalNombre: null,
+        });
         return;
       }
 
-      // El doc de usuario y las sucursales son independientes: se resuelven en
-      // paralelo para no encadenar round-trips y desbloquear `ready` antes.
-      const [usuarioDoc, sucursalId] = await Promise.all([
+      const [usuarioDoc, tenant] = await Promise.all([
         resolveUsuarioDoc(uid, email, displayName),
-        resolveSucursalId(negocioId),
+        resolveTenant(negocioId),
       ]);
       if (gen !== hydrateGen) return;
 
-      set({ negocioId, sucursalId, usuarioDoc, ready: true });
+      set({ negocioId, usuarioDoc, ready: true, ...tenant });
     } catch (err) {
       if (gen !== hydrateGen) return;
       console.error("Error al hidratar sesión:", err);
       set({ ready: true, error: "Error al cargar datos del negocio" });
+    }
+  },
+
+  setSucursal: (sucursalId) => {
+    const sucursal = get().sucursales.find((item) => item.id === sucursalId);
+    if (!sucursal) return;
+    set({ sucursalId: sucursal.id, sucursalNombre: sucursal.nombre });
+    const negocioId = get().negocioId;
+    if (negocioId) {
+      void AsyncStorage.setItem(sucursalKey(negocioId), sucursal.id);
     }
   },
 

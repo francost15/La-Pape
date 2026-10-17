@@ -13,12 +13,10 @@ export function SuccessActions({
   colors,
   onContinuar,
   onDescargarRecibo,
-  onEnviarRecibo,
 }: SuccessActionsProps) {
   const haptic = useHaptic();
   const reduceMotion = useReducedMotion();
   const descargar = usePressScale(reduceMotion);
-  const enviar = usePressScale(reduceMotion);
 
   return (
     <View style={{ padding: 20, gap: 10 }}>
@@ -56,41 +54,6 @@ export function SuccessActions({
           </Text>
         </Pressable>
       </Animated.View>
-
-      {onEnviarRecibo && (
-        <Animated.View style={enviar.animatedStyle}>
-          <Pressable
-            onPress={() => {
-              haptic();
-              onEnviarRecibo();
-            }}
-            onPressIn={enviar.onPressIn}
-            onPressOut={enviar.onPressOut}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              paddingVertical: 15,
-              borderRadius: 14,
-              backgroundColor: AppColors.success,
-            }}
-          >
-            <IconSymbol name="paperplane.fill" size={16} color="#fff" />
-            <Text
-              style={{
-                fontSize: 15,
-                color: "#fff",
-                fontFamily: AppFonts.bodyStrong,
-                letterSpacing: -0.2,
-                ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
-              }}
-            >
-              Enviar Recibo
-            </Text>
-          </Pressable>
-        </Animated.View>
-      )}
 
       <TouchableOpacity
         onPress={onContinuar}

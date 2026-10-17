@@ -7,7 +7,7 @@ import { Easing } from "react-native-reanimated";
 
 export type { TabTheme } from "@/interface/layout";
 
-export const PC_ONLY_ROUTES = ["resumen"] as const;
+export const PC_ONLY_ROUTES: readonly string[] = [];
 
 export const ACTIVE_BG = AppColors.primary;
 export const ACTIVE_ICON_COLOR = "#ffffff";

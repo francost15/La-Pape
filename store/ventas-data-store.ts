@@ -1,10 +1,12 @@
 import type { Venta } from "@/interface/ventas";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
+import type { VentasQueryOptions } from "@/lib/services/ventas";
 import {
   createVentasDetallesListener,
   type VentasListenerCallbacks,
 } from "@/lib/services/ventas/ventas-listener";
 import { getRangoConsulta, useFiltrosStore } from "@/store/filtros-store";
+import { AppState, type AppStateStatus } from "react-native";
 
 /**
  * Suscripción compartida de ventas + detalles.
@@ -28,6 +30,29 @@ let stopInner: (() => void) | null = null;
 let stopFiltros: (() => void) | null = null;
 let lastSnapshot: { ventas: Venta[]; detallesMap: Record<string, VentaDetalle[]> } | null = null;
 
+// Rango con el que se armó el listener activo. En periodos relativos ("hoy",
+// "semana", "mes") el `desde` es un límite calculado que se congela: al cruzar
+// medianoche/mes en una sesión always-on la consulta seguiría filtrando el día
+// viejo. Guardamos el rango para detectar ese desfase y re-suscribir.
+let activeRango: VentasQueryOptions | null = null;
+let dayCheckTimer: ReturnType<typeof setInterval> | null = null;
+let stopAppState: (() => void) | null = null;
+
+const CHECK_INTERVAL_MS = 60_000;
+
+function rangoKey(r: VentasQueryOptions | null): string {
+  return `${r?.desde?.getTime() ?? ""}-${r?.hasta?.getTime() ?? ""}`;
+}
+
+// Si el rango relativo cambió respecto al del listener activo (p. ej. cruzó la
+// medianoche), re-suscribe con el rango vigente. No-op si nada cambió.
+function maybeRestartForRango(): void {
+  if (!activeNegocioId || !stopInner) return;
+  const { periodo, rangoPersonalizado } = useFiltrosStore.getState();
+  const rango = getRangoConsulta(periodo, rangoPersonalizado);
+  if (rangoKey(rango) !== rangoKey(activeRango)) startListener(activeNegocioId);
+}
+
 // Los detalles de una venta son inmutables: conservarlos entre re-suscripciones
 // (cambios de período) evita volver a descargarlos.
 let detallesCache: Record<string, VentaDetalle[]> = {};
@@ -42,6 +67,7 @@ function startListener(negocioId: string): void {
 
   const { periodo, rangoPersonalizado } = useFiltrosStore.getState();
   const rango = getRangoConsulta(periodo, rangoPersonalizado);
+  activeRango = rango;
 
   stopInner = createVentasDetallesListener(
     negocioId,
@@ -64,7 +90,14 @@ function teardown(): void {
   stopInner = null;
   stopFiltros?.();
   stopFiltros = null;
+  if (dayCheckTimer) {
+    clearInterval(dayCheckTimer);
+    dayCheckTimer = null;
+  }
+  stopAppState?.();
+  stopAppState = null;
   activeNegocioId = null;
+  activeRango = null;
   lastSnapshot = null;
   detallesCache = {};
 }
@@ -91,6 +124,18 @@ export function subscribeVentasData(negocioId: string, listener: VentasDataListe
         state.periodo !== prev.periodo || state.rangoPersonalizado !== prev.rangoPersonalizado;
       if (cambioPeriodo && activeNegocioId) startListener(activeNegocioId);
     });
+
+    // Sesión always-on (terminal de POS en foreground todo el día): un timer
+    // detecta el cruce de medianoche/mes. Al volver de background lo cubre
+    // AppState, porque los timers no corren fiables en segundo plano.
+    dayCheckTimer ??= setInterval(maybeRestartForRango, CHECK_INTERVAL_MS);
+    if (!stopAppState) {
+      const onAppState = (status: AppStateStatus) => {
+        if (status === "active") maybeRestartForRango();
+      };
+      const sub = AppState.addEventListener("change", onAppState);
+      stopAppState = () => sub.remove();
+    }
   } else if (lastSnapshot) {
     // Suscriptor tardío: recibe el último snapshot sin esperar al próximo evento.
     listener.onData(lastSnapshot.ventas, lastSnapshot.detallesMap);

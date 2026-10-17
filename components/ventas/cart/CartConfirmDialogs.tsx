@@ -1,6 +1,8 @@
 import { Strings } from "@/constants/strings";
 import type { CartConfirmDialogsProps } from "@/interface/ventas";
+import { useCheckoutStore } from "@/store/checkout-store";
 import ConfirmAlert from "../../ui/ConfirmAlert";
+import { CheckoutDialog } from "./CheckoutDialog";
 
 export function CartConfirmDialogs({
   deleteConfirmItem,
@@ -13,6 +15,8 @@ export function CartConfirmDialogs({
   onConfirmClear,
   onCancelClear,
 }: CartConfirmDialogsProps) {
+  const processing = useCheckoutStore((s) => s.processing);
+
   return (
     <>
       <ConfirmAlert
@@ -25,15 +29,11 @@ export function CartConfirmDialogs({
         onCancel={onCancelRemove}
         danger
       />
-      <ConfirmAlert
+      <CheckoutDialog
         visible={confirmVisible}
-        title={Strings.ventas.completeSale}
-        message={Strings.ventas.confirmComplete}
-        confirmText={Strings.ventas.accept}
-        cancelText={Strings.common.cancel}
+        processing={processing}
         onConfirm={onCompleteVenta}
         onCancel={onCancelComplete}
-        danger={false}
       />
       <ConfirmAlert
         visible={clearCartConfirmVisible}

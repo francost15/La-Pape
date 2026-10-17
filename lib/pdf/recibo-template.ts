@@ -37,8 +37,22 @@ function shortId(id: string): string {
   return id.slice(-6).toUpperCase();
 }
 
+/**
+ * Escapa texto para interpolarlo seguro en el HTML del recibo. Sin esto, un
+ * nombre de producto/negocio con `<`, `&` o `"` (editables por el usuario)
+ * podría romper el markup o inyectar contenido en el PDF.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function buildReciboHTML(data: ReciboData, logoBase64: string): string {
-  const negocio = data.negocioNombre ?? "La Pape";
+  const negocio = escapeHtml(data.negocioNombre ?? "La Pape");
 
   return `<!DOCTYPE html>
 <html>
@@ -221,7 +235,7 @@ export function buildReciboHTML(data: ReciboData, logoBase64: string): string {
                 .map(
                   (item) => `
               <tr>
-                <td>${item.nombre}</td>
+                <td>${escapeHtml(item.nombre)}</td>
                 <td class="center">${item.cantidad}</td>
                 <td class="right">${formatCurrency(item.precioUnitario)}</td>
                 <td class="total-col">${formatCurrency(item.totalLinea)}</td>
@@ -269,7 +283,7 @@ export function buildReciboHTML(data: ReciboData, logoBase64: string): string {
                   Detalles de pago
                 </div>
                 <div style="font-size:13px;color:#111827;line-height:20px;">
-                  Método de pago: <strong>${data.metodoPago}</strong>
+                  Método de pago: <strong>${escapeHtml(data.metodoPago)}</strong>
                 </div>
                 <div style="font-size:13px;color:#111827;line-height:20px;">
                   Estado: <strong>Completada</strong>

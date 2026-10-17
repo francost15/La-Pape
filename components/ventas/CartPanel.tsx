@@ -158,7 +158,9 @@ export default function CartPanel() {
         <EmptyState
           icon="cart"
           title={Strings.ventas.emptyCart}
-          description={Strings.ventas.emptyCartHint}
+          description={
+            isDesktop ? Strings.ventas.emptyCartHintDesktop : Strings.ventas.emptyCartHintMobile
+          }
           iconColor={colors.textMuted}
         />
       </View>

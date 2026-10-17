@@ -1,3 +1,4 @@
+import { labelMetodoPago, METODOS_PAGO, parseMonto } from "@/constants/pagos";
 import { notify } from "@/lib/notify";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils/format";
 import { Strings } from "@/constants/strings";
@@ -33,17 +34,26 @@ export function useCompleteVenta(onSuccess?: () => void) {
   const completeVenta = useCallback(async () => {
     if (useCheckoutStore.getState().processing) return;
 
-    setProcessing(true);
-    closeConfirm();
-
     if (!negocioId || !userId) {
       notify.error({ title: Strings.errors.session });
-      setProcessing(false);
       return;
     }
 
+    const subtotal = getTotal();
+    const { metodoPago, montoRecibido } = useCheckoutStore.getState();
+    const monto = metodoPago === METODOS_PAGO.EFECTIVO ? parseMonto(montoRecibido) : undefined;
+    if (
+      metodoPago === METODOS_PAGO.EFECTIVO &&
+      (monto == null || Number.isNaN(monto) || monto < subtotal)
+    ) {
+      notify.error({ title: Strings.ventas.cashShort });
+      return;
+    }
+
+    setProcessing(true);
+    closeConfirm();
+
     try {
-      const subtotal = getTotal();
       const result = await completeVentaFlow({
         items,
         negocioId,
@@ -51,6 +61,8 @@ export function useCompleteVenta(onSuccess?: () => void) {
         userId,
         total: subtotal,
         subtotal,
+        metodoPago,
+        montoRecibido: monto,
       });
 
       // Actualiza el stock local de forma optimista
@@ -89,6 +101,7 @@ export function useCompleteVenta(onSuccess?: () => void) {
           subtotal,
           descuento: 0,
           items: ventaItems,
+          metodoPago: labelMetodoPago(result.metodoPago),
         });
 
         setProcessing(false);

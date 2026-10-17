@@ -12,10 +12,15 @@ export const Strings = {
 
   ventas: {
     emptyCart: "Carrito vacío",
-    emptyCartHint: "Agrega productos desde el panel lateral",
+    emptyCartHintMobile: "Toca Agregar productos para armar la venta",
+    emptyCartHintDesktop: "Agrega productos desde el catálogo",
     completeSale: "Completar venta",
     clearCart: "Limpiar",
     confirmComplete: "¿Estás seguro de completar esta venta?",
+    cashShort: "El monto recibido no alcanza el total",
+    amountReceived: "Monto recibido",
+    changeDue: "Vuelto",
+    charge: "Cobrar",
     confirmClear: "¿Estás seguro de vaciar el carrito?",
     cartEmptied: "Carrito vaciado",
     saleCompleted: "Venta completada",
@@ -28,7 +33,7 @@ export const Strings = {
   productos: {
     emptyProducts: "No hay productos",
     emptyProductsAvailable: "No hay productos disponibles",
-    emptyProductsHint: "Agrega productos desde el panel lateral",
+    emptyProductsHint: "El catálogo de este negocio está vacío",
     createFirstProduct: "Crear primer producto",
     noSearchResults: "No se encontraron productos con esa búsqueda",
     loadMore: "Cargar más",

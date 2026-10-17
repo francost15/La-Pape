@@ -8,6 +8,7 @@ import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import AppText from "@/components/ui/AppText";
 import EmptyState from "@/components/ui/EmptyState";
 import { useResumen } from "@/hooks/use-resumen";
+import { useSessionStore } from "@/store/session-store";
 import { AppColors } from "@/constants/colors";
 import { ResumenSkeleton } from "@/components/ui/skeletons";
 import React from "react";
@@ -37,7 +38,7 @@ export default function ResumenScreen() {
           <EmptyState
             icon="error"
             title={error ?? "No tienes un negocio asignado"}
-            description="Configura tu negocio para ver el resumen de ventas"
+            description="Pide a un administrador que te asigne un negocio. Desde aquí no se crea uno."
             iconColor={AppColors.light.textMuted}
           />
         </View>
@@ -89,6 +90,7 @@ export default function ResumenScreen() {
         }}
       >
         <View className="gap-6">
+          <TenantLine />
           <PeriodFilter
             periodo={periodo}
             onPeriodoChange={setPeriodo}
@@ -141,6 +143,14 @@ export default function ResumenScreen() {
       </ScrollView>
     </AnimatedScreen>
   );
+}
+
+function TenantLine() {
+  const negocioNombre = useSessionStore((s) => s.negocioNombre);
+  const sucursalNombre = useSessionStore((s) => s.sucursalNombre);
+  const label = [negocioNombre, sucursalNombre].filter(Boolean).join(" · ");
+  if (!label) return null;
+  return <AppText variant="body">{label}</AppText>;
 }
 
 function SectionTitle({ title }: { title: string }) {

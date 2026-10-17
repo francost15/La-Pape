@@ -1,3 +1,4 @@
+import { labelMetodoPago } from "@/constants/pagos";
 import { Strings } from "@/constants/strings";
 import type { HistoryState, HistoryStore } from "@/interface/ventas";
 import { notify } from "@/lib/notify";
@@ -99,7 +100,7 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
       subtotal: venta.subtotal,
       descuento: venta.descuento,
       total: venta.total,
-      metodoPago: "Efectivo",
+      metodoPago: labelMetodoPago(venta.metodo_pago),
     };
 
     try {

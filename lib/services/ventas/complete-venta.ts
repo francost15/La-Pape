@@ -1,3 +1,4 @@
+import { isMetodoPago, type MetodoPago } from "@/constants/pagos";
 import type { CartItem } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
 import {
@@ -16,12 +17,16 @@ export interface CompleteVentaParams {
   userId: string;
   total: number;
   subtotal: number;
+  metodoPago: MetodoPago;
+  /** Solo efectivo. Debe ser mayor o igual al total. */
+  montoRecibido?: number;
 }
 
 export interface CompleteVentaResult {
   ventaId: string;
   fecha: Date;
   total: number;
+  metodoPago: MetodoPago;
 }
 
 /**
@@ -49,7 +54,16 @@ export interface CompleteVentaResult {
  * @throws InsufficientStockError if there isn't enough stock to fulfill the order
  */
 export async function completeVentaFlow(params: CompleteVentaParams): Promise<CompleteVentaResult> {
-  const { items, negocioId, sucursalId, userId, total, subtotal } = params;
+  const { items, negocioId, sucursalId, userId, total, subtotal, metodoPago, montoRecibido } =
+    params;
+  if (!isMetodoPago(metodoPago)) {
+    throw new VentaError("El medio de pago no es válido");
+  }
+  const vuelto =
+    metodoPago === "EFECTIVO" ? Math.round(((montoRecibido ?? 0) - total) * 100) / 100 : 0;
+  if (metodoPago === "EFECTIVO" && (montoRecibido == null || vuelto < 0)) {
+    throw new VentaError("El monto recibido no alcanza el total");
+  }
   if (!items.length) {
     throw new VentaError("No hay productos en el carrito");
   }
@@ -99,6 +113,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       total,
       estado: "PAGADA",
       tipo_venta: "CONTADO",
+      metodo_pago: metodoPago,
       createdAt: now,
       updatedAt: now,
     });
@@ -122,8 +137,9 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     transaction.set(pagoRef, {
       venta_id: ventaRef.id,
       negocio_id: negocioId,
-      metodo_pago: "EFECTIVO",
+      metodo_pago: metodoPago,
       monto: total,
+      ...(metodoPago === "EFECTIVO" ? { monto_recibido: montoRecibido, vuelto } : {}),
       createdAt: now,
     });
 
@@ -154,7 +170,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     return ventaRef.id;
   });
 
-  return { ventaId, fecha, total };
+  return { ventaId, fecha, total, metodoPago };
 }
 
 /**

@@ -5,7 +5,7 @@ export const VENTAS_TOUR: TourStep[] = [
     id: "ventas-1",
     title: "Punto de Venta",
     description:
-      "Este es tu carrito. Aquí verás los productos que agregues. Toca el + para añadir productos.",
+      "Este es tu carrito. Aquí verás los productos que agregues. Toca Agregar productos para sumarlos.",
   },
   {
     id: "ventas-2",

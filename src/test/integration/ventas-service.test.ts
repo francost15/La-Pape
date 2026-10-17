@@ -22,18 +22,16 @@ vi.mock("firebase/firestore", () => ({
 }));
 
 vi.mock("@/lib/services/ventas-detalle", () => ({
-  getDetallesByVenta: vi
-    .fn()
-    .mockResolvedValue([
-      {
-        id: "d1",
-        venta_id: "v1",
-        producto_id: "p1",
-        cantidad: 2,
-        precio_unitario: 50,
-        total_linea: 100,
-      },
-    ]),
+  getDetallesByVenta: vi.fn().mockResolvedValue([
+    {
+      id: "d1",
+      venta_id: "v1",
+      producto_id: "p1",
+      cantidad: 2,
+      precio_unitario: 50,
+      total_linea: 100,
+    },
+  ]),
 }));
 
 function createMockProduct(id: string, nombre: string, cantidad: number): Product {
@@ -66,6 +64,8 @@ describe("Ventas Service Integration", () => {
         userId: "user-1",
         total: 0,
         subtotal: 0,
+        metodoPago: "EFECTIVO",
+        montoRecibido: 0,
       };
 
       await expect(completeVentaFlow(params)).rejects.toThrow(VentaError);
@@ -86,6 +86,8 @@ describe("Ventas Service Integration", () => {
         userId: "user-1",
         total: 0,
         subtotal: 0,
+        metodoPago: "EFECTIVO",
+        montoRecibido: 0,
       };
 
       await expect(completeVentaFlow(params)).rejects.toThrow(InvalidQuantityError);
@@ -106,6 +108,8 @@ describe("Ventas Service Integration", () => {
         userId: "user-1",
         total: 0,
         subtotal: 0,
+        metodoPago: "EFECTIVO",
+        montoRecibido: 0,
       };
 
       await expect(completeVentaFlow(params)).rejects.toThrow(InvalidQuantityError);
@@ -150,6 +154,7 @@ describe("Ventas Service Integration", () => {
         userId: "user-1",
         total: 500,
         subtotal: 500,
+        metodoPago: "DEBITO",
       };
 
       const result = await completeVentaFlow(params);

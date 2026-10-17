@@ -29,6 +29,11 @@ export function createVentasDetallesListener(
 
   const cache: Record<string, VentaDetalle[]> = options.cache ?? {};
   let retryTimer: ReturnType<typeof setTimeout> | null = null;
+  // El callback de onSnapshot es async (await de detalles antes de publicar).
+  // Numeramos cada snapshot para descartar publicaciones de generaciones viejas
+  // que terminen su fetch tarde y harían "retroceder" la UI a una lista vieja.
+  let generation = 0;
+  let latestVentas: Venta[] = [];
 
   // Snapshot publicado del cache. Se reutiliza la MISMA referencia mientras no
   // se agreguen detalles nuevos: así los useMemo downstream (agrupación de
@@ -63,6 +68,8 @@ export function createVentasDetallesListener(
   const unsub = onVentasByNegocio(
     negocioId,
     async (ventasFromDb) => {
+      const myGen = ++generation;
+      latestVentas = ventasFromDb;
       if (retryTimer) {
         clearTimeout(retryTimer);
         retryTimer = null;
@@ -72,10 +79,15 @@ export function createVentasDetallesListener(
 
       if (idsToFetch.length > 0) {
         const { stillEmpty, changed } = await fetchDetalles(idsToFetch);
+        // Un snapshot más nuevo llegó mientras esperábamos: descartar esta emisión.
+        if (myGen !== generation) return;
         if (stillEmpty.length > 0) {
           retryTimer = setTimeout(async () => {
             const retry = await fetchDetalles(stillEmpty);
-            publish(ventasFromDb, retry.changed);
+            // El retry solo rellena el cache de detalles; re-emite la lista de
+            // ventas MÁS RECIENTE (no una congelada) y solo si sigue vigente.
+            if (myGen !== generation) return;
+            publish(latestVentas, retry.changed);
           }, 2000);
         }
         publish(ventasFromDb, changed);

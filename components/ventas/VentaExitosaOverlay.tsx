@@ -2,6 +2,7 @@ import { generateAndShareRecibo } from "@/lib/pdf/generate-recibo";
 import type { ReciboData } from "@/lib/pdf/recibo-template";
 import { notify } from "@/lib/notify";
 import { useCheckoutStore } from "@/store/checkout-store";
+import { useSessionStore } from "@/store/session-store";
 import React, { useCallback } from "react";
 import VentaExitosaModal from "./VentaExitosaModal";
 
@@ -19,7 +20,8 @@ export default function VentaExitosaOverlay() {
       subtotal: successVenta.subtotal,
       descuento: successVenta.descuento,
       total: successVenta.total,
-      metodoPago: "Efectivo",
+      metodoPago: successVenta.metodoPago,
+      negocioNombre: useSessionStore.getState().negocioNombre ?? undefined,
     };
 
     try {
@@ -38,7 +40,6 @@ export default function VentaExitosaOverlay() {
       venta={successVenta}
       onClose={closeSuccess}
       onDescargarRecibo={handleDescargarRecibo}
-      onEnviarRecibo={() => {}}
     />
   );
 }

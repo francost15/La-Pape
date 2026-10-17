@@ -17,7 +17,6 @@ export default function VentaExitosaModal({
   venta,
   onClose,
   onDescargarRecibo,
-  onEnviarRecibo,
 }: VentaExitosaModalProps) {
   const { isDark, colors } = useThemeColors();
   const haptic = useHaptic();
@@ -77,7 +76,6 @@ export default function VentaExitosaModal({
             colors={colors}
             onContinuar={handleClose}
             onDescargarRecibo={onDescargarRecibo}
-            onEnviarRecibo={onEnviarRecibo}
           />
 
           {/* Close button */}

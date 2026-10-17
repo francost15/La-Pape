@@ -1,3 +1,4 @@
+import type { MetodoPago } from "@/constants/pagos";
 import type { Product } from "@/interface/products";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
 import type { LineaVentaDisplay, VentasDetallesBaseState } from "@/interface/shared";
@@ -21,18 +22,23 @@ export interface VentaCompletada {
   subtotal: number;
   descuento: number;
   items: LineaVentaDisplay[];
+  metodoPago: string;
 }
 
 export interface CheckoutStore {
   confirmVisible: boolean;
   processing: boolean;
   successVenta: VentaCompletada | null;
+  metodoPago: MetodoPago;
+  montoRecibido: string;
 
   openConfirm: () => void;
   closeConfirm: () => void;
   setProcessing: (v: boolean) => void;
   setSuccessVenta: (venta: VentaCompletada) => void;
   closeSuccess: () => void;
+  setMetodoPago: (metodo: MetodoPago) => void;
+  setMontoRecibido: (monto: string) => void;
 }
 
 export interface Venta {
@@ -47,6 +53,8 @@ export interface Venta {
   total: number; // float
   estado: VentaEstado; // enum
   tipo_venta: TipoVenta;
+  /** Medio con el que se cobró. Las ventas anteriores a este campo no lo tienen. */
+  metodo_pago?: string;
   notas?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -201,7 +209,6 @@ export interface VentaExitosaModalProps {
   venta: VentaCompletada;
   onClose: () => void;
   onDescargarRecibo?: () => void;
-  onEnviarRecibo?: () => void;
 }
 
 export interface SuccessActionsProps {
@@ -209,7 +216,6 @@ export interface SuccessActionsProps {
   colors: ThemeColors;
   onContinuar: () => void;
   onDescargarRecibo?: () => void;
-  onEnviarRecibo?: () => void;
 }
 
 export interface SuccessDetailsProps {
