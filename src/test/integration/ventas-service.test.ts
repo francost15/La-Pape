@@ -13,7 +13,7 @@ vi.mock("@/lib/firebase", () => ({
 
 vi.mock("firebase/firestore", () => ({
   collection: vi.fn().mockReturnValue({}),
-  doc: vi.fn().mockReturnValue({}),
+  doc: vi.fn().mockReturnValue({ id: "venta-id-123" }),
   runTransaction: (...args: unknown[]) => mockRunTransaction(...args),
   Timestamp: {
     now: vi.fn().mockReturnValue({ toDate: () => new Date() }),
@@ -134,7 +134,7 @@ describe("Ventas Service Integration", () => {
       mockRunTransaction.mockImplementation(async (db, callback) => {
         const mockGet = vi.fn().mockResolvedValue({
           exists: () => true,
-          data: () => ({ cantidad: 10 }),
+          data: () => ({ cantidad: 10, precio_venta: 80 }),
         });
 
         const transaction = {
@@ -143,8 +143,7 @@ describe("Ventas Service Integration", () => {
           update: vi.fn(),
         };
 
-        await callback(transaction);
-        return "venta-id-123";
+        return callback(transaction);
       });
 
       const params: CompleteVentaParams = {
@@ -159,6 +158,43 @@ describe("Ventas Service Integration", () => {
 
       const result = await completeVentaFlow(params);
       expect(result.ventaId).toBe("venta-id-123");
+      expect(result.total).toBe(400);
+    });
+
+    it("charges catalog price when the cart price was changed", async () => {
+      const items = [
+        {
+          productId: "prod-1",
+          product: createMockProduct("prod-1", "Test Product", 10),
+          quantity: 1,
+          unitPrice: 1,
+        },
+      ];
+      const set = vi.fn();
+      mockRunTransaction.mockImplementation(async (_db, callback) => {
+        return callback({
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ cantidad: 10, precio_venta: 80 }),
+          }),
+          set,
+          update: vi.fn(),
+        });
+      });
+
+      const result = await completeVentaFlow({
+        items,
+        negocioId: "negocio-1",
+        sucursalId: "sucursal-1",
+        userId: "user-1",
+        total: 1,
+        subtotal: 1,
+        metodoPago: "DEBITO",
+      });
+
+      expect(result.total).toBe(80);
+      const line = set.mock.calls.map((call) => call[1]).find((doc) => doc.precio_unitario != null);
+      expect(line).toMatchObject({ precio_unitario: 80, total_linea: 80 });
     });
   });
 

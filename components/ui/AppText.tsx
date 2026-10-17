@@ -1,8 +1,9 @@
 import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import React from "react";
-import { Platform, Text, type TextProps, type TextStyle } from "react-native";
+import { Platform, Text, type TextStyle } from "react-native";
 import type { ThemeColors } from "@/interface/theme";
+import type { AppTextProps, AppTextVariant } from "@/interface/ui";
 
 /**
  * AppText — primitiva de texto canónica.
@@ -16,19 +17,9 @@ import type { ThemeColors } from "@/interface/theme";
  * - body       15/22  Inter Regular           — texto de lectura
  * - bodyStrong 15/22  Inter Medium            — botones, énfasis
  * - label      13/18  Inter Medium            — labels de formularios/listas
- * - eyebrow    10/14  Inter Bold uppercase    — kicker con tracking amplio
+ * - eyebrow    10/14  Inter Bold    — kicker con tracking amplio
  * - caption    12/16  Inter Regular           — metadatos, notas al pie
  */
-export type AppTextVariant =
-  | "display"
-  | "heading"
-  | "subheading"
-  | "body"
-  | "bodyStrong"
-  | "label"
-  | "eyebrow"
-  | "caption";
-
 // En native el peso viene codificado en el archivo de fuente
 // (SpaceGrotesk_700Bold, Inter_500Medium…); poner fontWeight ahí puede forzar
 // un fallback de familia en Android. En web la familia es genérica ("Inter"),
@@ -82,7 +73,6 @@ const VARIANT_STYLES: Record<AppTextVariant, TextStyle> = {
     fontSize: 10,
     lineHeight: 14,
     letterSpacing: 1.6,
-    textTransform: "uppercase",
     ...webWeight("700"),
   },
   caption: {
@@ -106,16 +96,6 @@ const VARIANT_COLOR: Record<AppTextVariant, keyof ThemeColors> = {
   eyebrow: "textLabel",
   caption: "textMuted",
 };
-
-export interface AppTextProps extends TextProps {
-  variant?: AppTextVariant;
-  /**
-   * Override del color por defecto del variant. Se aplica vía `style`, por lo
-   * que gana sobre clases `text-*` del className; para colorear con className
-   * hay que sobreescribir con este prop o dejar el default.
-   */
-  color?: string;
-}
 
 function AppText({ variant = "body", color, style, children, ...textProps }: AppTextProps) {
   const { colors } = useThemeColors();

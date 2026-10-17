@@ -6,7 +6,7 @@ export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
   return (
     <View>
       <Text
-        className="text-3xl tracking-tighter text-[#111827] dark:text-[#F9FAFB]"
+        className="text-3xl tracking-tighter text-content-primary"
         style={{ fontFamily: AppFonts.display, lineHeight: 36 }}
       >
         {product.nombre}
@@ -14,7 +14,7 @@ export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
       <View className="mt-2 flex-row flex-wrap items-center gap-2">
         {product.marca ? (
           <Text
-            className="text-xs tracking-widest text-content-secondary uppercase"
+            className="text-xs tracking-widest text-content-secondary"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             {product.marca}
@@ -23,14 +23,14 @@ export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
         {categoria ? (
           <>
             {product.marca ? (
-              <View className="h-1 w-1 rounded-full bg-[#D1D5DB] dark:bg-[#4B5563]" />
+              <View className="h-1 w-1 rounded-full bg-line-strong" />
             ) : null}
             <View
               className="rounded-full px-3 py-1"
               style={{ backgroundColor: "rgba(234, 88, 12, 0.08)" }}
             >
               <Text
-                className="text-[10px] font-bold tracking-widest text-[#EA580C] uppercase dark:text-[#FB923C]"
+                className="text-[10px] font-bold tracking-widest text-accent"
                 style={{ fontFamily: AppFonts.bodyStrong }}
               >
                 {categoria.nombre}
@@ -41,7 +41,7 @@ export function ProductoInfo({ product, categoria }: ProductoInfoProps) {
       </View>
       {product.descripcion ? (
         <Text
-          className="mt-4 text-base leading-6 text-[#6B7280] dark:text-[#A1A1AA]"
+          className="mt-4 text-base leading-6 text-content-secondary"
           style={{ fontFamily: AppFonts.body }}
         >
           {product.descripcion}

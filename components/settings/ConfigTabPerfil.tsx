@@ -53,9 +53,8 @@ export default function ConfigTabPerfil() {
       notify.success({ title: "Perfil actualizado" });
     } catch {
       notify.error({ title: "No se pudo actualizar el perfil" });
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   }, [userId, userEmail, editNombre, patchProfile]);
 
   const handleCancelEdit = useCallback(() => {
@@ -69,7 +68,7 @@ export default function ConfigTabPerfil() {
 
   return (
     <View className="gap-4">
-      <View className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
+      <View className="rounded-2xl border border-line bg-surface-elevated p-4">
         <View className="flex-row items-center gap-4">
           <UserAvatar name={nombre} photoUri={photoURL} size={72} />
           <View className="flex-1">
@@ -86,7 +85,7 @@ export default function ConfigTabPerfil() {
                   <Pressable
                     onPress={handleSave}
                     disabled={saving || !editNombre.trim()}
-                    className="flex-1 items-center rounded-xl bg-orange-600 py-2.5 active:opacity-90"
+                    className="flex-1 items-center rounded-xl bg-accent py-2.5 active:opacity-90"
                     style={!editNombre.trim() ? { opacity: 0.5 } : undefined}
                   >
                     {saving ? (
@@ -98,9 +97,9 @@ export default function ConfigTabPerfil() {
                   <Pressable
                     onPress={handleCancelEdit}
                     disabled={saving}
-                    className="flex-1 items-center rounded-xl bg-gray-200 py-2.5 active:opacity-90 dark:bg-neutral-600"
+                    className="flex-1 items-center rounded-xl bg-surface-hover py-2.5 active:opacity-90"
                   >
-                    <Text className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    <Text className="text-sm font-semibold text-content-secondary">
                       Cancelar
                     </Text>
                   </Pressable>
@@ -108,14 +107,14 @@ export default function ConfigTabPerfil() {
               </View>
             ) : (
               <>
-                <Text className="text-lg font-bold text-gray-900 dark:text-white">{nombre}</Text>
-                <Text className="text-sm text-gray-500 dark:text-gray-400">{email}</Text>
+                <Text className="text-lg font-bold text-content-primary">{nombre}</Text>
+                <Text className="text-sm text-content-secondary">{email}</Text>
                 <Pressable
                   onPress={handleStartEdit}
                   className="mt-1 flex-row items-center gap-1.5 self-start active:opacity-80"
                 >
                   <IconSymbol name="pencil" size={14} color={AppColors.light.textMuted} />
-                  <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <Text className="text-xs font-medium text-content-secondary">
                     Editar perfil
                   </Text>
                 </Pressable>
@@ -125,42 +124,42 @@ export default function ConfigTabPerfil() {
         </View>
       </View>
 
-      <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
+      <View className="overflow-hidden rounded-2xl border border-line bg-surface-elevated p-4">
         <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Apariencia</Text>
+          <Text className="text-sm text-content-secondary">Apariencia</Text>
           <ThemeToggle />
         </View>
       </View>
 
-      <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+      <View className="overflow-hidden rounded-2xl border border-line bg-surface-elevated">
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="envelope.fill" size={16} color={AppColors.light.textMuted} />
-          <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Email</Text>
+          <Text className="w-20 text-sm text-content-secondary">Email</Text>
           <Text
-            className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
+            className="flex-1 text-right text-sm font-medium text-content-primary"
             numberOfLines={1}
           >
             {email || "—"}
           </Text>
         </View>
-        <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
+        <View className="mx-4 h-px bg-surface-hover" />
         <View className="flex-row items-center gap-3 px-4 py-3.5">
           <IconSymbol name="building.2.fill" size={16} color={AppColors.light.textMuted} />
-          <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Negocio</Text>
+          <Text className="w-20 text-sm text-content-secondary">Negocio</Text>
           <Text
-            className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
+            className="flex-1 text-right text-sm font-medium text-content-primary"
             numberOfLines={1}
           >
             {negocioNombre || (negocioId ? "Negocio sin nombre" : "Sin negocio")}
           </Text>
         </View>
-        <View className="mx-4 h-px bg-gray-100 dark:bg-neutral-700" />
+        <View className="mx-4 h-px bg-surface-hover" />
         <View className="gap-3 px-4 py-3.5">
           <View className="flex-row items-center gap-3">
             <IconSymbol name="building.2.fill" size={16} color={AppColors.light.textMuted} />
-            <Text className="w-20 text-sm text-gray-500 dark:text-gray-400">Sucursal</Text>
+            <Text className="w-20 text-sm text-content-secondary">Sucursal</Text>
             <Text
-              className="flex-1 text-right text-sm font-medium text-gray-800 dark:text-gray-200"
+              className="flex-1 text-right text-sm font-medium text-content-primary"
               numberOfLines={1}
             >
               {sucursalNombre || "Sin sucursal"}
@@ -179,11 +178,11 @@ export default function ConfigTabPerfil() {
                     accessibilityLabel={sucursal.nombre}
                     className={`min-h-11 items-center justify-center rounded-xl border px-3 ${
                       selected
-                        ? "border-orange-600 bg-orange-50 dark:bg-orange-950"
-                        : "border-gray-200 dark:border-neutral-600"
+                        ? "border-accent bg-accent-soft"
+                        : "border-line-strong"
                     }`}
                   >
-                    <Text className="text-sm text-gray-800 dark:text-gray-200">
+                    <Text className="text-sm text-content-primary">
                       {sucursal.nombre}
                     </Text>
                   </Pressable>
@@ -199,19 +198,19 @@ export default function ConfigTabPerfil() {
           await resetAllTours();
           notify.success({ title: "Tours reiniciados" });
         }}
-        className="border-t border-gray-100 py-3 dark:border-neutral-700"
+        className="border-t border-line py-3"
       >
-        <Text className="text-center text-sm text-orange-600 dark:text-orange-400">
+        <Text className="text-center text-sm text-accent">
           Ver tutorial de nuevo
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={handleSignOut}
-        className="flex-row items-center justify-center gap-2 rounded-2xl bg-red-50 py-4 active:opacity-80 dark:bg-red-900/20"
+        className="flex-row items-center justify-center gap-2 rounded-2xl bg-error/10 py-4 active:opacity-80"
       >
         <IconSymbol name="arrow.uturn.backward" size={18} color={AppColors.error} />
-        <Text className="text-sm font-semibold text-red-600 dark:text-red-400">Cerrar sesión</Text>
+        <Text className="text-sm font-semibold text-error">Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   );

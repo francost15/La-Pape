@@ -68,9 +68,8 @@ export default function AuthScreen() {
         type: "manual",
         message: error instanceof Error ? error.message : "Error de autenticación",
       });
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const onGooglePress = async () => {

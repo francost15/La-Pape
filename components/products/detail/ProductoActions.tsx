@@ -31,7 +31,7 @@ export function ProductoActions({ deleting, onEdit, onDelete }: ProductoActionsP
       <TouchableOpacity
         onPress={onEdit}
         disabled={deleting}
-        className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-[#EA580C] active:opacity-90"
+        className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-accent active:opacity-90"
         style={shadow("0 8px 24px rgba(234, 88, 12, 0.3)", 6)}
         accessibilityRole="button"
         accessibilityLabel="Editar producto"

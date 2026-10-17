@@ -1,35 +1,13 @@
-import type { LineaVentaDisplay } from "@/interface/shared";
+import type { ReciboData } from "@/interface/ventas";
+import { formatCurrency, formatTime } from "@/lib/utils/format";
 
-export interface ReciboData {
-  ventaId: string;
-  fecha: Date;
-  items: LineaVentaDisplay[];
-  subtotal: number;
-  descuento: number;
-  total: number;
-  metodoPago: string;
-  negocioNombre?: string;
-}
-
-function formatCurrency(value: number): string {
-  return `$${value.toLocaleString("es-CL", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+export type { ReciboData };
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CL", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
-}
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString("es-CL", {
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 

@@ -44,7 +44,12 @@ export default function ProductListContent({
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    await refresh();
+    try {
+      await refresh();
+    } catch {
+      setRefreshing(false);
+      return;
+    }
     setRefreshing(false);
   }, [refresh]);
 
@@ -84,7 +89,6 @@ export default function ProductListContent({
               fontFamily: AppFonts.body,
               marginTop: 10,
               letterSpacing: 0.3,
-              textTransform: "uppercase",
             }}
           >
             {productCount} {productCount === 1 ? "producto" : "productos"}

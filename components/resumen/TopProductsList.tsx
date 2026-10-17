@@ -1,5 +1,4 @@
 import { ResumenRow } from "@/components/resumen/shared/ResumenRow";
-import SectionCard from "@/components/resumen/shared/SectionCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { ResumenThumb } from "@/components/resumen/shared/ResumenThumb";
 import { formatCurrency, pluralize } from "@/lib/utils/format";
@@ -39,9 +38,9 @@ const RankingRow = React.memo(function RankingRow({ item, rank, showDivider }: R
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
-export default function TopProductsList({ title, items }: TopProductsListProps) {
+export default function TopProductsList({ items }: TopProductsListProps) {
   return (
-    <SectionCard title={title} className="min-w-0 flex-1">
+    <View className="min-w-0 flex-1">
       {items.length === 0 ? (
         <EmptyState title="Sin datos disponibles" iconName="chart.bar.fill" />
       ) : (
@@ -56,6 +55,6 @@ export default function TopProductsList({ title, items }: TopProductsListProps) 
           ))}
         </View>
       )}
-    </SectionCard>
+    </View>
   );
 }

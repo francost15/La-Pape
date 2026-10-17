@@ -27,6 +27,178 @@ import {
   View,
 } from "react-native";
 
+function ProductosHeader({
+  isDesktop,
+  searchInputRef,
+  searchText,
+  setSearchText,
+  categories,
+  selectedCategoryId,
+  setSelectedCategoryId,
+  goToCreateProduct,
+  productCount,
+}: {
+  isDesktop: boolean;
+  searchInputRef: React.RefObject<TextInput | null>;
+  searchText: string;
+  setSearchText: (text: string) => void;
+  categories: { id: string; nombre: string }[];
+  selectedCategoryId: string | null;
+  setSelectedCategoryId: (id: string | null) => void;
+  goToCreateProduct: () => void;
+  productCount: number;
+}) {
+  return (
+    <View style={{ width: "100%", paddingHorizontal: isDesktop ? 10 : 0 }}>
+      <View
+        className="flex-row items-stretch gap-3"
+        style={{ marginBottom: 16, marginTop: isDesktop ? 8 : 4 }}
+      >
+        <View className="min-w-0 flex-1">
+          <SearchProducts
+            ref={searchInputRef}
+            searchText={searchText}
+            onSearchChange={setSearchText}
+            size={isDesktop ? "large" : "default"}
+          />
+        </View>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={goToCreateProduct}
+          className="shrink-0 flex-row items-center"
+        >
+          <CircleIconButton
+            icon="plus"
+            variant="primary"
+            onPress={goToCreateProduct}
+            size={isDesktop ? 48 : 40}
+          />
+        </TouchableOpacity>
+      </View>
+      {categories.length > 0 ? (
+        <BadgeCategoryProducts
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onCategoryPress={setSelectedCategoryId}
+        />
+      ) : null}
+      {productCount > 0 ? (
+        <AppText
+          variant="eyebrow"
+          style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
+        >
+          {productCount} {productCount === 1 ? "producto" : "productos"}
+        </AppText>
+      ) : null}
+    </View>
+  );
+}
+
+function ProductosEmpty({
+  isCatalogEmpty,
+  onCreate,
+}: {
+  isCatalogEmpty: boolean;
+  onCreate: () => void;
+}) {
+  if (isCatalogEmpty) {
+    return (
+      <View className="w-full flex-1 items-center justify-center py-20">
+        <EmptyState
+          icon="products"
+          title={Strings.productos.emptyProductsAvailable}
+          description={Strings.productos.emptyProductsHint}
+          iconColor={AppColors.primary}
+        />
+        <View className="mt-4">
+          <Button
+            title={Strings.productos.createFirstProduct}
+            fullWidth={false}
+            onPress={onCreate}
+          />
+        </View>
+      </View>
+    );
+  }
+  return (
+    <View className="w-full flex-1 items-center justify-center py-20">
+      <EmptyState
+        icon="search"
+        title={Strings.common.noResults}
+        description={Strings.productos.noSearchResults}
+        iconColor={AppColors.light.textMuted}
+      />
+    </View>
+  );
+}
+
+function ProductosFooter({
+  loadingMore,
+  hasMore,
+  onLoadMore,
+}: {
+  loadingMore: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+}) {
+  if (loadingMore) {
+    return (
+      <View className="w-full items-center py-4">
+        <ActivityIndicator color={AppColors.primary} />
+      </View>
+    );
+  }
+  if (!hasMore) return null;
+  return (
+    <View className="w-full items-center py-4">
+      <Button title={Strings.productos.loadMore} fullWidth={false} onPress={onLoadMore} />
+    </View>
+  );
+}
+
+function ProductosSkeleton({ isDesktop, numColumns }: { isDesktop: boolean; numColumns: number }) {
+  const bone = isDesktop ? 48 : 40;
+  return (
+    <AnimatedScreen className="bg-canvas">
+      <View
+        style={
+          isDesktop
+            ? { flex: 1, paddingHorizontal: 26, paddingTop: 20 }
+            : { flex: 1, paddingTop: 8 }
+        }
+      >
+        <View
+          className="flex-row items-center gap-3"
+          style={{
+            marginBottom: 16,
+            marginTop: isDesktop ? 8 : 4,
+            paddingHorizontal: isDesktop ? 0 : 16,
+          }}
+        >
+          <View className="flex-1">
+            <Bone width="100%" height={bone} borderRadius={12} />
+          </View>
+          <Bone width={bone} height={bone} borderRadius={isDesktop ? 24 : 20} />
+        </View>
+        <ProductListSkeleton numColumns={numColumns} count={isDesktop ? numColumns * 2 : 8} />
+      </View>
+    </AnimatedScreen>
+  );
+}
+
+function gridPadding(isDesktop: boolean) {
+  if (isDesktop) return { paddingHorizontal: 16, paddingBottom: 40, paddingTop: 12 };
+  return { paddingTop: 8, paddingBottom: 120, paddingHorizontal: 0 };
+}
+
+function columnCount(isDesktop: boolean, width: number): number {
+  if (!isDesktop) return 1;
+  if (width >= 1600) return 5;
+  if (width >= 1200) return 4;
+  if (width >= 992) return 3;
+  return 2;
+}
+
 export default function ProductosScreen() {
   const { width, isDesktop } = useResponsive();
   const { products, categories, loading, error, retry, refresh } = useProductosScreen();
@@ -38,13 +210,7 @@ export default function ProductosScreen() {
   const PAGE_SIZE = 20;
   const searchInputRef = useRef<TextInput>(null);
 
-  const numColumns = useMemo(() => {
-    if (!isDesktop) return 1;
-    if (width >= 1600) return 5;
-    if (width >= 1200) return 4;
-    if (width >= 992) return 3;
-    return 2;
-  }, [width, isDesktop]);
+  const numColumns = columnCount(isDesktop, width);
 
   const hasMore = filteredProducts.length > page * PAGE_SIZE;
   const visibleProducts = useMemo(
@@ -54,7 +220,12 @@ export default function ProductosScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refresh();
+    try {
+      await refresh();
+    } catch {
+      setRefreshing(false);
+      return;
+    }
     setRefreshing(false);
   }, [refresh]);
 
@@ -112,149 +283,10 @@ export default function ProductosScreen() {
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
 
-  const ListHeader = useMemo(
-    () => (
-      <View style={{ width: "100%", paddingHorizontal: isDesktop ? 10 : 0 }}>
-        <View
-          className="flex-row items-stretch gap-3"
-          style={{ marginBottom: 16, marginTop: isDesktop ? 8 : 4 }}
-        >
-          <View className="min-w-0 flex-1">
-            <SearchProducts
-              ref={searchInputRef}
-              searchText={searchText}
-              onSearchChange={setSearchText}
-              size={isDesktop ? "large" : "default"}
-            />
-          </View>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={goToCreateProduct}
-            className="shrink-0 flex-row items-center"
-          >
-            <CircleIconButton
-              icon="plus"
-              variant="primary"
-              onPress={goToCreateProduct}
-              size={isDesktop ? 48 : 40}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {categories.length > 0 && (
-          <BadgeCategoryProducts
-            categories={categories}
-            selectedCategoryId={selectedCategoryId}
-            onCategoryPress={setSelectedCategoryId}
-          />
-        )}
-
-        {/* Dynamic products count */}
-        {filteredProducts.length > 0 && (
-          <AppText
-            variant="eyebrow"
-            style={{ marginBottom: 12, marginTop: 4, marginLeft: isDesktop ? 4 : 16 }}
-          >
-            {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"}
-          </AppText>
-        )}
-      </View>
-    ),
-    [
-      isDesktop,
-      searchText,
-      setSearchText,
-      categories,
-      selectedCategoryId,
-      setSelectedCategoryId,
-      goToCreateProduct,
-      filteredProducts.length,
-    ]
-  );
-
-  const ListFooter = useMemo(
-    () => (
-      <View className="w-full items-center py-4">
-        {loadingMore ? (
-          <ActivityIndicator color={AppColors.primary} />
-        ) : hasMore ? (
-          // View intermedio: el wrapper interno de Button usa alignSelf flex-start
-          // con fullWidth={false}; sin este View el botón se pegaría a la izquierda
-          <View>
-            <Button title={Strings.productos.loadMore} fullWidth={false} onPress={loadMore} />
-          </View>
-        ) : null}
-      </View>
-    ),
-    [loadingMore, hasMore, loadMore]
-  );
-
-  const ListEmpty = useMemo(
-    () => (
-      <View className="w-full flex-1 items-center justify-center py-20">
-        {products.length === 0 ? (
-          <>
-            <EmptyState
-              icon="products"
-              title={Strings.productos.emptyProductsAvailable}
-              description={Strings.productos.emptyProductsHint}
-              iconColor={AppColors.primary}
-            />
-            <View className="mt-4">
-              <Button
-                title={Strings.productos.createFirstProduct}
-                fullWidth={false}
-                onPress={goToCreateProduct}
-              />
-            </View>
-          </>
-        ) : (
-          <EmptyState
-            icon="search"
-            title={Strings.common.noResults}
-            description={Strings.productos.noSearchResults}
-            iconColor={AppColors.light.textMuted}
-          />
-        )}
-      </View>
-    ),
-    [products.length, goToCreateProduct]
-  );
-
   // Carga inicial: skeleton que espeja el grid/lista real (antes se mostraba
   // brevemente el empty state, que se leía como "no hay productos")
   if (loading && products.length === 0) {
-    return (
-      <AnimatedScreen className="bg-canvas">
-        <View
-          style={
-            isDesktop
-              ? { flex: 1, paddingHorizontal: 26, paddingTop: 20 }
-              : { flex: 1, paddingTop: 8 }
-          }
-        >
-          {/* Placeholder de la fila búsqueda + botón crear */}
-          <View
-            className="flex-row items-center gap-3"
-            style={{
-              marginBottom: 16,
-              marginTop: isDesktop ? 8 : 4,
-              paddingHorizontal: isDesktop ? 0 : 16,
-            }}
-          >
-            <View className="flex-1">
-              <Bone width="100%" height={isDesktop ? 48 : 40} borderRadius={12} />
-            </View>
-            <Bone
-              width={isDesktop ? 48 : 40}
-              height={isDesktop ? 48 : 40}
-              borderRadius={isDesktop ? 24 : 20}
-            />
-          </View>
-          <ProductListSkeleton numColumns={numColumns} count={isDesktop ? numColumns * 2 : 8} />
-        </View>
-      </AnimatedScreen>
-    );
+    return <ProductosSkeleton isDesktop={isDesktop} numColumns={numColumns} />;
   }
 
   if (error) {
@@ -276,18 +308,30 @@ export default function ProductosScreen() {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         numColumns={numColumns}
-        ListHeaderComponent={ListHeader}
-        ListEmptyComponent={ListEmpty}
-        ListFooterComponent={ListFooter}
+        ListHeaderComponent={
+          <ProductosHeader
+            isDesktop={isDesktop}
+            searchInputRef={searchInputRef}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            categories={categories}
+            selectedCategoryId={selectedCategoryId}
+            setSelectedCategoryId={setSelectedCategoryId}
+            goToCreateProduct={goToCreateProduct}
+            productCount={filteredProducts.length}
+          />
+        }
+        ListEmptyComponent={
+          <ProductosEmpty isCatalogEmpty={products.length === 0} onCreate={goToCreateProduct} />
+        }
+        ListFooterComponent={
+          <ProductosFooter loadingMore={loadingMore} hasMore={hasMore} onLoadMore={loadMore} />
+        }
         onEndReached={() => {
           if (hasMore && !loadingMore) loadMore();
         }}
         onEndReachedThreshold={0.5}
-        contentContainerStyle={
-          isDesktop
-            ? { paddingHorizontal: 16, paddingBottom: 40, paddingTop: 12 }
-            : { paddingTop: 8, paddingBottom: 120, paddingHorizontal: 0 }
-        }
+        contentContainerStyle={gridPadding(isDesktop)}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

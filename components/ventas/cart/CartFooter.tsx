@@ -69,7 +69,6 @@ export function CartFooter({
           style={{
             fontSize: 10,
             letterSpacing: 2,
-            textTransform: "uppercase",
             color: colors.textMuted,
             fontFamily: AppFonts.bodyStrong,
             marginBottom: 4,
@@ -122,7 +121,6 @@ export function CartFooter({
                   fontSize: 16,
                   letterSpacing: 1.5,
                   color: "#ffffff",
-                  textTransform: "uppercase",
                   fontFamily: AppFonts.bodyStrong,
                   ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
                 }}
@@ -152,7 +150,6 @@ export function CartFooter({
               style={{
                 fontSize: 13,
                 letterSpacing: 2,
-                textTransform: "uppercase",
                 color: AppColors.primary,
                 fontFamily: AppFonts.bodyStrong,
                 ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),

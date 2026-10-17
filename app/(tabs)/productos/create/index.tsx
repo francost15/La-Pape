@@ -3,7 +3,6 @@ import { auth, CreateProductFormData, createProductSchema, getProductosScreenDat
 import { getCategoriasByNegocio } from "@/lib/services/categorias";
 import { notify } from "@/lib/notify";
 import { createProduct } from "@/lib/services/productos";
-import { getNegocioIdByUsuario } from "@/lib/services/usuarios-negocios";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,7 +50,6 @@ function BackButton({ isDark }: { isDark: boolean }) {
 export default function CreateProduct() {
   const isWeb = Platform.OS === "web";
   const sessionUserId = useSessionStore((s) => s.userId);
-  const sessionUserEmail = useSessionStore((s) => s.userEmail);
   const sessionNegocioId = useSessionStore((s) => s.negocioId);
   const negocioId = useProductosStore((s) => s.negocioId);
   const categories = useProductosStore((s) => s.categories);
@@ -90,35 +88,33 @@ export default function CreateProduct() {
         setProductLoading(true);
         if (!sessionUserId) {
           router.replace("/");
+          setProductLoading(false);
           return;
         }
 
-        const currentNegocioId =
-          sessionNegocioId ?? (await getNegocioIdByUsuario(sessionUserId, sessionUserEmail || ""));
-        if (!currentNegocioId) {
+        if (!sessionNegocioId) {
           Alert.alert("Error", "No tienes un negocio asignado");
           router.back();
+          setProductLoading(false);
           return;
         }
 
-        setNegocioId(currentNegocioId);
+        setNegocioId(sessionNegocioId);
         if (categories.length === 0) {
-          const categoriasData = await getCategoriasByNegocio(currentNegocioId);
+          const categoriasData = await getCategoriasByNegocio(sessionNegocioId);
           setCategories(categoriasData);
         }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Error al cargar los datos";
         Alert.alert("Error", message);
         router.back();
-      } finally {
-        setProductLoading(false);
       }
+      setProductLoading(false);
     };
 
     loadData();
   }, [
     sessionUserId,
-    sessionUserEmail,
     sessionNegocioId,
     categories.length,
     setCategories,
@@ -161,9 +157,8 @@ export default function CreateProduct() {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "No se pudo crear el producto";
       notify.error({ title: "Error", description: message });
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const { isDark, colors } = useThemeColors();
@@ -208,8 +203,7 @@ export default function CreateProduct() {
             backgroundColor: colors.surface,
             borderRadius: 24,
             padding: 24,
-            boxShadow: Platform.OS === "web" ? "0 12px 24px rgba(0,0,0,0.04)" : undefined,
-            elevation: Platform.OS !== "web" ? 4 : undefined,
+            boxShadow: "0 12px 24px rgba(0,0,0,0.04)",
             borderWidth: 1,
             borderColor: colors.border,
           }}
@@ -229,7 +223,7 @@ export default function CreateProduct() {
             }}
           >
             <Text
-              className="text-[13px] font-bold tracking-widest uppercase"
+              className="text-[13px] font-bold tracking-widest"
               style={{
                 color: colors.textPrimary,
                 fontFamily: AppFonts.bodyStrong,
@@ -244,8 +238,7 @@ export default function CreateProduct() {
             disabled={loading}
             style={{
               backgroundColor: AppColors.primary,
-              boxShadow: Platform.OS === "web" ? "0 8px 16px rgba(234, 88, 12, 0.25)" : undefined,
-              elevation: Platform.OS !== "web" ? 6 : undefined,
+              boxShadow: "0 8px 16px rgba(234, 88, 12, 0.25)",
             }}
           >
             {loading ? (

@@ -1,13 +1,9 @@
-import type { Venta } from "@/interface/ventas";
+import type { VentasListenerCallbacks, VentasQueryOptions, Venta } from "@/interface/ventas";
 import type { VentaDetalle } from "@/interface/ventas-detalle";
-import { onVentasByNegocio, VentasQueryOptions } from "@/lib/services/ventas";
+import { onVentasByNegocio } from "@/lib/services/ventas";
 import { getDetallesByVentaIds } from "@/lib/services/ventas-detalle";
 
-export interface VentasListenerCallbacks {
-  onData: (ventas: Venta[], detallesMap: Record<string, VentaDetalle[]>) => void;
-  onError: (error: unknown) => void;
-  onLoading?: () => void;
-}
+export type { VentasListenerCallbacks };
 
 interface VentasListenerOptions {
   /** Rango/límite que acota la consulta de ventas en el servidor. */
@@ -100,6 +96,7 @@ export function createVentasDetallesListener(
   );
 
   return () => {
+    generation += 1;
     unsub();
     if (retryTimer) clearTimeout(retryTimer);
   };

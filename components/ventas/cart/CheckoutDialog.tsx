@@ -6,14 +6,24 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { formatCurrency } from "@/lib/utils/format";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useSessionStore } from "@/store/session-store";
+import type { CheckoutDialogProps } from "@/interface/ventas";
 import { useVentasStore } from "@/store/ventas-store";
 import { Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-interface CheckoutDialogProps {
-  visible: boolean;
-  processing: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+function cashChange(esEfectivo: boolean, recibido: number, total: number): number {
+  if (!esEfectivo || Number.isNaN(recibido)) return 0;
+  return recibido - total;
+}
+
+function chipStyle(selected: boolean, isDark: boolean, border: string) {
+  return {
+    borderColor: selected ? AppColors.primary : border,
+    backgroundColor: selected
+      ? isDark
+        ? AppColors.primaryGhostDark
+        : AppColors.primaryGhost
+      : "transparent",
+  };
 }
 
 const METODOS: MetodoPago[] = [
@@ -38,7 +48,7 @@ export function CheckoutDialog({ visible, processing, onConfirm, onCancel }: Che
 
   const recibido = parseMonto(montoRecibido);
   const esEfectivo = metodoPago === METODOS_PAGO.EFECTIVO;
-  const vuelto = esEfectivo && !Number.isNaN(recibido) ? recibido - total : 0;
+  const vuelto = cashChange(esEfectivo, recibido, total);
   const faltaEfectivo = esEfectivo && (Number.isNaN(recibido) || vuelto < 0);
   const preview = items.slice(0, 4);
   const resto = items.length - preview.length;
@@ -75,17 +85,7 @@ export function CheckoutDialog({ visible, processing, onConfirm, onCancel }: Che
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                     accessibilityLabel={sucursal.nombre}
-                    style={[
-                      styles.chip,
-                      {
-                        borderColor: selected ? AppColors.primary : colors.border,
-                        backgroundColor: selected
-                          ? isDark
-                            ? AppColors.primaryGhostDark
-                            : AppColors.primaryGhost
-                          : "transparent",
-                      },
-                    ]}
+                    style={[styles.chip, chipStyle(selected, isDark, colors.border)]}
                   >
                     <Text style={{ color: colors.textPrimary, fontFamily: AppFonts.body }}>
                       {sucursal.nombre}
@@ -127,17 +127,7 @@ export function CheckoutDialog({ visible, processing, onConfirm, onCancel }: Che
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
                   accessibilityLabel={METODO_PAGO_LABEL[metodo]}
-                  style={[
-                    styles.chip,
-                    {
-                      borderColor: selected ? AppColors.primary : colors.border,
-                      backgroundColor: selected
-                        ? isDark
-                          ? AppColors.primaryGhostDark
-                          : AppColors.primaryGhost
-                        : "transparent",
-                    },
-                  ]}
+                  style={[styles.chip, chipStyle(selected, isDark, colors.border)]}
                 >
                   <Text style={{ color: colors.textPrimary, fontFamily: AppFonts.bodyStrong }}>
                     {METODO_PAGO_LABEL[metodo]}

@@ -1,3 +1,4 @@
+import type { BottomSheetModalProps } from "@/interface/ui";
 import React from "react";
 import { Modal, Pressable, View } from "react-native";
 import Animated, {
@@ -7,16 +8,6 @@ import Animated, {
   SlideInDown,
   SlideOutDown,
 } from "react-native-reanimated";
-
-interface BottomSheetModalProps {
-  visible: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  /** Alto máximo del sheet en px. Default 560. */
-  maxHeight?: number;
-  /** Etiqueta accesible del backdrop. */
-  closeLabel?: string;
-}
 
 /**
  * BottomSheetModal — sheet mobile que sube desde abajo.
@@ -61,8 +52,8 @@ export function BottomSheetModal({
             .reduceMotion(ReduceMotion.System)}
           exiting={SlideOutDown.duration(200).reduceMotion(ReduceMotion.System)}
         >
-          <View className="rounded-t-3xl bg-white dark:bg-neutral-800" style={{ maxHeight }}>
-            <View className="mt-3 mb-1 h-1 w-10 self-center rounded-full bg-gray-300 dark:bg-neutral-600" />
+          <View className="rounded-t-3xl bg-surface-elevated" style={{ maxHeight }}>
+            <View className="mt-3 mb-1 h-1 w-10 self-center rounded-full bg-line-strong" />
             {children}
           </View>
         </Animated.View>

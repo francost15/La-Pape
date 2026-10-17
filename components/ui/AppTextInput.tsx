@@ -1,16 +1,9 @@
 import { AppColors } from "@/constants/colors";
 import { AppFonts } from "@/constants/typography";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import type { AppTextInputProps } from "@/interface/ui";
 import React, { forwardRef, useState } from "react";
-import {
-  Platform,
-  Text,
-  TextInput,
-  View,
-  type StyleProp,
-  type TextInputProps,
-  type ViewStyle,
-} from "react-native";
+import { Platform, Text, TextInput, View } from "react-native";
 
 /**
  * AppTextInput — input de formulario canónico.
@@ -20,15 +13,16 @@ import {
  * focus y a rojo con error. Pensado para React Hook Form: pasar
  * `error={errors.campo?.message}` directamente.
  */
-export interface AppTextInputProps extends TextInputProps {
-  /** Label visible encima del input */
-  label?: string;
-  /** Mensaje de error (RHF: `errors.campo?.message`). Pinta borde y texto en rojo. */
-  error?: string;
-  /** Texto de ayuda debajo del input (se oculta si hay error) */
-  hint?: string;
-  /** Estilo del contenedor externo (label + input + error) */
-  containerStyle?: StyleProp<ViewStyle>;
+function pickBorder(
+  hasError: boolean,
+  focused: boolean,
+  errorColor: string,
+  accent: string,
+  border: string
+) {
+  if (hasError) return errorColor;
+  if (focused) return accent;
+  return border;
 }
 
 const AppTextInput = forwardRef<TextInput, AppTextInputProps>(function AppTextInput(
@@ -41,7 +35,7 @@ const AppTextInput = forwardRef<TextInput, AppTextInputProps>(function AppTextIn
   const errorColor = isDark ? AppColors.errorLight : AppColors.error;
   const accent = isDark ? AppColors.primaryLight : AppColors.primary;
 
-  const borderColor = error ? errorColor : focused ? accent : colors.borderStrong;
+  const borderColor = pickBorder(Boolean(error), focused, errorColor, accent, colors.borderStrong);
 
   return (
     <View style={containerStyle}>

@@ -50,7 +50,11 @@ export function CardProductCompact({
     </Text>
   );
 
-  if (mode === "stock") {
+  if (mode === "stock") return stockBody();
+  if (mode === "ranking") return rankingBody();
+  return mobileBody();
+
+  function stockBody() {
     const stockCantidad = stockData?.cantidad ?? product.cantidad;
     const stockMinimo = stockData?.stockMinimo ?? product.stock_minimo ?? 0;
     return (
@@ -77,7 +81,7 @@ export function CardProductCompact({
             </Text>
             <Text
               className={`text-[16px] font-bold tabular-nums ${
-                stockCantidad === 0 ? "text-red-500" : ""
+                stockCantidad === 0 ? "text-error" : ""
               }`}
               style={{
                 color:
@@ -96,7 +100,7 @@ export function CardProductCompact({
     );
   }
 
-  if (mode === "ranking") {
+  function rankingBody() {
     return (
       <View
         className="overflow-hidden rounded-xl"
@@ -144,47 +148,48 @@ export function CardProductCompact({
     );
   }
 
-  // mode === "mobile"
-  return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={onPress}
-      className="w-full flex-row items-center gap-3 px-3 py-3.5"
-      style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
-    >
-      {thumb}
-      <View className="min-w-0 flex-1 gap-1">
-        {nombre}
-        <View className="flex-row items-center gap-2">
-          <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
-            {product.marca || "Genérico"}
+  function mobileBody() {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={onPress}
+        className="w-full flex-row items-center gap-3 px-3 py-3.5"
+        style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
+      >
+        {thumb}
+        <View className="min-w-0 flex-1 gap-1">
+          {nombre}
+          <View className="flex-row items-center gap-2">
+            <Text className="text-[12px]" style={{ color: colors.textSecondary }}>
+              {product.marca || "Genérico"}
+            </Text>
+            {product.cantidad !== undefined && (
+              <Text
+                className="text-[11px] font-medium"
+                style={{ color: product.cantidad > 0 ? AppColors.success : AppColors.error }}
+              >
+                {product.cantidad > 0 ? `${product.cantidad} disp.` : "Sin stock"}
+              </Text>
+            )}
+          </View>
+        </View>
+        <View className="items-end gap-0.5">
+          <Text
+            className="text-[16px] font-bold"
+            style={{
+              color: isDark ? AppColors.primaryLight : AppColors.primary,
+              fontFamily: AppFonts.display,
+            }}
+          >
+            {formatCurrency(product.precio_venta)}
           </Text>
-          {product.cantidad !== undefined && (
-            <Text
-              className="text-[11px] font-medium"
-              style={{ color: product.cantidad > 0 ? AppColors.success : AppColors.error }}
-            >
-              {product.cantidad > 0 ? `${product.cantidad} disp.` : "Sin stock"}
+          {product.precio_mayoreo > 0 && (
+            <Text className="text-[11px]" style={{ color: colors.textLabel }}>
+              May: {formatCurrency(product.precio_mayoreo)}
             </Text>
           )}
         </View>
-      </View>
-      <View className="items-end gap-0.5">
-        <Text
-          className="text-[16px] font-bold"
-          style={{
-            color: isDark ? AppColors.primaryLight : AppColors.primary,
-            fontFamily: AppFonts.display,
-          }}
-        >
-          {formatCurrency(product.precio_venta)}
-        </Text>
-        {product.precio_mayoreo > 0 && (
-          <Text className="text-[11px]" style={{ color: colors.textLabel }}>
-            May: {formatCurrency(product.precio_mayoreo)}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  }
 }

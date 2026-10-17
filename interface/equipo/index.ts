@@ -34,6 +34,8 @@ export interface EquipoStore {
   clear: () => void;
 }
 
+export type SettingsTabId = "perfil" | "equipo";
+
 export interface ConfigTabEquipoProps {
   onRefresh: () => void;
 }

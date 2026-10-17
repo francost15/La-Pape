@@ -63,8 +63,8 @@ export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps
   };
 
   return (
-    <View className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-      <Text className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+    <View className="rounded-2xl border border-line bg-surface-elevated p-4">
+      <Text className="mb-4 text-sm font-semibold text-content-secondary">
         Crear usuario nuevo
       </Text>
       <View className="gap-3">
@@ -140,13 +140,13 @@ export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps
             size={16}
             color={AppColors.light.textMuted}
           />
-          <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <Text className="text-xs font-medium text-content-secondary">
             {showPass ? "Ocultar contraseñas" : "Mostrar contraseñas"}
           </Text>
         </Pressable>
 
         <View>
-          <Text className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Rol</Text>
+          <Text className="mb-2 text-xs font-medium text-content-secondary">Rol</Text>
           <Controller
             control={control}
             name="rol"
@@ -160,12 +160,12 @@ export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps
                       key={r}
                       onPress={() => onChange(r)}
                       className={`flex-1 items-center rounded-xl py-2.5 ${
-                        isActive ? `${c.bg} ${c.darkBg}` : "bg-gray-100 dark:bg-neutral-700"
+                        isActive ? `${c.bg} ${c.darkBg}` : "bg-surface-hover"
                       }`}
                     >
                       <Text
                         className={`text-xs font-semibold ${
-                          isActive ? `${c.text} ${c.darkText}` : "text-gray-500"
+                          isActive ? `${c.text} ${c.darkText}` : "text-content-secondary"
                         }`}
                       >
                         {ROL_LABELS[r]}
@@ -181,7 +181,7 @@ export function CrearUsuarioForm({ negocioId, onCreated }: CrearUsuarioFormProps
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-          className="flex-row items-center justify-center gap-2 rounded-xl bg-orange-600 py-4 active:opacity-90"
+          className="flex-row items-center justify-center gap-2 rounded-xl bg-accent py-4 active:opacity-90"
           style={isSubmitting ? { opacity: 0.7 } : undefined}
         >
           {isSubmitting ? (

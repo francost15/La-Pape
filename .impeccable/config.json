@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-10-17T14:22:02.182Z",
+        "reason": "La marca ya fija Space Grotesk en constants/typography y global.css; no es una fuente nueva de esta refactorización."
+      }
+    ]
+  }
+}

@@ -3,6 +3,7 @@ import { AppFonts } from "@/constants/typography";
 import { usePressScale } from "@/hooks/use-press-scale";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import type { ButtonProps, ButtonSize, ButtonVariant } from "@/interface/ui";
 import * as Haptics from "expo-haptics";
 import React, { useCallback } from "react";
 import {
@@ -11,9 +12,6 @@ import {
   Pressable,
   Text,
   type GestureResponderEvent,
-  type PressableProps,
-  type StyleProp,
-  type TextStyle,
   type ViewStyle,
 } from "react-native";
 import Animated from "react-native-reanimated";
@@ -21,7 +19,7 @@ import Animated from "react-native-reanimated";
 /**
  * Button — CTA canónico de la app.
  *
- * Reemplaza el patrón repetido `rounded-xl bg-orange-500 px-5 py-3.5` +
+ * Reemplaza el patrón repetido `rounded-xl bg-accent px-5 py-3.5` +
  * haptics + press-scale que hoy se hand-rollea en decenas de pantallas.
  *
  * - `primary`     naranja de marca, texto blanco (CTA principal)
@@ -29,9 +27,6 @@ import Animated from "react-native-reanimated";
  * - `ghost`       transparente, texto naranja (acciones terciarias/links)
  * - `destructive` rojo semántico, texto blanco
  */
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
-export type ButtonSize = "sm" | "md" | "lg";
-
 interface SizeSpec {
   minHeight: number;
   paddingHorizontal: number;
@@ -46,21 +41,6 @@ const SIZES: Record<ButtonSize, SizeSpec> = {
   md: { minHeight: 48, paddingHorizontal: 20, fontSize: 15, borderRadius: 14, hitSlopV: 0 },
   lg: { minHeight: 56, paddingHorizontal: 24, fontSize: 16, borderRadius: 16, hitSlopV: 0 },
 };
-
-export interface ButtonProps extends Omit<PressableProps, "style" | "children"> {
-  title: string;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  loading?: boolean;
-  /** Ocupa todo el ancho disponible (default true, como los CTA existentes) */
-  fullWidth?: boolean;
-  /** Icono opcional a la izquierda del texto */
-  icon?: React.ReactNode;
-  /** Desactiva el impacto háptico (activado por defecto en native) */
-  haptics?: boolean;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-}
 
 function Button({
   title,

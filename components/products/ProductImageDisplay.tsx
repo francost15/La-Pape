@@ -30,7 +30,7 @@ export default function ProductImageDisplay({
   return (
     <View className="flex-1 items-center justify-center gap-2">
       <IconSymbol name="photo.fill" size={40} color="#d1d5db" />
-      <Text className="text-[12px] text-gray-400 dark:text-gray-600">Sin imagen</Text>
+      <Text className="text-[12px] text-content-muted">Sin imagen</Text>
     </View>
   );
 }

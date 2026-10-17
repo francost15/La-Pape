@@ -41,7 +41,7 @@ const KpiCard = memo(function KpiCard({
 
         <View className="flex-1">
           <Text
-            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
+            className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary"
             style={{ fontFamily: AppFonts.bodyStrong }}
             numberOfLines={1}
           >
@@ -49,7 +49,7 @@ const KpiCard = memo(function KpiCard({
           </Text>
 
           <Text
-            className="leading-tight tracking-tighter text-[#111827] dark:text-[#F9FAFB]"
+            className="leading-tight tracking-tighter text-content-primary"
             style={{ fontSize: 32, fontFamily: AppFonts.display }}
             numberOfLines={1}
             adjustsFontSizeToFit
@@ -60,7 +60,7 @@ const KpiCard = memo(function KpiCard({
 
           {subtitle ? (
             <Text
-              className="mt-2 text-[11px] font-medium tracking-wider text-[#6B7280] uppercase dark:text-[#9CA3AF]"
+              className="mt-2 text-[11px] font-medium tracking-wider text-content-secondary"
               style={{ fontFamily: AppFonts.body }}
             >
               {subtitle}

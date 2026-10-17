@@ -32,7 +32,7 @@ function BackButton() {
     >
       <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
       <Text
-        className="text-xs font-bold tracking-widest text-content-secondary uppercase"
+        className="text-xs font-bold tracking-widest text-content-secondary"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         VOLVER
@@ -90,10 +90,10 @@ export function ProductoDetailView({
                   <QRCode value={product.id} size={80} />
                 </View>
                 <View>
-                  <Text className="text-xs font-bold tracking-widest text-content-secondary uppercase">
+                  <Text className="text-xs font-bold tracking-widest text-content-secondary">
                     Identifier
                   </Text>
-                  <Text className="mt-0.5 font-mono text-sm text-[#6B7280]">
+                  <Text className="mt-0.5 font-mono text-sm text-content-secondary">
                     {product.id.substring(0, 12)}...
                   </Text>
                 </View>
@@ -109,7 +109,7 @@ export function ProductoDetailView({
               <View className="gap-6">
                 <View>
                   <Text
-                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
+                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Valuación Comercial
@@ -123,7 +123,7 @@ export function ProductoDetailView({
 
                 <View>
                   <Text
-                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase"
+                    className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary"
                     style={{ fontFamily: AppFonts.bodyStrong }}
                   >
                     Estado de Inventario
@@ -155,7 +155,7 @@ export function ProductoDetailView({
       >
         <BackButton />
         <View
-          className="w-full overflow-hidden rounded-[24px] bg-white dark:bg-neutral-800"
+          className="w-full overflow-hidden rounded-[24px] bg-surface-elevated"
           style={{
             aspectRatio: 1,
             ...shadow("0 12px 24px rgba(0,0,0,0.04)", 8),
@@ -175,7 +175,7 @@ export function ProductoDetailView({
 
         <View className="mt-4 gap-6">
           <View>
-            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
+            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary">
               COMERCIAL
             </Text>
             <ProductPriceCard
@@ -186,7 +186,7 @@ export function ProductoDetailView({
           </View>
 
           <View>
-            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
+            <Text className="mb-3 text-[10px] font-bold tracking-[0.2em] text-content-secondary">
               INVENTARIO
             </Text>
             <ProductStockCard
@@ -197,11 +197,11 @@ export function ProductoDetailView({
           </View>
 
           <View
-            className="items-center rounded-3xl bg-white p-6 dark:bg-neutral-800"
+            className="items-center rounded-3xl bg-surface-elevated p-6"
             style={shadow("0 4px 12px rgba(0,0,0,0.04)", 4)}
           >
             <QRCode value={product.id} size={140} />
-            <Text className="mt-4 text-[11px] font-medium tracking-tight text-gray-500 uppercase dark:text-gray-400">
+            <Text className="mt-4 text-[11px] font-medium tracking-tight text-content-secondary">
               Escaneo de Producto
             </Text>
           </View>
@@ -209,7 +209,7 @@ export function ProductoDetailView({
       </ScrollView>
 
       <View
-        className="border-t border-gray-100 bg-canvas px-6 py-4 dark:border-neutral-800"
+        className="border-t border-line bg-canvas px-6 py-4"
         style={{ paddingBottom: 16 + tabBarHeight }}
       >
         <ProductoActions deleting={deleting} onEdit={onEdit} onDelete={onDelete} />

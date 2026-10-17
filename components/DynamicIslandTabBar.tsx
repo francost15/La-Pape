@@ -5,16 +5,9 @@ import { BlurView } from "expo-blur";
 import React, { useEffect, useMemo } from "react";
 import { useWindowDimensions, View } from "react-native";
 import Animated, { FadeInDown, ReduceMotion } from "react-native-reanimated";
-import { PcOnlyBadge } from "./tab-bar/PcOnlyBadge";
 import { SlidingIndicator } from "./tab-bar/SlidingIndicator";
 import { TabItem } from "./tab-bar/TabItem";
-import {
-  ESTIMATED_ISLAND_HEIGHT,
-  ICON_MAP,
-  isWeb,
-  PC_ONLY_ROUTES,
-  THEME,
-} from "./tab-bar/constants";
+import { ESTIMATED_ISLAND_HEIGHT, ICON_MAP, isWeb, THEME } from "./tab-bar/constants";
 import { styles } from "./tab-bar/styles";
 import type { TabConfig } from "@/interface/layout";
 
@@ -37,13 +30,11 @@ export function DynamicIslandTabBar({ state, descriptors, navigation, insets }: 
       state.routes.map((route) => {
         const opts = descriptors[route.key].options;
         const title = opts.title ?? route.name;
-        const pcOnly = PC_ONLY_ROUTES.includes(route.name as (typeof PC_ONLY_ROUTES)[number]);
         return {
           routeName: route.name,
           routeKey: route.key,
           label: typeof title === "string" ? title : route.name,
           icon: ICON_MAP[route.name] ?? "doc.text",
-          pcOnly,
         };
       }),
     [state.routes, descriptors]
@@ -128,13 +119,6 @@ export function DynamicIslandTabBar({ state, descriptors, navigation, insets }: 
           </View>
         </View>
       </BlurView>
-      {!isWeb && tabs[activeIndex] ? (
-        <PcOnlyBadge
-          tab={tabs[activeIndex]}
-          visible={tabs[activeIndex]?.pcOnly === true}
-          theme={theme}
-        />
-      ) : null}
     </Animated.View>
   );
 }

@@ -48,7 +48,7 @@ if (Platform.OS === "web" && typeof window !== "undefined") {
 }
 
 export default function RootLayout() {
-  const { isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   // fontError: si la carga falla (p. ej. sin red en el primer arranque), seguimos
   // con las fuentes del sistema en vez de dejar la app bloqueada en el splash.
   const [fontsLoaded, fontError] = useFonts(BRAND_FONTS);
@@ -73,6 +73,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS !== "web" || typeof document === "undefined") return;
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    if (theme === "light" || theme === "dark") root.classList.add(theme);
     document.title = "Punto de Venta La Pape";
     if (!document.querySelector('meta[name="description"]')) {
       const meta = document.createElement("meta");
@@ -81,7 +84,7 @@ export default function RootLayout() {
         "Sistema punto de venta. Gestión de productos, ventas, inventario y reportes en tiempo real.";
       document.head.appendChild(meta);
     }
-  }, []);
+  }, [theme]);
 
   // El splash nativo sigue visible mientras devolvemos null, así que no hay pantalla en blanco.
   // La sesión (useSessionStore.ready) se resuelve en (auth)/(tabs); este gate solo cubre fuentes.

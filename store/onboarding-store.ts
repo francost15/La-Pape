@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { OnboardingStore, TourStep } from "@/interface/onboarding";
-import { ONBOARDING_STEPS } from "@/lib/services/onboarding";
+import type { OnboardingStore } from "@/interface/onboarding";
 import { create } from "zustand";
 
 const TOUR_COMPLETED_KEY = "tours_completed";
@@ -20,41 +19,10 @@ export async function resetAllTours(): Promise<void> {
 }
 
 export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
-  isVisible: false,
-  currentStepIndex: 0,
-  completedSteps: [],
-  isLoading: true,
-
   isTourOpen: false,
   activeTourId: null,
   tourSteps: [],
   tourStepIndex: 0,
-
-  show: () => set({ isVisible: true }),
-
-  hide: () => set({ isVisible: false }),
-
-  nextStep: () => {
-    const { currentStepIndex, completedSteps } = get();
-    const currentStep = ONBOARDING_STEPS[currentStepIndex];
-    if (currentStep && !completedSteps.includes(currentStep.id)) {
-      set({ completedSteps: [...completedSteps, currentStep.id] });
-    }
-    if (currentStepIndex < ONBOARDING_STEPS.length - 1) {
-      set({ currentStepIndex: currentStepIndex + 1 });
-    } else {
-      set({ isVisible: false });
-    }
-  },
-
-  skip: () => set({ isVisible: false }),
-
-  setCompletedSteps: (steps) => set({ completedSteps: steps, isLoading: false }),
-
-  getCurrentStep: () => {
-    const { currentStepIndex } = get();
-    return ONBOARDING_STEPS[currentStepIndex] ?? null;
-  },
 
   startTour: async (tourId, steps) => {
     const completedKey = `${TOUR_COMPLETED_KEY}_${tourId}`;

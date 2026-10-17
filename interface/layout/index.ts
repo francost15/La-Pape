@@ -14,7 +14,6 @@ export interface TabConfig {
   routeKey: string;
   label: string;
   icon: IconSymbolName;
-  pcOnly?: boolean;
 }
 
 export interface SlidingIndicatorProps {
@@ -30,10 +29,4 @@ export interface TabItemProps {
   theme: TabTheme;
   onPress: () => void;
   onLongPress: () => void;
-}
-
-export interface PcOnlyBadgeProps {
-  tab: TabConfig;
-  visible: boolean;
-  theme: TabTheme;
 }

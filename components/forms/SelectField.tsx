@@ -1,21 +1,10 @@
 import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
+import type { SelectFieldProps, SelectOption } from "@/interface/ui";
 import { type ChangeEvent, createElement, useState } from "react";
-import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
-import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Controller, type FieldValues } from "react-hook-form";
+import { FlatList, Platform, Text, TouchableOpacity, View } from "react-native";
 
-export interface SelectOption {
-  value: string;
-  label: string;
-}
-
-interface SelectFieldProps<T extends FieldValues> {
-  control: Control<T>;
-  name: FieldPath<T>;
-  label: string;
-  options: SelectOption[];
-  placeholder: string;
-  error?: string;
-}
+export type { SelectOption };
 
 /**
  * SelectField — picker de formulario unificado (RHF).
@@ -37,16 +26,14 @@ export function SelectField<T extends FieldValues>({
 
   return (
     <View>
-      <Text className="mt-2 mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </Text>
+      <Text className="mt-2 mb-2 text-sm font-medium text-content-secondary">{label}</Text>
       <Controller
         control={control}
         name={name}
         render={({ field: { onChange, value } }) => {
           const selected = options.find((o) => o.value === value);
           return (
-            <View className="overflow-hidden rounded-lg border border-gray-300 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+            <View className="overflow-hidden rounded-lg border border-line-strong bg-surface-elevated">
               {isWeb ? (
                 createElement(
                   "select",
@@ -54,14 +41,14 @@ export function SelectField<T extends FieldValues>({
                     value: value ?? "",
                     onChange: (e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value),
                     className:
-                      "w-full px-4 py-3 bg-transparent text-black dark:text-white border-none outline-none",
+                      "w-full px-4 py-3 bg-transparent text-content-primary border-none outline-none",
                     style: { width: "100%", padding: "12px 16px" },
                   },
                   createElement(
                     "option",
                     {
                       value: "",
-                      className: "bg-white dark:bg-neutral-800 text-black dark:text-white",
+                      className: "bg-surface-elevated text-content-primary",
                     },
                     placeholder
                   ),
@@ -71,7 +58,7 @@ export function SelectField<T extends FieldValues>({
                       {
                         key: opt.value,
                         value: opt.value,
-                        className: "bg-white dark:bg-neutral-800 text-black dark:text-white",
+                        className: "bg-surface-elevated text-content-primary",
                       },
                       opt.label
                     )
@@ -83,16 +70,10 @@ export function SelectField<T extends FieldValues>({
                     className="flex-row items-center justify-between px-4 py-3"
                     onPress={() => setShowModal(true)}
                   >
-                    <Text
-                      className={
-                        selected
-                          ? "text-gray-900 dark:text-gray-100"
-                          : "text-gray-400 dark:text-gray-500"
-                      }
-                    >
+                    <Text className={selected ? "text-content-primary" : "text-content-muted"}>
                       {selected?.label ?? placeholder}
                     </Text>
-                    <Text className="text-gray-400 dark:text-gray-500">▼</Text>
+                    <Text className="text-content-muted">▼</Text>
                   </TouchableOpacity>
                   <BottomSheetModal
                     visible={showModal}
@@ -101,21 +82,19 @@ export function SelectField<T extends FieldValues>({
                   >
                     <View className="px-6 pt-2 pb-6">
                       <View className="mb-4 flex-row items-center justify-between">
-                        <Text className="text-xl font-bold text-black dark:text-white">
-                          {label}
-                        </Text>
+                        <Text className="text-xl font-bold text-content-primary">{label}</Text>
                         <TouchableOpacity onPress={() => setShowModal(false)}>
-                          <Text className="text-lg font-semibold text-orange-600">Cerrar</Text>
+                          <Text className="text-lg font-semibold text-accent">Cerrar</Text>
                         </TouchableOpacity>
                       </View>
-                      <ScrollView>
-                        {options.map((opt) => (
+                      <FlatList
+                        data={options}
+                        keyExtractor={(opt) => opt.value}
+                        style={{ maxHeight: 360 }}
+                        renderItem={({ item: opt }) => (
                           <TouchableOpacity
-                            key={opt.value}
                             className={`mb-2 rounded-lg p-4 ${
-                              value === opt.value
-                                ? "bg-orange-600"
-                                : "bg-gray-100 dark:bg-neutral-700"
+                              value === opt.value ? "bg-accent" : "bg-surface-hover"
                             }`}
                             onPress={() => {
                               onChange(opt.value);
@@ -126,14 +105,14 @@ export function SelectField<T extends FieldValues>({
                               className={
                                 value === opt.value
                                   ? "font-semibold text-white"
-                                  : "text-black dark:text-white"
+                                  : "text-content-primary"
                               }
                             >
                               {opt.label}
                             </Text>
                           </TouchableOpacity>
-                        ))}
-                      </ScrollView>
+                        )}
+                      />
                     </View>
                   </BottomSheetModal>
                 </>
@@ -142,7 +121,7 @@ export function SelectField<T extends FieldValues>({
           );
         }}
       />
-      {error ? <Text className="mt-1 text-xs text-red-500">{error}</Text> : null}
+      {error ? <Text className="mt-1 text-xs text-error">{error}</Text> : null}
     </View>
   );
 }

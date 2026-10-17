@@ -1,5 +1,4 @@
-import type { UserRole } from "@/interface";
-import { UpdateUsuarioInput, Usuario } from "@/interface";
+import { type CreateUserWithAuthInput, type UpdateUsuarioInput, type Usuario } from "@/interface";
 import { db } from "@/lib/firebase";
 import { getSecondaryAuth } from "@/lib/firebase-secondary";
 import { createUsuarioNegocio } from "@/lib/services/usuarios-negocios";
@@ -16,14 +15,7 @@ import {
   where,
 } from "firebase/firestore";
 
-export interface CreateUserWithAuthInput {
-  email: string;
-  password: string;
-  nombre: string;
-  telefono?: string;
-  rol: UserRole;
-  negocioId: string;
-}
+export type { CreateUserWithAuthInput };
 
 /**
  * Crea usuario en Firebase Auth + Firestore y lo vincula al negocio.

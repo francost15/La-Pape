@@ -28,17 +28,17 @@ export function useStaggeredEntrance(
 
   useEffect(() => {
     if (reduceMotion) {
-      opacity.value = 1;
-      translateY.value = 0;
+      opacity.set(1);
+      translateY.set(0);
       return;
     }
     const delay = index * stagger;
-    opacity.value = withDelay(delay, withTiming(1, { duration }));
-    translateY.value = withDelay(delay, withTiming(0, { duration }));
+    opacity.set(withDelay(delay, withTiming(1, { duration })));
+    translateY.set(withDelay(delay, withTiming(0, { duration })));
   }, [index, opacity, translateY, reduceMotion, duration, stagger]);
 
   return useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
+    opacity: opacity.get(),
+    transform: [{ translateY: translateY.get() }],
   }));
 }

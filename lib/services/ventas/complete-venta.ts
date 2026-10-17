@@ -1,5 +1,5 @@
-import { isMetodoPago, type MetodoPago } from "@/constants/pagos";
-import type { CartItem } from "@/interface/ventas";
+import { isMetodoPago } from "@/constants/pagos";
+import type { CartItem, CompleteVentaParams, CompleteVentaResult } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
 import {
   InsufficientStockError,
@@ -9,25 +9,7 @@ import {
 } from "@/lib/errors";
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 
-export interface CompleteVentaParams {
-  items: CartItem[];
-  negocioId: string;
-  /** Null/omitido cuando el negocio no tiene sucursales; no se escribe el campo. */
-  sucursalId?: string | null;
-  userId: string;
-  total: number;
-  subtotal: number;
-  metodoPago: MetodoPago;
-  /** Solo efectivo. Debe ser mayor o igual al total. */
-  montoRecibido?: number;
-}
-
-export interface CompleteVentaResult {
-  ventaId: string;
-  fecha: Date;
-  total: number;
-  metodoPago: MetodoPago;
-}
+export type { CompleteVentaParams, CompleteVentaResult };
 
 /**
  * Orchestrates the full transactional flow of a sale.
@@ -54,15 +36,9 @@ export interface CompleteVentaResult {
  * @throws InsufficientStockError if there isn't enough stock to fulfill the order
  */
 export async function completeVentaFlow(params: CompleteVentaParams): Promise<CompleteVentaResult> {
-  const { items, negocioId, sucursalId, userId, total, subtotal, metodoPago, montoRecibido } =
-    params;
+  const { items, negocioId, sucursalId, userId, metodoPago, montoRecibido } = params;
   if (!isMetodoPago(metodoPago)) {
     throw new VentaError("El medio de pago no es válido");
-  }
-  const vuelto =
-    metodoPago === "EFECTIVO" ? Math.round(((montoRecibido ?? 0) - total) * 100) / 100 : 0;
-  if (metodoPago === "EFECTIVO" && (montoRecibido == null || vuelto < 0)) {
-    throw new VentaError("El monto recibido no alcanza el total");
   }
   if (!items.length) {
     throw new VentaError("No hay productos en el carrito");
@@ -83,22 +59,42 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     qtyByProduct.set(item.productId, (qtyByProduct.get(item.productId) ?? 0) + item.quantity);
   }
 
-  const ventaId = await runTransaction(db, async (transaction) => {
+  const charged = await runTransaction(db, async (transaction) => {
     // Phase 1: Read all necessary data first (Firestore transaction rule)
     const stockByProduct = new Map<string, number>();
-    for (const [productId, requestedQty] of qtyByProduct.entries()) {
-      const productRef = doc(db, "productos", productId);
-      const productSnap = await transaction.get(productRef);
+    const priceByProduct = new Map<string, number>();
+    const snaps = await Promise.all(
+      [...qtyByProduct.entries()].map(async ([productId, requestedQty]) => {
+        const productSnap = await transaction.get(doc(db, "productos", productId));
+        return { productId, requestedQty, productSnap };
+      })
+    );
+    for (const { productId, requestedQty, productSnap } of snaps) {
       if (!productSnap.exists()) {
         throw new ProductNotFoundError(productId);
       }
 
-      const currentStock = Number(productSnap.data().cantidad ?? 0);
+      const data = productSnap.data();
+      const currentStock = Number(data.cantidad ?? 0);
       if (currentStock < requestedQty) {
         throw new InsufficientStockError(itemName(items, productId), currentStock);
       }
 
       stockByProduct.set(productId, currentStock);
+      priceByProduct.set(productId, Number(data.precio_venta ?? 0));
+    }
+
+    let serverTotal = 0;
+    const lines = items.map((item) => {
+      const unit = priceByProduct.get(item.productId) ?? 0;
+      const line = Math.round(unit * item.quantity * 100) / 100;
+      serverTotal = Math.round((serverTotal + line) * 100) / 100;
+      return { item, unit, line };
+    });
+    const vuelto =
+      metodoPago === "EFECTIVO" ? Math.round(((montoRecibido ?? 0) - serverTotal) * 100) / 100 : 0;
+    if (metodoPago === "EFECTIVO" && (montoRecibido == null || vuelto < 0)) {
+      throw new VentaError("El monto recibido no alcanza el total");
     }
 
     // Phase 2: Perform all write operations
@@ -108,9 +104,9 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       ...sucursalField,
       usuario_id: userId,
       fecha: Timestamp.fromDate(fecha),
-      subtotal,
+      subtotal: serverTotal,
       descuento: 0,
-      total,
+      total: serverTotal,
       estado: "PAGADA",
       tipo_venta: "CONTADO",
       metodo_pago: metodoPago,
@@ -118,7 +114,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       updatedAt: now,
     });
 
-    for (const item of items) {
+    for (const { item, unit, line } of lines) {
       const detalleRef = doc(collection(db, "ventas_detalle"));
       transaction.set(detalleRef, {
         venta_id: ventaRef.id,
@@ -127,8 +123,8 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
         negocio_id: negocioId,
         producto_id: item.productId,
         cantidad: item.quantity,
-        precio_unitario: item.unitPrice,
-        total_linea: item.unitPrice * item.quantity,
+        precio_unitario: unit,
+        total_linea: line,
         createdAt: now,
       });
     }
@@ -138,7 +134,7 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       venta_id: ventaRef.id,
       negocio_id: negocioId,
       metodo_pago: metodoPago,
-      monto: total,
+      monto: serverTotal,
       ...(metodoPago === "EFECTIVO" ? { monto_recibido: montoRecibido, vuelto } : {}),
       createdAt: now,
     });
@@ -167,10 +163,10 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       });
     }
 
-    return ventaRef.id;
+    return { ventaId: ventaRef.id, total: serverTotal };
   });
 
-  return { ventaId, fecha, total, metodoPago };
+  return { ventaId: charged.ventaId, fecha, total: charged.total, metodoPago };
 }
 
 /**

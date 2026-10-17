@@ -258,3 +258,67 @@ export interface HistoryStore extends HistoryState {
   confirmRefund: (args: { sucursalId?: string | null; userId: string }) => Promise<void>;
   verRecibo: (venta: Venta, productNames: Record<string, string>) => Promise<void>;
 }
+
+export interface CompleteVentaParams {
+  items: CartItem[];
+  negocioId: string;
+  sucursalId?: string | null;
+  userId: string;
+  total: number;
+  subtotal: number;
+  metodoPago: MetodoPago;
+  montoRecibido?: number;
+}
+
+export interface CompleteVentaResult {
+  ventaId: string;
+  fecha: Date;
+  total: number;
+  metodoPago: MetodoPago;
+}
+
+export interface RefundVentaParams {
+  ventaId: string;
+  sucursalId?: string | null;
+  userId: string;
+}
+
+export interface RefundVentaResult {
+  ventaId: string;
+  detalles: VentaDetalle[];
+}
+
+export interface VentasQueryOptions {
+  desde?: Date;
+  hasta?: Date;
+  limitCount?: number;
+}
+
+export interface VentasListenerCallbacks {
+  onData: (ventas: Venta[], detallesMap: Record<string, VentaDetalle[]>) => void;
+  onError: (error: unknown) => void;
+  onLoading?: () => void;
+}
+
+export interface ReciboData {
+  ventaId: string;
+  fecha: Date;
+  items: LineaVentaDisplay[];
+  subtotal: number;
+  descuento: number;
+  total: number;
+  metodoPago: string;
+  negocioNombre?: string;
+}
+
+export interface CheckoutDialogProps {
+  visible: boolean;
+  processing: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export interface CartHeaderProps {
+  variant: "mobile" | "desktop";
+  itemCount: number;
+}

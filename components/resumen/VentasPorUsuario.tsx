@@ -1,5 +1,4 @@
 import { ResumenRow } from "@/components/resumen/shared/ResumenRow";
-import SectionCard from "@/components/resumen/shared/SectionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import EmptyState from "@/components/ui/EmptyState";
 import { useHaptic } from "@/hooks/use-haptic";
@@ -43,9 +42,9 @@ function VentasPorUsuarioRow({
         }
       >
         {/* Barra de participación: 2px, discreta */}
-        <View className="mt-1.5 ml-11 h-0.5 overflow-hidden rounded-full bg-[#F5F5F4] dark:bg-[#1A1F2B]">
+        <View className="mt-1.5 ml-11 h-0.5 overflow-hidden rounded-full bg-surface-hover">
           <View
-            className="h-full rounded-full bg-[#ea580c]"
+            className="h-full rounded-full bg-accent"
             style={{ width: `${porcentajeDelTotal}%` }}
           />
         </View>
@@ -72,7 +71,7 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
   }, [haptic]);
 
   return (
-    <SectionCard title="Ventas por Usuario">
+    <View>
       {data.length === 0 ? (
         <EmptyState title="Sin datos en este período" iconName="person.2.fill" />
       ) : (
@@ -92,7 +91,7 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
           {hasMore && !expanded ? (
             <Pressable onPress={handleVerMas} className="mt-3 items-center py-2 active:opacity-70">
               <Text
-                className="text-[12px] font-semibold text-orange-500 uppercase dark:text-orange-400"
+                className="text-[12px] font-semibold text-accent"
                 style={{ letterSpacing: 0.8 }}
               >
                 Ver {remainingCount} más
@@ -101,6 +100,6 @@ export default function VentasPorUsuario({ data }: VentasPorUsuarioProps) {
           ) : null}
         </>
       )}
-    </SectionCard>
+    </View>
   );
 }

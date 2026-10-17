@@ -31,18 +31,18 @@ export default function AnimatedScreen({ children, style, className }: AnimatedS
     if (!isFocused) return;
     if (reduceMotion || hasEnteredRef.current) {
       hasEnteredRef.current = true;
-      opacity.value = 1;
-      translateY.value = 0;
+      opacity.set(1);
+      translateY.set(0);
       return;
     }
     hasEnteredRef.current = true;
-    opacity.value = withTiming(1, TIMING_CONFIG);
-    translateY.value = withTiming(0, TIMING_CONFIG);
+    opacity.set(withTiming(1, TIMING_CONFIG));
+    translateY.set(withTiming(0, TIMING_CONFIG));
   }, [isFocused, opacity, reduceMotion, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
+    opacity: opacity.get(),
+    transform: [{ translateY: translateY.get() }],
   }));
 
   return (

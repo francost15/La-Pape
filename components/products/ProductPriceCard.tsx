@@ -21,7 +21,7 @@ export default function ProductPriceCard({
           Precio Publico
         </AppText>
         <Text
-          className="text-4xl tracking-tighter text-[#EA580C] dark:text-[#FB923C]"
+          className="text-4xl tracking-tighter text-accent"
           style={{ fontFamily: AppFonts.display, lineHeight: 48 }}
         >
           {formatCurrency(precioVenta)}
@@ -34,21 +34,21 @@ export default function ProductPriceCard({
             Precio Mayoreo
           </AppText>
           <Text
-            className="text-lg tracking-tight text-[#111827] dark:text-[#F9FAFB]"
+            className="text-lg tracking-tight text-content-primary"
             style={{ fontFamily: AppFonts.heading }}
           >
             {formatCurrency(precioMayoreo)}
           </Text>
         </View>
 
-        <View className="h-8 w-px bg-[#F3F4F6] dark:bg-[#374151]" />
+        <View className="h-8 w-px bg-surface-hover" />
 
         <View>
           <AppText variant="eyebrow" style={{ marginBottom: 4 }}>
             Costo Adquisición
           </AppText>
           <Text
-            className="text-lg tracking-tight text-[#6B7280] dark:text-[#9CA3AF]"
+            className="text-lg tracking-tight text-content-secondary"
             style={{ fontFamily: AppFonts.bodyStrong }}
           >
             {formatCurrency(costoPromedio)}

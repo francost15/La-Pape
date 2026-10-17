@@ -1,28 +1,27 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppFonts } from "@/constants/typography";
 import type { EditProductActionsProps } from "@/interface/products";
-import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 export function EditProductActions({ loading, onCancel, onSave }: EditProductActionsProps) {
   return (
     <View className="flex-row gap-3">
       <TouchableOpacity
-        className="h-12 flex-row items-center justify-center rounded-full border border-gray-200 bg-white px-6 active:opacity-80 dark:border-neutral-800 dark:bg-neutral-800"
+        className="h-12 flex-row items-center justify-center rounded-full border border-line-strong bg-surface-elevated px-6 active:opacity-80"
         onPress={onCancel}
         disabled={loading}
       >
         <Text
-          className="text-sm font-bold tracking-wide text-gray-500 uppercase dark:text-gray-400"
+          className="text-sm font-bold tracking-wide text-content-secondary"
           style={{ fontFamily: AppFonts.bodyStrong }}
         >
           Cancelar
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-[#EA580C] active:opacity-90"
+        className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-accent active:opacity-90"
         style={{
-          boxShadow: Platform.OS === "web" ? "0 8px 24px rgba(234, 88, 12, 0.3)" : undefined,
-          elevation: Platform.OS !== "web" ? 6 : undefined,
+          boxShadow: "0 8px 24px rgba(234, 88, 12, 0.3)",
         }}
         onPress={onSave}
         disabled={loading}

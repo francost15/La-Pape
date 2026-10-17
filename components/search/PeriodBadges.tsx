@@ -39,11 +39,11 @@ const BadgeLabel = React.memo(function BadgeLabel({
   const progress = useSharedValue(selected ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(selected ? 1 : 0, LABEL_TIMING);
+    progress.set(withTiming(selected ? 1 : 0, LABEL_TIMING));
   }, [selected, progress]);
 
   const colorStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(progress.value, [0, 1], [isDark ? "#9ca3af" : "#6b7280", "#ffffff"]),
+    color: interpolateColor(progress.get(), [0, 1], [isDark ? "#9ca3af" : "#6b7280", "#ffffff"]),
   }));
 
   return (

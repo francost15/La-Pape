@@ -1,18 +1,9 @@
 import { AppFonts } from "@/constants/typography";
+import type { UserAvatarProps } from "@/interface/ui";
 import { getInitials } from "@/lib/utils/format";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { Text, View, type StyleProp, type ViewStyle } from "react-native";
-
-interface UserAvatarProps {
-  name?: string | null;
-  photoUri?: string | null;
-  /** Diámetro en px. Default 40. */
-  size?: number;
-  /** Tamaño de fuente de las iniciales; por defecto se deriva del `size`. */
-  fontSize?: number;
-  style?: StyleProp<ViewStyle>;
-}
+import { Text, View, type ViewStyle } from "react-native";
 
 /**
  * UserAvatar — foto de perfil circular con fallback a iniciales.
@@ -39,11 +30,11 @@ export function UserAvatar({ name, photoUri, size = 40, fontSize, style }: UserA
 
   return (
     <View
-      className="items-center justify-center overflow-hidden bg-orange-100 dark:bg-orange-900/30"
+      className="items-center justify-center overflow-hidden bg-accent-soft"
       style={[dimension, style]}
     >
       <Text
-        className="font-bold text-orange-600 dark:text-orange-400"
+        className="font-bold text-accent"
         style={{ fontSize: fontSize ?? Math.round(size * 0.38), fontFamily: AppFonts.heading }}
       >
         {getInitials(name)}

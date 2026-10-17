@@ -40,16 +40,16 @@ export default function ProductStockCard({
         </View>
 
         {isCritical && (
-          <View className="mb-1.5 flex-row items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 dark:bg-red-900/20">
+          <View className="mb-1.5 flex-row items-center gap-1.5 rounded-full bg-error/10 px-3 py-1.5">
             <IconSymbol name="exclamationmark.triangle.fill" size={12} color={AppColors.error} />
-            <Text className="text-[10px] font-bold tracking-widest text-red-600 uppercase dark:text-red-400">
+            <Text className="text-[10px] font-bold tracking-widest text-error">
               Crítico
             </Text>
           </View>
         )}
       </View>
 
-      <View className="mt-6 h-2 overflow-hidden rounded-full bg-[#F3F4F6] dark:bg-[#374151]">
+      <View className="mt-6 h-2 overflow-hidden rounded-full bg-surface-hover">
         <View
           className="h-full rounded-full"
           style={{
@@ -61,10 +61,10 @@ export default function ProductStockCard({
 
       {stockMinimo != null && (
         <View className="mt-3 flex-row items-center justify-between">
-          <Text className="text-[11px] font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+          <Text className="text-[11px] font-medium tracking-wider text-content-secondary">
             Stock Mínimo
           </Text>
-          <Text className="text-[11px] font-bold text-gray-700 tabular-nums dark:text-gray-300">
+          <Text className="text-[11px] font-bold text-content-secondary tabular-nums">
             {stockMinimo} Unidades
           </Text>
         </View>

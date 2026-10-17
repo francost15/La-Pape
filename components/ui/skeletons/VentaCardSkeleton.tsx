@@ -1,7 +1,8 @@
 import { AppColors } from "@/constants/colors";
+import type { HistoryListSkeletonProps } from "@/interface/ui";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import { Bone } from "./Bone";
 
 /**
@@ -15,10 +16,9 @@ function VentaCardSkeleton() {
 
   return (
     <View
-      className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1F2B]"
+      className="overflow-hidden rounded-2xl bg-surface-elevated"
       style={{
-        boxShadow: Platform.OS === "web" ? "0 4px 12px rgba(0,0,0,0.02)" : undefined,
-        elevation: Platform.OS !== "web" ? 2 : undefined,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
       }}
     >
       <View
@@ -38,12 +38,6 @@ function VentaCardSkeleton() {
       </View>
     </View>
   );
-}
-
-interface HistoryListSkeletonProps {
-  /** Grupos de fecha simulados (encabezado + cards), como las secciones reales */
-  groups?: number;
-  cardsPerGroup?: number;
 }
 
 /**

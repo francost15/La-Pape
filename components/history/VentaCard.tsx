@@ -21,6 +21,72 @@ import Animated, {
  * VentaCard — fila expandible del historial.
  * Barra de acento izquierda; detalle inline sin capa de fondo extra.
  */
+function VentaDetails({
+  venta,
+  detalles,
+  productNames,
+  isReembolso,
+  colors,
+  animatedStyle,
+  onVerRecibo,
+  onReembolso,
+}: Pick<
+  VentaCardProps,
+  "venta" | "detalles" | "productNames" | "isReembolso" | "onVerRecibo" | "onReembolso"
+> & {
+  colors: ReturnType<typeof useThemeColors>["colors"];
+  animatedStyle: { opacity: number };
+}) {
+  return (
+    <Animated.View style={animatedStyle}>
+      <View className="px-5 pt-4 pb-5" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+        <AppText variant="label" style={{ marginBottom: 12 }}>
+          Detalle de productos
+        </AppText>
+        <View className="mb-6 gap-2">
+          {detalles.map((d) => (
+            <View key={d.id} className="flex-row items-baseline justify-between py-1">
+              <AppText variant="label" style={{ flex: 1, marginRight: 8 }} numberOfLines={1}>
+                {d.cantidad} × {productNames[d.producto_id] ?? "Producto"}
+              </AppText>
+              <AppText variant="bodyStrong" style={{ fontVariant: ["tabular-nums"] }}>
+                {formatCurrency(d.total_linea)}
+              </AppText>
+            </View>
+          ))}
+        </View>
+        <View className="flex-row gap-2.5">
+          <View style={{ flex: 1 }}>
+            <Button
+              title="Ver recibo"
+              icon={<IconSymbol name="eye.fill" size={16} color="white" />}
+              onPress={() => onVerRecibo(venta)}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              title="Reembolso"
+              variant="secondary"
+              disabled={isReembolso}
+              icon={
+                <IconSymbol
+                  name="arrow.uturn.backward"
+                  size={14}
+                  color={isReembolso ? colors.textMuted : AppColors.error}
+                />
+              }
+              onPress={() => onReembolso(venta)}
+              style={{ borderColor: isReembolso ? colors.border : "rgba(220, 38, 38, 0.2)" }}
+              textStyle={{ color: isReembolso ? colors.textMuted : AppColors.error }}
+              accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
+            />
+          </View>
+        </View>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default React.memo(function VentaCard({
   venta,
   detalles,
@@ -37,11 +103,11 @@ export default React.memo(function VentaCard({
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withTiming(expandido ? 1 : 0, { duration: 200 });
+    opacity.set(withTiming(expandido ? 1 : 0, { duration: 200 }));
   }, [expandido, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+    opacity: opacity.get(),
   }));
 
   const accent = isReembolso ? AppColors.errorLight : AppColors.primary;
@@ -100,64 +166,16 @@ export default React.memo(function VentaCard({
       </View>
 
       {expandido ? (
-        <Animated.View style={animatedStyle}>
-          <View
-            className="px-5 pt-4 pb-5"
-            style={{ borderTopWidth: 1, borderTopColor: colors.border }}
-          >
-            <AppText variant="label" style={{ marginBottom: 12 }}>
-              Detalle de productos
-            </AppText>
-
-            <View className="mb-6 gap-2">
-              {detalles.map((d) => {
-                const nombre = productNames[d.producto_id] ?? "Producto";
-                return (
-                  <View key={d.id} className="flex-row items-baseline justify-between py-1">
-                    <AppText variant="label" style={{ flex: 1, marginRight: 8 }} numberOfLines={1}>
-                      {d.cantidad} × {nombre}
-                    </AppText>
-                    <AppText variant="bodyStrong" style={{ fontVariant: ["tabular-nums"] }}>
-                      {formatCurrency(d.total_linea)}
-                    </AppText>
-                  </View>
-                );
-              })}
-            </View>
-
-            <View className="flex-row gap-2.5">
-              <View style={{ flex: 1 }}>
-                <Button
-                  title="Ver recibo"
-                  icon={<IconSymbol name="eye.fill" size={16} color="white" />}
-                  onPress={() => onVerRecibo(venta)}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Button
-                  title="Reembolso"
-                  variant="secondary"
-                  disabled={isReembolso}
-                  icon={
-                    <IconSymbol
-                      name="arrow.uturn.backward"
-                      size={14}
-                      color={isReembolso ? colors.textMuted : AppColors.error}
-                    />
-                  }
-                  onPress={() => onReembolso(venta)}
-                  style={{
-                    borderColor: isReembolso ? colors.border : "rgba(220, 38, 38, 0.2)",
-                  }}
-                  textStyle={{
-                    color: isReembolso ? colors.textMuted : AppColors.error,
-                  }}
-                  accessibilityLabel={isReembolso ? "Venta ya reembolsada" : "Reembolsar venta"}
-                />
-              </View>
-            </View>
-          </View>
-        </Animated.View>
+        <VentaDetails
+          venta={venta}
+          detalles={detalles}
+          productNames={productNames}
+          isReembolso={isReembolso}
+          colors={colors}
+          animatedStyle={animatedStyle}
+          onVerRecibo={onVerRecibo}
+          onReembolso={onReembolso}
+        />
       ) : null}
     </Animated.View>
   );

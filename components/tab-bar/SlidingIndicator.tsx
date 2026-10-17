@@ -8,11 +8,13 @@ export function SlidingIndicator({ activeIndex, tabCount, islandWidth }: Sliding
   const activeTranslation = useSharedValue(activeIndex);
 
   useEffect(() => {
-    activeTranslation.value = withSpring(activeIndex, {
-      damping: 24,
-      stiffness: 260,
-      mass: 0.8,
-    });
+    activeTranslation.set(
+      withSpring(activeIndex, {
+        damping: 24,
+        stiffness: 260,
+        mass: 0.8,
+      })
+    );
   }, [activeIndex, activeTranslation]);
 
   // La isla tiene un padding horizontal total de 24 (12 por lado)
@@ -21,7 +23,7 @@ export function SlidingIndicator({ activeIndex, tabCount, islandWidth }: Sliding
 
   const animatedStyle = useAnimatedStyle(() => {
     "worklet";
-    const centerX = (activeTranslation.value + 0.5) * tabWidth;
+    const centerX = (activeTranslation.get() + 0.5) * tabWidth;
     const x = centerX - PILL_W / 2;
 
     return {

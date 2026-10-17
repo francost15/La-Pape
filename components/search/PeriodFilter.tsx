@@ -53,8 +53,9 @@ export default function PeriodFilter({
   onPeriodoChange,
   rangoPersonalizado,
   onRangoPersonalizadoChange,
-  formatDate = (d) => formatDateUtil(d, "Seleccionar"),
+  formatDate: formatDateProp,
 }: PeriodFilterProps) {
+  const formatDate = formatDateProp ?? formatDateUtil;
   const isMobile = useLayoutStore((s) => s.isMobile);
   const [showModal, setShowModal] = useState(false);
   const [rangoTemporal, setRangoTemporal] = useState<RangoFechas>({
@@ -102,12 +103,12 @@ export default function PeriodFilter({
           >
             <Pressable
               onPress={() => setShowModal(true)}
-              className="mt-2 flex-row items-center gap-1.5 rounded-lg border border-orange-200/60 bg-orange-50 px-3 py-1.5 dark:border-orange-800/30 dark:bg-orange-900/20"
+              className="mt-2 flex-row items-center gap-1.5 rounded-lg border border-accent/30 bg-accent-soft px-3 py-1.5"
               accessibilityRole="button"
               accessibilityLabel="Editar período personalizado"
               accessibilityHint="Abre el modal para cambiar fecha de inicio y fin"
             >
-              <Text className="text-[12px] font-medium text-orange-600 dark:text-orange-400">
+              <Text className="text-[12px] font-medium text-accent">
                 {formatDate(rangoPersonalizado!.inicio)} — {formatDate(rangoPersonalizado!.fin)}
               </Text>
             </Pressable>

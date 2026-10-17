@@ -84,7 +84,7 @@ export default function CampoImagen({
 
   return (
     <View>
-      <Text className="mt-2 mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Imagen</Text>
+      <Text className="mt-2 mb-2 text-sm font-medium text-content-secondary">Imagen</Text>
       <Controller
         control={control}
         name="imagen"
@@ -92,7 +92,7 @@ export default function CampoImagen({
           <View>
             {!isWeb && (
               <TouchableOpacity
-                className="mb-3 flex-row items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-3"
+                className="mb-3 flex-row items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3"
                 onPress={() => setShowImageModal(true)}
               >
                 <IconSymbol name="camera.fill" size={20} color="white" />
@@ -114,7 +114,7 @@ export default function CampoImagen({
                   }
                 />
                 <TouchableOpacity className="mt-2 py-2" onPress={() => onChange("")}>
-                  <Text className="text-sm font-medium text-red-600 dark:text-red-400">
+                  <Text className="text-sm font-medium text-error">
                     Quitar imagen
                   </Text>
                 </TouchableOpacity>
@@ -122,7 +122,7 @@ export default function CampoImagen({
             ) : null}
 
             <TextInput
-              className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-black dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+              className="rounded-lg border border-line-strong bg-surface-elevated px-4 py-3 text-content-primary"
               placeholder="O ingresa una URL de imagen"
               placeholderTextColor={AppColors.light.textMuted}
               value={value || ""}
@@ -139,16 +139,16 @@ export default function CampoImagen({
               >
                 <View className="px-6 pt-2 pb-6">
                   <View className="mb-4 flex-row items-center justify-between">
-                    <Text className="text-xl font-bold text-black dark:text-white">
+                    <Text className="text-xl font-bold text-content-primary">
                       Seleccionar Imagen
                     </Text>
                     <TouchableOpacity onPress={() => setShowImageModal(false)}>
-                      <Text className="text-lg font-semibold text-orange-600">Cerrar</Text>
+                      <Text className="text-lg font-semibold text-accent">Cerrar</Text>
                     </TouchableOpacity>
                   </View>
                   <View className="gap-3">
                     <TouchableOpacity
-                      className="flex-row items-center justify-center gap-3 rounded-lg bg-orange-600 px-6 py-4"
+                      className="flex-row items-center justify-center gap-3 rounded-lg bg-accent px-6 py-4"
                       onPress={() => pickImageFromCamera(onChange)}
                     >
                       <IconSymbol name="camera.fill" size={24} color="white" />
@@ -170,7 +170,7 @@ export default function CampoImagen({
           </View>
         )}
       />
-      {errors.imagen && <Text className="mt-1 text-xs text-red-500">{errors.imagen.message}</Text>}
+      {errors.imagen && <Text className="mt-1 text-xs text-error">{errors.imagen.message}</Text>}
     </View>
   );
 }

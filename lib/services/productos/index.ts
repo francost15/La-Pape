@@ -1,7 +1,7 @@
 import { Categoria, CreateProductInput, Product, UpdateProductInput } from "@/interface";
 import { db } from "@/lib/firebase";
 import { createConverter } from "@/lib/utils/firestore-converter";
-import { AppError, ProductNotFoundError, NotFoundError } from "@/lib/errors";
+import { AppError } from "@/lib/errors";
 import {
   addDoc,
   collection,
@@ -10,6 +10,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   Timestamp,
   updateDoc,
@@ -110,6 +111,27 @@ const getProductsByNegocio = async (negocio_id: string): Promise<Product[]> => {
     throw new AppError("No se pudieron obtener los productos", "GET_PRODUCTS_ERROR");
   }
 };
+
+export function onProductosByNegocio(
+  negocioId: string,
+  onData: (products: Product[]) => void,
+  onError?: (error: Error) => void
+): () => void {
+  const q = query(
+    collection(db, "productos").withConverter(productConverter),
+    where("negocio_id", "==", negocioId),
+    where("activo", "==", true)
+  );
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const products = snapshot.docs.map((item) => item.data());
+      products.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      onData(products);
+    },
+    (error) => onError?.(error)
+  );
+}
 
 /**
  * Partially updates an existing product.

@@ -28,19 +28,21 @@ export function Bone({ style, className, width, height, borderRadius = 8 }: Skel
   useEffect(() => {
     if (reduceMotion) {
       cancelAnimation(opacity);
-      opacity.value = 0.5;
+      opacity.set(0.5);
       return;
     }
-    opacity.value = withRepeat(
-      withSequence(withTiming(0.7, { duration: 800 }), withTiming(0.3, { duration: 800 })),
-      -1, // Infinito
-      true
+    opacity.set(
+      withRepeat(
+        withSequence(withTiming(0.7, { duration: 800 }), withTiming(0.3, { duration: 800 })),
+        -1,
+        true
+      )
     );
     return () => cancelAnimation(opacity);
   }, [opacity, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+    opacity: opacity.get(),
   }));
 
   // Base neutra por tema: gris claro en light, surfaceHover en dark (igual que Skeleton.tsx)

@@ -3,11 +3,23 @@ import Navbar from "@/components/navbar";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppColors } from "@/constants/colors";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { onProductosByNegocio } from "@/lib/services/productos";
+import { useProductosStore } from "@/store/productos-store";
+import { useSessionStore } from "@/store/session-store";
 import { Tabs } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export default function TabLayout() {
   const { ready } = useRequireAuth({ redirectUnauthenticatedTo: "/" });
+  const negocioId = useSessionStore((s) => s.negocioId);
+
+  useEffect(() => {
+    if (!negocioId) return;
+    return onProductosByNegocio(negocioId, (products) => {
+      useProductosStore.getState().setProducts(products);
+    });
+  }, [negocioId]);
 
   if (!ready) {
     return (

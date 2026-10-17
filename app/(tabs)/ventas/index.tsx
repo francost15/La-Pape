@@ -1,4 +1,3 @@
-import { OnboardingHint, useOnboardingAfterLogin } from "@/components/onboarding/OnboardingHint";
 import { Tour } from "@/components/onboarding/Tour";
 import AnimatedScreen from "@/components/ui/AnimatedScreen";
 import AppText from "@/components/ui/AppText";
@@ -13,14 +12,10 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useOnboardingStore } from "@/store/onboarding-store";
+import type { CartHeaderProps } from "@/interface/ventas";
 import { useVentasStore } from "@/store/ventas-store";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput, View } from "react-native";
-
-interface CartHeaderProps {
-  variant: "mobile" | "desktop";
-  itemCount: number;
-}
 
 // Encabezado del carrito compartido entre el layout móvil y el sidebar desktop:
 // mismo contenido, solo cambian paddings y escala tipográfica.
@@ -67,8 +62,6 @@ export default function VentasScreen() {
   const searchInputRef = useRef<TextInput>(null);
   const startTour = useOnboardingStore((s) => s.startTour);
   const completeTour = useOnboardingStore((s) => s.completeTour);
-
-  useOnboardingAfterLogin();
 
   useEffect(() => {
     startTour("ventas", VENTAS_TOUR);
@@ -144,7 +137,6 @@ export default function VentasScreen() {
 
       {!isDesktop && <FooterProducts />}
 
-      <OnboardingHint />
       <Tour onComplete={completeTour} />
     </AnimatedScreen>
   );

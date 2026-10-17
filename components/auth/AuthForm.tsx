@@ -19,12 +19,14 @@ export default function AuthForm({
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
   const handleGooglePress = async () => {
+    setGoogleLoading(true);
     try {
-      setGoogleLoading(true);
       await onGooglePress();
-    } finally {
+    } catch (error) {
       setGoogleLoading(false);
+      throw error;
     }
+    setGoogleLoading(false);
   };
 
   const submitLabel = isSignUp ? "Registrarse" : "Iniciar Sesión";

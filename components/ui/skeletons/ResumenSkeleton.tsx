@@ -1,4 +1,4 @@
-import SectionCard from "@/components/resumen/shared/SectionCard";
+import type { ResumenSkeletonProps } from "@/interface/ui";
 import React from "react";
 import { View } from "react-native";
 import { Bone } from "./Bone";
@@ -9,7 +9,7 @@ import { Bone } from "./Bone";
  */
 function KpiTileSkeleton() {
   return (
-    <View className="min-w-[140px] flex-1 rounded-[24px] bg-white p-6 dark:bg-[#1A1F2B]">
+    <View className="min-w-[140px] flex-1 rounded-[24px] bg-surface-elevated p-6">
       <View className="flex-row items-start gap-4">
         <Bone width={3} height={32} borderRadius={2} className="mt-1" />
         <View className="flex-1">
@@ -35,7 +35,7 @@ function SectionTitleSkeleton() {
 /** Filas de una sección (vendedores / productos): avatar + texto + monto */
 function SectionRowsSkeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <SectionCard className="gap-3">
+    <View className="gap-3">
       {Array.from({ length: rows }, (_, i) => (
         <View key={i} className="flex-row items-center gap-3 py-2">
           <Bone width={40} height={40} borderRadius={20} />
@@ -46,12 +46,8 @@ function SectionRowsSkeleton({ rows = 3 }: { rows?: number }) {
           <Bone width={64} height={14} />
         </View>
       ))}
-    </SectionCard>
+    </View>
   );
-}
-
-interface ResumenSkeletonProps {
-  isMobile: boolean;
 }
 
 /**

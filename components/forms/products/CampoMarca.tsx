@@ -1,9 +1,9 @@
 import { SelectField, type SelectOption } from "@/components/forms/SelectField";
-import type { ProductFormFieldProps } from "@/interface/products";
+import type { ProductFormSectionProps } from "@/interface/products";
 import { useProductosStore } from "@/store/productos-store";
 import { useMemo } from "react";
 
-export default function CampoMarca({ control, errors }: ProductFormFieldProps) {
+export default function CampoMarca({ control, errors }: ProductFormSectionProps) {
   const products = useProductosStore((s) => s.products);
 
   const options = useMemo<SelectOption[]>(() => {

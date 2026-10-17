@@ -26,10 +26,10 @@ export default function CircleIconButton({
 
   const bgClass =
     variant === "primary"
-      ? "bg-orange-500"
+      ? "bg-accent"
       : variant === "success"
         ? "bg-green-600"
-        : "bg-gray-200 dark:bg-neutral-700";
+        : "bg-surface-hover";
   const iconColor =
     variant === "primary" || variant === "success" ? "#ffffff" : isDark ? "#d4d4d4" : "#4b5563";
 

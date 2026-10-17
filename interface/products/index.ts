@@ -1,7 +1,8 @@
 import type { Categoria } from "@/interface/categorias";
 import type { ThemeColors } from "@/interface/theme";
+import type { AppTextInputProps } from "@/interface/ui";
 import type { CreateProductFormData } from "@/lib/validations/product-schema";
-import type { Control, FieldErrors } from "react-hook-form";
+import type { Control, FieldErrors, FieldPath } from "react-hook-form";
 import type { StyleProp, ViewStyle } from "react-native";
 
 // Producto - El ID se usará como código de barras
@@ -65,24 +66,37 @@ export interface CardProductsProps {
   stockData?: { cantidad: number; stockMinimo: number };
 }
 
-/** Props base compartidas por campos de formulario de producto (RHF). */
-export interface ProductFormFieldProps {
+/** Props base de las secciones del formulario de producto (RHF). */
+export interface ProductFormSectionProps {
   control: Control<CreateProductFormData>;
   errors: FieldErrors<CreateProductFormData>;
 }
 
-export interface CampoCategoriaProps extends ProductFormFieldProps {
+export type NumericMode = "decimal" | "integer";
+
+/** Campo RHF sobre AppTextInput; omite value/onChange/error (los maneja el Controller). */
+export interface ProductFormFieldProps extends Omit<
+  AppTextInputProps,
+  "value" | "onChangeText" | "onBlur" | "error"
+> {
+  control: Control<CreateProductFormData>;
+  name: FieldPath<CreateProductFormData>;
+  label: string;
+  numeric?: NumericMode;
+}
+
+export interface CampoCategoriaProps extends ProductFormSectionProps {
   categories: Categoria[];
   isWeb?: boolean;
 }
 
-export interface CampoImagenProps extends ProductFormFieldProps {
+export interface CampoImagenProps extends ProductFormSectionProps {
   isWeb?: boolean;
   /** Tamaño fijo del preview en layout tipo detalle (ej. 420x420 desktop) */
   previewSize?: { width: number; height: number };
 }
 
-export interface FormProductosProps extends ProductFormFieldProps {
+export interface FormProductosProps extends ProductFormSectionProps {
   categories: Categoria[];
   isWeb?: boolean;
   /** Cuando true, no se renderiza el campo imagen (para layouts que lo ubican aparte) */

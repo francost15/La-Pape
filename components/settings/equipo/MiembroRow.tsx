@@ -20,9 +20,11 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
       setLoadingRol(true);
       try {
         await onRolChange(miembro.relacion.id, miembro.relacion.usuario_id, miembro.email, r);
-      } finally {
+      } catch (error) {
         setLoadingRol(false);
+        throw error;
       }
+      setLoadingRol(false);
     },
     [miembro, onRolChange]
   );
@@ -31,13 +33,15 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
     setLoadingDes(true);
     try {
       await onDesactivar(miembro.relacion.id);
-    } finally {
+    } catch (error) {
       setLoadingDes(false);
+      throw error;
     }
+    setLoadingDes(false);
   }, [miembro, onDesactivar]);
 
   return (
-    <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+    <View className="overflow-hidden rounded-2xl border border-line bg-surface-elevated">
       <Pressable
         onPress={() => setExpanded((v) => !v)}
         className="flex-row items-center gap-3 px-4 py-3.5 active:opacity-80"
@@ -45,12 +49,12 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
         <UserAvatar name={miembro.nombre} photoUri={miembro.foto} size={44} />
         <View className="min-w-0 flex-1">
           <View className="flex-row flex-wrap items-center gap-2">
-            <Text className="text-sm font-semibold text-gray-900 dark:text-white">
+            <Text className="text-sm font-semibold text-content-primary">
               {miembro.nombre}
             </Text>
-            {isMe && <Text className="text-xs text-gray-400 dark:text-gray-500">(tú)</Text>}
+            {isMe && <Text className="text-xs text-content-muted">(tú)</Text>}
           </View>
-          <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+          <Text className="text-xs text-content-secondary" numberOfLines={1}>
             {miembro.email}
           </Text>
         </View>
@@ -63,8 +67,8 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
       </Pressable>
 
       {expanded && (
-        <View className="gap-3 border-t border-gray-100 px-4 pt-3 pb-4 dark:border-neutral-700">
-          <Text className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
+        <View className="gap-3 border-t border-line px-4 pt-3 pb-4">
+          <Text className="text-xs font-semibold tracking-wide text-content-secondary">
             Cambiar rol
           </Text>
           <View className="flex-row flex-wrap gap-2">
@@ -79,12 +83,12 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
                   className={`rounded-xl border px-3 py-2 ${
                     isActive
                       ? `${c.bg} ${c.darkBg} border-transparent`
-                      : "border-gray-200 dark:border-neutral-600"
+                      : "border-line-strong"
                   }`}
                 >
                   <Text
                     className={`text-xs font-semibold ${
-                      isActive ? `${c.text} ${c.darkText}` : "text-gray-500"
+                      isActive ? `${c.text} ${c.darkText}` : "text-content-secondary"
                     }`}
                   >
                     {ROL_LABELS[r]}
@@ -97,14 +101,14 @@ export function MiembroRow({ miembro, currentUserId, onRolChange, onDesactivar }
             <TouchableOpacity
               onPress={handleDesactivar}
               disabled={loadingDes}
-              className="flex-row items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 active:opacity-80 dark:bg-red-900/20"
+              className="flex-row items-center gap-2 rounded-xl bg-error/10 px-3 py-2.5 active:opacity-80"
             >
               {loadingDes ? (
                 <ActivityIndicator size="small" color={AppColors.error} />
               ) : (
                 <IconSymbol name="xmark.circle.fill" size={16} color={AppColors.error} />
               )}
-              <Text className="text-sm font-semibold text-red-600 dark:text-red-400">
+              <Text className="text-sm font-semibold text-error">
                 Quitar del negocio
               </Text>
             </TouchableOpacity>

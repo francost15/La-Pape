@@ -47,7 +47,7 @@ export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
     <View className="gap-6">
       {/* Lista de empleados */}
       <View>
-        <Text className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <Text className="mb-3 text-sm font-semibold text-content-secondary">
           Empleados ({miembros.length})
         </Text>
         {loading ? (
@@ -55,15 +55,15 @@ export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
             <ActivityIndicator color={AppColors.primary} />
           </View>
         ) : miembros.length === 0 ? (
-          <View className="items-center rounded-2xl bg-gray-50 py-12 dark:bg-neutral-800/60">
+          <View className="items-center rounded-2xl bg-surface-hover py-12">
             <IconSymbol
               name="person.2.fill"
               size={48}
               color={AppColors.light.textMuted}
               style={{ marginBottom: 8 }}
             />
-            <Text className="text-sm text-gray-500 dark:text-gray-400">No hay empleados aún</Text>
-            <Text className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            <Text className="text-sm text-content-secondary">No hay empleados aún</Text>
+            <Text className="mt-1 text-xs text-content-muted">
               Invita o crea usuarios para añadirlos
             </Text>
           </View>

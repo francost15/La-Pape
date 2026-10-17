@@ -64,10 +64,14 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
 
       // Repone el stock localmente para reflejar el reembolso sin esperar al listener.
       const detalles = detallesMap[refundTarget.id] ?? [];
+      const qtyByProduct = new Map<string, number>();
+      for (const det of detalles) {
+        qtyByProduct.set(det.producto_id, (qtyByProduct.get(det.producto_id) ?? 0) + det.cantidad);
+      }
       const currentProducts = useProductosStore.getState().products;
       const updated = currentProducts.map((p) => {
-        const det = detalles.find((d) => d.producto_id === p.id);
-        return det ? { ...p, cantidad: p.cantidad + det.cantidad } : p;
+        const qty = qtyByProduct.get(p.id);
+        return qty ? { ...p, cantidad: p.cantidad + qty } : p;
       });
       useProductosStore.getState().setProducts(updated);
 

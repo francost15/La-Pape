@@ -1,16 +1,8 @@
+import type { CenteredModalProps } from "@/interface/ui";
 import { shadow } from "@/lib/utils/shadows";
 import React from "react";
 import { Modal, Pressable, View } from "react-native";
 import Animated, { FadeIn, FadeOut, ReduceMotion, ZoomIn, ZoomOut } from "react-native-reanimated";
-
-interface CenteredModalProps {
-  visible: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  /** Alto máximo del contenido en px. Default 560. */
-  maxHeight?: number;
-  closeLabel?: string;
-}
 
 /**
  * CenteredModal — diálogo centrado con zoom (variante desktop).
@@ -52,7 +44,7 @@ export function CenteredModal({
           className="w-full max-w-md"
         >
           <View
-            className="mx-4 overflow-hidden rounded-3xl bg-white dark:bg-neutral-800"
+            className="mx-4 overflow-hidden rounded-3xl bg-surface-elevated"
             style={[{ maxHeight }, shadow("0 24px 48px rgba(0,0,0,0.2)", 24)]}
           >
             {children}

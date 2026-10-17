@@ -11,16 +11,10 @@ import type { Config } from "tailwindcss";
  *     <Text className="text-content-primary">…</Text>
  *   </View>
  *
- * ⚠️ ACTIVACIÓN PENDIENTE (Tailwind v4 es CSS-first): este archivo NO se
- * carga automáticamente. Para que estos tokens generen clases hay que añadir
- * en `app/global.css` (después de los @import de tailwind):
- *
- *   @config "../tailwind.config.ts";
- *
- * Esa línea pertenece a la ola de migración de pantallas (global.css está
- * fuera del scope de este cambio). Mientras tanto, las primitivas de
- * `components/ui/` (AppText, Button, AppTextInput) resuelven el tema vía
- * `useThemeColors()` en JS y funcionan hoy sin depender de estas clases.
+ * `app/global.css` carga este archivo con `@config`. Las clases de token
+ * (`text-content-primary`, `bg-accent`, …) no llevan variante `dark:`:
+ * las variables cambian con la media query y, en web, con la clase
+ * `light`/`dark` de `<html>`.
  */
 export default {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],

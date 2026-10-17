@@ -12,8 +12,8 @@ export function ResumenThumb({ uri }: { uri?: string | null }) {
       uri={uri}
       size={36}
       borderRadius={8}
-      className="shrink-0 bg-[#F5F5F4] dark:bg-[#1A1F2B]"
-      fallback={<View className="h-4 w-4 rounded bg-[#E5E7EB] dark:bg-[#2A3040]" />}
+      className="shrink-0 bg-surface-hover"
+      fallback={<View className="h-4 w-4 rounded bg-surface-hover" />}
     />
   );
 }

@@ -1,25 +1,8 @@
-import { IconSymbol, type IconSymbolName } from "@/components/ui/icon-symbol";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import type { ThumbProps } from "@/interface/ui";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { View, type StyleProp, type ViewStyle } from "react-native";
-
-interface ThumbProps {
-  /** URL de la imagen; si es vacía/nula o falla la carga se muestra el fallback. */
-  uri?: string | null;
-  /** Lado del thumbnail en px cuando no se controla el tamaño vía className. */
-  size?: number;
-  borderRadius?: number;
-  className?: string;
-  style?: StyleProp<ViewStyle>;
-  /** Clave de reciclaje para FlashList/FlatList (evita imágenes cruzadas). */
-  recyclingKey?: string;
-  /** Ícono SF Symbol del fallback por defecto. */
-  iconName?: IconSymbolName;
-  iconSize?: number;
-  iconColor?: string;
-  /** Fallback custom; si se pasa, reemplaza al ícono. */
-  fallback?: React.ReactNode;
-}
+import { View, type ViewStyle } from "react-native";
 
 /**
  * Thumbnail con fallback y estado de error INTERNO.

@@ -98,7 +98,7 @@ export function useCompleteVenta(onSuccess?: () => void) {
           id: result.ventaId,
           fecha: fechaStr,
           total: result.total,
-          subtotal,
+          subtotal: result.total,
           descuento: 0,
           items: ventaItems,
           metodoPago: labelMetodoPago(result.metodoPago),

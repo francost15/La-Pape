@@ -8,20 +8,25 @@ import { AppFonts } from "@/constants/typography";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useEquipoStore } from "@/store/equipo-store";
 import { useResponsive } from "@/hooks/use-responsive";
+import type { SettingsTabId } from "@/interface/equipo";
 import { useSessionStore } from "@/store/session-store";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 
-type TabId = "perfil" | "equipo";
-
-const TABS: { id: TabId; label: string }[] = [
+const TABS: { id: SettingsTabId; label: string }[] = [
   { id: "perfil", label: "Mi Perfil" },
   { id: "equipo", label: "Equipo" },
 ];
 
-function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => void }) {
+function TabBar({
+  active,
+  onChange,
+}: {
+  active: SettingsTabId;
+  onChange: (t: SettingsTabId) => void;
+}) {
   return (
     <View
       className="mb-6 flex-row gap-1 rounded-xl p-1"
@@ -68,7 +73,7 @@ function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => v
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>("perfil");
+  const [activeTab, setActiveTab] = useState<SettingsTabId>("perfil");
 
   useRequireAuth({ redirectUnauthenticatedTo: "/" });
 

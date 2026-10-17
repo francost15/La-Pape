@@ -40,9 +40,8 @@ export function useProductosScreen() {
       } catch (e: unknown) {
         const message = e instanceof Error ? e.message : "Error al cargar los productos";
         setError(message);
-      } finally {
-        if (showSpinner) setLoading(false);
       }
+      if (showSpinner) setLoading(false);
     },
     [negocioIdFromSession, setCategories, setError, setLoading, setNegocioId, setProducts]
   );

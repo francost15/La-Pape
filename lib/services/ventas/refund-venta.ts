@@ -1,19 +1,10 @@
-import { VentaDetalle } from "@/interface";
+import type { VentaDetalle } from "@/interface";
+import type { RefundVentaParams, RefundVentaResult } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 import { getDetallesByVenta } from "../ventas-detalle";
 
-export interface RefundVentaParams {
-  ventaId: string;
-  /** Null/omitido cuando el negocio no tiene sucursales; no se escribe el campo. */
-  sucursalId?: string | null;
-  userId: string;
-}
-
-export interface RefundVentaResult {
-  ventaId: string;
-  detalles: VentaDetalle[];
-}
+export type { RefundVentaParams, RefundVentaResult };
 
 /**
  * Flujo completo de reembolso:
@@ -60,9 +51,13 @@ export async function refundVentaFlow(params: RefundVentaParams): Promise<Refund
     }
 
     const stockByProduct = new Map<string, number>();
-    for (const productId of qtyByProduct.keys()) {
-      const productRef = doc(db, "productos", productId);
-      const productSnap = await transaction.get(productRef);
+    const snaps = await Promise.all(
+      [...qtyByProduct.keys()].map(async (productId) => {
+        const productSnap = await transaction.get(doc(db, "productos", productId));
+        return { productId, productSnap };
+      })
+    );
+    for (const { productId, productSnap } of snaps) {
       if (!productSnap.exists()) {
         throw new Error(`Producto no encontrado: ${productId}`);
       }

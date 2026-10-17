@@ -25,9 +25,7 @@ function printOnWeb(html: string): void {
   setTimeout(doPrint, 600);
 }
 
-export async function generateAndShareRecibo(
-  data: ReciboData,
-): Promise<void> {
+export async function generateAndShareRecibo(data: ReciboData): Promise<void> {
   const html = buildReciboHTML(data, LOGO_BASE64);
 
   if (Platform.OS === "web") {
@@ -36,9 +34,10 @@ export async function generateAndShareRecibo(
   }
 
   const Print = await import("expo-print");
-  const { uri } = await Print.printToFileAsync({ html });
-
-  const canShare = await Sharing.isAvailableAsync();
+  const [{ uri }, canShare] = await Promise.all([
+    Print.printToFileAsync({ html }),
+    Sharing.isAvailableAsync(),
+  ]);
   if (canShare) {
     await Sharing.shareAsync(uri, {
       mimeType: "application/pdf",

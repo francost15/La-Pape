@@ -61,8 +61,9 @@ Recent history shows short, imperative commit subjects, often in Spanish (e.g., 
 - Manejar estado de dominio y compartido con Zustand; evitar `useState` para ese tipo de estado.
 - Interfaces y tipos de dominio/props viven en `interface/`, no en `store/` ni embebidos en TSX.
 - Preferir Tailwind (`className`) frente a StyleSheet inline o tamaños en px.
-- Extraer y reutilizar componentes y hooks en lugar de duplicar UI entre pantallas.
-- Preferencia visual: UI limpia estilo Apple, acento naranja, animaciones suaves con Reanimated.
+- Reutilizar hooks y componentes existentes y minimizar código duplicado; evitar capas de abstracción nuevas.
+- Preferencia visual: UI limpia estilo Apple, acento naranja, animaciones suaves con Reanimated. No usar texto de UI en mayúsculas.
+- No hacer push a `origin` (`FrancoSanchezTrinidadIdea15/La-Pape`); el remoto del usuario es `upstream` (`francost15/La-Pape`).
 - En Ventas no mostrar stock ni precio de mayoreo; en Productos sí.
 - DynamicIslandTabBar sin etiquetas de texto; debe respetar correctamente light/dark.
 - Título de documento unificado en toda la app: "Punto de Venta La Pape".

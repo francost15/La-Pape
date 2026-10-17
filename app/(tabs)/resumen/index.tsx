@@ -123,7 +123,7 @@ export default function ResumenScreen() {
           {isMobile ? (
             <>
               <SectionTitle title="Productos Más Vendidos" />
-              <TopProductsList title="Productos Más Vendidos" items={ranking.top} />
+              <TopProductsList items={ranking.top} />
               <SectionTitle title="Bajo Stock" />
               <ProductosBajoStockList items={productosBajoStock} />
             </>
@@ -131,7 +131,7 @@ export default function ResumenScreen() {
             <View className="flex-row items-start gap-6">
               <View style={{ flex: 3 }}>
                 <SectionTitle title="Productos Más Vendidos" />
-                <TopProductsList title="Productos Más Vendidos" items={ranking.top} />
+                <TopProductsList items={ranking.top} />
               </View>
               <View style={{ flex: 2 }}>
                 <SectionTitle title="Bajo Stock" />

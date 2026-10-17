@@ -11,6 +11,36 @@ import { Platform, Text, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui/icon-symbol";
 import QuantityStepper from "./QuantityStepper";
 
+const ROW_LAYOUT = {
+  desktop: {
+    padY: 16,
+    padX: 40,
+    gap: 20,
+    img: 56,
+    radius: 14,
+    icon: 20,
+    lines: 1,
+    price: 18,
+    stepper: 34,
+  },
+  mobile: {
+    padY: 12,
+    padX: 16,
+    gap: 12,
+    img: 48,
+    radius: 10,
+    icon: 18,
+    lines: 2,
+    price: 16,
+    stepper: 32,
+  },
+} as const;
+
+function webFont(weight: "500" | "600" | "700") {
+  if (Platform.OS !== "web") return null;
+  return { fontWeight: weight };
+}
+
 /**
  * ProductRow — fila de producto del catálogo de ventas.
  *
@@ -42,10 +72,7 @@ export default React.memo(function ProductRow({
   const withBrand = showBrand ?? !isDesktop;
   const withDivider = divider ?? !isDesktop;
 
-  const imgSize = isDesktop ? 56 : 48;
-  const imgRadius = isDesktop ? 14 : 10;
-  const btnSize = isDesktop ? 38 : 38;
-  const stepperSize = isDesktop ? 34 : 32;
+  const layout = isDesktop ? ROW_LAYOUT.desktop : ROW_LAYOUT.mobile;
 
   return (
     <View
@@ -53,11 +80,11 @@ export default React.memo(function ProductRow({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: isDesktop ? 16 : 12,
-        paddingHorizontal: isDesktop ? 40 : 16,
-        gap: isDesktop ? 20 : 12,
+        paddingVertical: layout.padY,
+        paddingHorizontal: layout.padX,
+        gap: layout.gap,
         ...(withDivider ? { borderBottomWidth: 1, borderBottomColor: colors.border } : null),
-        ...(Platform.OS === "web" ? { cursor: inCart ? "default" : "pointer" } : {}),
+        ...(Platform.OS === "web" ? { cursor: inCart ? "default" : "pointer" } : null),
       }}
       // @ts-ignore web only onClick
       onClick={Platform.OS === "web" && !inCart ? handleAdd : undefined}
@@ -66,10 +93,10 @@ export default React.memo(function ProductRow({
       {/* ── Imagen ────────────────────────────────────────────── */}
       <Thumb
         uri={product.imagen}
-        size={imgSize}
-        borderRadius={imgRadius}
+        size={layout.img}
+        borderRadius={layout.radius}
         recyclingKey={product.id}
-        iconSize={isDesktop ? 20 : 18}
+        iconSize={layout.icon}
         iconColor={isDark ? AppColors.dark.textMuted : "#C7C7CC"}
         style={{
           backgroundColor: isDark ? AppColors.dark.surfaceElevated : AppColors.light.surfaceHover,
@@ -81,15 +108,15 @@ export default React.memo(function ProductRow({
       <View style={{ flex: 1, minWidth: 0, justifyContent: "center", gap: 2 }}>
         <Text
           style={{
-            fontSize: isDesktop ? 15 : 15,
+            fontSize: 15,
             color: colors.textPrimary,
             letterSpacing: -0.2,
             fontFamily: AppFonts.bodyStrong,
             // En native el peso va codificado en el archivo de fuente; un
             // fontWeight explícito fuerza bold sintético. En web sí se declara.
-            ...(Platform.OS === "web" ? { fontWeight: "600" as const } : null),
+            ...webFont("600"),
           }}
-          numberOfLines={isDesktop ? 1 : 2}
+          numberOfLines={layout.lines}
         >
           {product.nombre}
         </Text>
@@ -99,7 +126,7 @@ export default React.memo(function ProductRow({
               fontSize: 13,
               color: colors.textSecondary,
               fontFamily: AppFonts.body,
-              ...(Platform.OS === "web" ? { fontWeight: "500" as const } : null),
+              ...webFont("500"),
             }}
             numberOfLines={1}
           >
@@ -108,11 +135,11 @@ export default React.memo(function ProductRow({
         ) : null}
         <Text
           style={{
-            fontSize: isDesktop ? 18 : 16,
+            fontSize: layout.price,
             color: AppColors.primary,
             letterSpacing: -0.3,
             fontFamily: AppFonts.display,
-            ...(Platform.OS === "web" ? { fontWeight: "700" as const } : null),
+            ...webFont("700"),
           }}
         >
           {formatCurrency(product.precio_venta)}
@@ -126,16 +153,16 @@ export default React.memo(function ProductRow({
             quantity={quantity}
             onMinus={handleMinus}
             onPlus={handlePlus}
-            size={stepperSize}
+            size={layout.stepper}
           />
         ) : (
           <TouchableOpacity
             onPress={handleAdd}
             activeOpacity={0.8}
             style={{
-              width: btnSize,
-              height: btnSize,
-              borderRadius: btnSize / 2,
+              width: 38,
+              height: 38,
+              borderRadius: 19,
               backgroundColor: AppColors.primary,
               alignItems: "center",
               justifyContent: "center",
@@ -143,7 +170,7 @@ export default React.memo(function ProductRow({
             accessibilityRole="button"
             accessibilityLabel={`Agregar ${product.nombre}`}
           >
-            <IconSymbol name="plus" size={btnSize * 0.5} color="#ffffff" />
+            <IconSymbol name="plus" size={19} color="#ffffff" />
           </TouchableOpacity>
         )}
       </View>

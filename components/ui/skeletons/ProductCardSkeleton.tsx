@@ -1,12 +1,8 @@
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import type { ProductCardSkeletonProps, ProductListSkeletonProps } from "@/interface/ui";
 import React from "react";
 import { View } from "react-native";
 import { Bone } from "./Bone";
-
-interface ProductCardSkeletonProps {
-  /** "row" espeja CardProductCompact (mobile); "card" espeja CardProductDesktop (grid) */
-  variant?: "row" | "card";
-}
 
 /**
  * ProductCardSkeleton — espeja las dimensiones reales de CardProducts para que
@@ -51,12 +47,6 @@ function ProductCardSkeleton({ variant = "row" }: ProductCardSkeletonProps) {
       </View>
     </View>
   );
-}
-
-interface ProductListSkeletonProps {
-  /** Columnas del grid (1 = lista mobile) — debe coincidir con el grid real */
-  numColumns?: number;
-  count?: number;
 }
 
 /**

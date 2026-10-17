@@ -17,7 +17,7 @@ export default function CustomRangeContent({
   return (
     <>
       <Text
-        className={`text-center font-bold text-gray-800 dark:text-gray-100 ${
+        className={`text-center font-bold text-content-primary ${
           isMobile ? "mb-1 text-lg" : "mb-1 text-xl"
         }`}
         accessibilityRole="header"
@@ -25,7 +25,7 @@ export default function CustomRangeContent({
         Período Personalizado
       </Text>
 
-      <Text className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      <Text className="mb-4 text-center text-sm text-content-secondary">
         {selectingStep === "inicio" && "Selecciona la fecha de inicio"}
         {selectingStep === "fin" && "Ahora selecciona la fecha de fin"}
         {selectingStep === "done" && "Toca un día para reiniciar la selección"}
@@ -35,18 +35,16 @@ export default function CustomRangeContent({
         <View
           className={`flex-1 rounded-xl border px-3 py-2.5 ${
             selectingStep === "inicio"
-              ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-              : "border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800"
+              ? "border-accent bg-accent-soft"
+              : "border-line-strong bg-surface-elevated"
           }`}
         >
-          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-content-muted">
             Desde
           </Text>
           <Text
             className={`text-sm font-bold ${
-              rangoTemporal.inicio
-                ? "text-gray-800 dark:text-gray-100"
-                : "text-gray-400 dark:text-gray-500"
+              rangoTemporal.inicio ? "text-content-primary" : "text-content-muted"
             }`}
           >
             {formatDateShort(rangoTemporal.inicio)}
@@ -54,24 +52,22 @@ export default function CustomRangeContent({
         </View>
 
         <View className="justify-center">
-          <Text className="font-medium text-gray-400 dark:text-gray-500">→</Text>
+          <Text className="font-medium text-content-muted">→</Text>
         </View>
 
         <View
           className={`flex-1 rounded-xl border px-3 py-2.5 ${
             selectingStep === "fin"
-              ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
-              : "border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800"
+              ? "border-accent bg-accent-soft"
+              : "border-line-strong bg-surface-elevated"
           }`}
         >
-          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-gray-400 uppercase dark:text-gray-500">
+          <Text className="mb-0.5 text-[10px] font-semibold tracking-wider text-content-muted">
             Hasta
           </Text>
           <Text
             className={`text-sm font-bold ${
-              rangoTemporal.fin
-                ? "text-gray-800 dark:text-gray-100"
-                : "text-gray-400 dark:text-gray-500"
+              rangoTemporal.fin ? "text-content-primary" : "text-content-muted"
             }`}
           >
             {formatDateShort(rangoTemporal.fin)}
@@ -86,19 +82,17 @@ export default function CustomRangeContent({
       <View className="flex-row gap-3">
         <Pressable
           onPress={onCancel}
-          className="flex-1 items-center justify-center rounded-2xl bg-gray-100 py-3.5 dark:bg-neutral-700"
+          className="flex-1 items-center justify-center rounded-2xl bg-surface-hover py-3.5"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           accessibilityRole="button"
           accessibilityLabel="Cancelar selección de período"
         >
-          <Text className="text-[15px] font-semibold text-gray-700 dark:text-gray-200">
-            Cancelar
-          </Text>
+          <Text className="text-[15px] font-semibold text-content-secondary">Cancelar</Text>
         </Pressable>
         <Pressable
           onPress={onConfirm}
           disabled={!canConfirm}
-          className="flex-1 items-center justify-center rounded-2xl bg-orange-600 py-3.5"
+          className="flex-1 items-center justify-center rounded-2xl bg-accent py-3.5"
           style={({ pressed }) => ({
             opacity: canConfirm ? (pressed ? 0.8 : 1) : 0.4,
           })}

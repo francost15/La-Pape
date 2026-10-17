@@ -85,7 +85,6 @@ export interface RankingRowProps extends ListRowDividerProps {
 }
 
 export interface TopProductsListProps {
-  title: string;
   items: ProductoRanking[];
 }
 

@@ -1,4 +1,5 @@
 import { useResponsive } from "@/hooks/use-responsive";
+import type { DetailSkeletonProps } from "@/interface/ui";
 import React from "react";
 import { ScrollView, View } from "react-native";
 import { Bone } from "./Bone";
@@ -11,14 +12,6 @@ function FieldRowSkeleton() {
       <Bone width="100%" height={48} borderRadius={12} />
     </View>
   );
-}
-
-interface DetailSkeletonProps {
-  /**
-   * "detail" espeja ProductoDetailView (imagen hero + cards de info);
-   * "form" espeja EditProductView (imagen + filas de campos).
-   */
-  variant?: "detail" | "form";
 }
 
 /**
@@ -74,7 +67,7 @@ export function DetailSkeleton({ variant = "detail" }: DetailSkeletonProps) {
   if (isDesktop) {
     return (
       <ScrollView
-        className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+        className="flex-1 bg-canvas"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ alignItems: "center", padding: 48 }}
       >
@@ -96,7 +89,7 @@ export function DetailSkeleton({ variant = "detail" }: DetailSkeletonProps) {
 
   return (
     <ScrollView
-      className="flex-1 bg-[#FAFAF9] dark:bg-[#0C0F14]"
+      className="flex-1 bg-canvas"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
     >

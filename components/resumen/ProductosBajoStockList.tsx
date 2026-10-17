@@ -1,6 +1,5 @@
 import { ResumenRow } from "@/components/resumen/shared/ResumenRow";
 import { ResumenThumb } from "@/components/resumen/shared/ResumenThumb";
-import SectionCard from "@/components/resumen/shared/SectionCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { AppColors } from "@/constants/colors";
 import { goToProductDetail } from "@/lib/navigation/go-to-product";
@@ -52,7 +51,7 @@ const StockRow = React.memo(function StockRow({ product, showDivider }: StockRow
 
 export default function ProductosBajoStockList({ items }: ProductosBajoStockListProps) {
   return (
-    <SectionCard title="Necesitan stock" className="min-w-0 flex-1">
+    <View className="min-w-0 flex-1">
       {items.length === 0 ? (
         <EmptyState
           title="Ningún producto requiere reabastecimiento"
@@ -65,6 +64,6 @@ export default function ProductosBajoStockList({ items }: ProductosBajoStockList
           ))}
         </View>
       )}
-    </SectionCard>
+    </View>
   );
 }

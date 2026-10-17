@@ -4,7 +4,6 @@ export const Strings = {
     registerTitle: "Crear cuenta",
     emailPlaceholder: "Correo electrónico",
     passwordPlaceholder: "Contraseña",
-    forgotPassword: "¿Olvidaste tu contraseña?",
     noAccount: "¿No tienes cuenta?",
     hasAccount: "¿Ya tienes cuenta?",
     signInWithGoogle: "Continuar con Google",
@@ -16,7 +15,6 @@ export const Strings = {
     emptyCartHintDesktop: "Agrega productos desde el catálogo",
     completeSale: "Completar venta",
     clearCart: "Limpiar",
-    confirmComplete: "¿Estás seguro de completar esta venta?",
     cashShort: "El monto recibido no alcanza el total",
     amountReceived: "Monto recibido",
     changeDue: "Vuelto",
@@ -27,7 +25,6 @@ export const Strings = {
     errorRegisteringSale: "Error al registrar la venta",
     removeFromCart: "Eliminar del carrito",
     clearCartTitle: "Vaciar carrito",
-    accept: "Aceptar",
   },
 
   productos: {

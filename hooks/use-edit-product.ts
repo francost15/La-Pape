@@ -78,11 +78,13 @@ export function useEditProduct() {
   });
 
   useEffect(() => {
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
     const loadData = async () => {
       try {
         setProductLoading(true);
         if (!sessionUserId) {
-          setTimeout(() => router.replace("/"), 100);
+          redirectTimer = setTimeout(() => router.replace("/"), 100);
+          setProductLoading(false);
           return;
         }
 
@@ -112,6 +114,7 @@ export function useEditProduct() {
           Alert.alert("Error", "Producto no encontrado", [
             { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
           ]);
+          setProductLoading(false);
           return;
         }
 
@@ -123,6 +126,7 @@ export function useEditProduct() {
           Alert.alert("Error", "No tienes un negocio asignado", [
             { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
           ]);
+          setProductLoading(false);
           return;
         }
 
@@ -151,12 +155,12 @@ export function useEditProduct() {
         Alert.alert("Error", msg, [
           { text: "OK", onPress: () => setTimeout(() => router.back(), 100) },
         ]);
-      } finally {
-        setProductLoading(false);
       }
+      setProductLoading(false);
     };
 
     loadData();
+    return () => clearTimeout(redirectTimer);
     // negocioId y categories se leen del store pero no son deps de init (no deben retriggerar)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, productParam, reset, router]);
@@ -202,9 +206,8 @@ export function useEditProduct() {
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "No se pudo actualizar el producto";
       notify.error({ title: "Error", description: msg });
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return {

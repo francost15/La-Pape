@@ -29,3 +29,12 @@ export interface UsuarioInfo {
 }
 
 export type UsuariosMap = Record<string, UsuarioInfo>;
+
+export interface CreateUserWithAuthInput {
+  email: string;
+  password: string;
+  nombre: string;
+  telefono?: string;
+  rol: UserRole;
+  negocioId: string;
+}

@@ -26,7 +26,7 @@ function BackButton() {
     >
       <IconSymbol name="chevron.left" size={18} color={AppColors.light.textSecondary} />
       <Text
-        className="text-xs font-bold tracking-widest text-content-secondary uppercase"
+        className="text-xs font-bold tracking-widest text-content-secondary"
         style={{ fontFamily: AppFonts.bodyStrong }}
       >
         VOLVER
@@ -67,7 +67,7 @@ export function EditProductView({
               {/* Columna izquierda: Imagen hero */}
               <View className="flex-1 gap-6">
                 <View
-                  className="overflow-hidden rounded-[32px] bg-white dark:bg-neutral-800"
+                  className="overflow-hidden rounded-[32px] bg-surface-elevated"
                   style={shadow("0 24px 48px rgba(0,0,0,0.06)", 0)}
                 >
                   <CampoImagen
@@ -78,10 +78,10 @@ export function EditProductView({
                   />
                 </View>
                 <View className="px-2">
-                  <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary uppercase">
+                  <Text className="mb-1 text-[10px] font-bold tracking-[0.2em] text-content-secondary">
                     Guas de Edición
                   </Text>
-                  <Text className="text-xs leading-4 text-gray-400 dark:text-gray-500">
+                  <Text className="text-xs leading-4 text-content-muted">
                     Actualiza la imagen del producto cargando un archivo o ingresando una URL
                     directa.
                   </Text>
@@ -92,12 +92,12 @@ export function EditProductView({
               <View style={{ width: 480 }} className="gap-8">
                 <View>
                   <Text
-                    className="mb-1 text-2xl tracking-tight text-[#111827] dark:text-[#F9FAFB]"
+                    className="mb-1 text-2xl tracking-tight text-content-primary"
                     style={{ fontFamily: AppFonts.display }}
                   >
                     Editor de Producto
                   </Text>
-                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                  <Text className="text-sm text-content-secondary">
                     Actualiza los detalles técnicos y comerciales.
                   </Text>
                 </View>
@@ -133,12 +133,12 @@ export function EditProductView({
         <BackButton />
         <View className="mb-6">
           <Text
-            className="text-3xl tracking-tighter text-[#111827] dark:text-[#F9FAFB]"
+            className="text-3xl tracking-tighter text-content-primary"
             style={{ fontFamily: AppFonts.display }}
           >
             Editar
           </Text>
-          <Text className="text-sm text-gray-500 dark:text-gray-400">
+          <Text className="text-sm text-content-secondary">
             Modifica los campos necesarios para reflejar los cambios.
           </Text>
         </View>
@@ -147,7 +147,7 @@ export function EditProductView({
       </ScrollView>
 
       <View
-        className="border-t border-gray-100 bg-canvas px-6 py-4 dark:border-neutral-800"
+        className="border-t border-line bg-canvas px-6 py-4"
         style={{ paddingBottom: 16 + tabBarHeight }}
       >
         {actions}

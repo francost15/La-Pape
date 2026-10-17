@@ -1,5 +1,4 @@
 import EmptyState from "@/components/ui/EmptyState";
-import SectionCard from "@/components/resumen/shared/SectionCard";
 import { AppColors } from "@/constants/colors";
 import { formatCurrency } from "@/lib/utils/format";
 import type { CategoriaVenta, CategoryBreakdownProps, LegendItemProps } from "@/interface/resumen";
@@ -59,8 +58,8 @@ function DonutChart({ data, size }: { data: CategoriaVenta[]; size: number }) {
   return (
     <Svg width={size} height={size}>
       <G>
-        {slices.map((s, i) => (
-          <Path key={i} d={s.path} fill={s.color} />
+        {slices.map((s) => (
+          <Path key={s.path} d={s.path} fill={s.color} />
         ))}
         <Circle cx={cx} cy={cy} r={innerR - 1} fill="transparent" />
       </G>
@@ -91,7 +90,7 @@ function LegendItem({ color, label, value, percentage }: LegendItemProps) {
       </View>
 
       {/* Barra de 1px: presencia mínima, máxima legibilidad */}
-      <View className="ml-4 h-px overflow-hidden rounded-full bg-[#F5F5F4] dark:bg-[#1A1F2B]">
+      <View className="ml-4 h-px overflow-hidden rounded-full bg-surface-hover">
         <View
           className="h-full rounded-full"
           style={{ backgroundColor: color, width: `${percentage}%` }}
@@ -109,7 +108,7 @@ export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownP
   const isEmpty = data.length === 0 || total === 0;
 
   return (
-    <SectionCard title="Ventas por Categoría">
+    <View>
       {isEmpty ? (
         <EmptyState title="Sin datos en este período" iconName="chart.pie.fill" />
       ) : (
@@ -130,6 +129,6 @@ export default function CategoryBreakdown({ data, isMobile }: CategoryBreakdownP
           </View>
         </View>
       )}
-    </SectionCard>
+    </View>
   );
 }

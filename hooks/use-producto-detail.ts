@@ -80,10 +80,9 @@ export function useProductoDetail() {
         } catch (e) {
           console.error(e);
           if (isMounted) setCurrentProduct(null);
-        } finally {
-          if (isMounted) setProductLoading(false);
-          isLoading = false;
         }
+        if (isMounted) setProductLoading(false);
+        isLoading = false;
       };
 
       loadProduct();
@@ -126,9 +125,8 @@ export function useProductoDetail() {
             } catch (error: unknown) {
               const message = error instanceof Error ? error.message : "No se pudo eliminar";
               notify.error({ title: "Error", description: message });
-            } finally {
-              setDeleting(false);
             }
+            setDeleting(false);
           },
         },
       ]

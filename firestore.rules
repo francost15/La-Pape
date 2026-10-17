@@ -96,11 +96,13 @@ service cloud.firestore {
       allow read: if canReadTenantDoc();
       allow create: if canCreateTenantDoc()
         && request.resource.data.precio_venta is number
-        && request.resource.data.cantidad is number;
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad >= 0;
       allow update: if canReadTenantDoc()
         && tenantUnchanged()
         && request.resource.data.precio_venta is number
-        && request.resource.data.cantidad is number;
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad >= 0;
       allow delete: if canReadTenantDoc(); // Ajustar a solo admins
     }
 
@@ -138,7 +140,8 @@ service cloud.firestore {
       allow read: if ('negocio_id' in resource.data)
         ? isMember(resource.data.negocio_id)
         : isMember(get(/databases/$(database)/documents/ventas/$(resource.data.venta_id)).data.negocio_id);
-      allow create: if isMember(request.resource.data.negocio_id);
+      allow create: if isMember(request.resource.data.negocio_id)
+        && request.resource.data.metodo_pago in ['EFECTIVO', 'DEBITO', 'TRANSFERENCIA'];
       allow update, delete: if false;
     }
 

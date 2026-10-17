@@ -14,12 +14,12 @@ export function ThemeToggle() {
   return (
     <TouchableOpacity
       onPress={toggleTheme}
-      className="flex-row items-center gap-2 rounded-full bg-gray-100 px-3 py-2 dark:bg-neutral-800"
+      className="flex-row items-center gap-2 rounded-full bg-surface-hover px-3 py-2"
       accessibilityRole="button"
       accessibilityLabel={`Tema: ${label}. Toca para cambiar.`}
     >
       <IconSymbol name={icon} size={20} color={isDark ? "#fbbf24" : AppColors.primaryLight} />
-      <Text className="text-sm text-gray-700 dark:text-gray-300">{label}</Text>
+      <Text className="text-sm text-content-secondary">{label}</Text>
     </TouchableOpacity>
   );
 }

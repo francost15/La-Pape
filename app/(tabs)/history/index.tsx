@@ -10,7 +10,7 @@ import { useHistory } from "@/hooks/use-history";
 import { useResponsive } from "@/hooks/use-responsive";
 import { Venta, VentaDetalle } from "@/interface";
 import { formatCurrency } from "@/lib/utils/format";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { SectionList, Text, View } from "react-native";
 import { HistoryListSkeleton } from "@/components/ui/skeletons";
 import Animated, { FadeIn, ReduceMotion } from "react-native-reanimated";
@@ -58,7 +58,7 @@ export default function HistoryScreen() {
               }}
             />
             <Text
-              className={`text-[12px] font-bold tracking-[0.2em] uppercase ${
+              className={`text-[12px] font-bold tracking-[0.2em] ${
                 isTodayOrYesterday ? "text-accent" : "text-content-secondary"
               }`}
               style={{ fontFamily: AppFonts.bodyStrong }}
@@ -97,34 +97,28 @@ export default function HistoryScreen() {
     [expandedIds, productNames, toggleCard, handleVerRecibo, handleReembolso]
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <View className={isTablet ? "mx-auto w-full max-w-2xl pb-2" : "pb-2"}>
-        <PeriodFilter
-          periodo={periodo}
-          onPeriodoChange={setPeriodo}
-          rangoPersonalizado={rangoPersonalizado}
-          onRangoPersonalizadoChange={setRangoPersonalizado}
-        />
-      </View>
-    ),
-    [isTablet, periodo, setPeriodo, rangoPersonalizado, setRangoPersonalizado]
+  const ListHeaderComponent = (
+    <View className={isTablet ? "mx-auto w-full max-w-2xl pb-2" : "pb-2"}>
+      <PeriodFilter
+        periodo={periodo}
+        onPeriodoChange={setPeriodo}
+        rangoPersonalizado={rangoPersonalizado}
+        onRangoPersonalizadoChange={setRangoPersonalizado}
+      />
+    </View>
   );
 
-  const ListEmptyComponent = useMemo(
-    () => (
-      <Animated.View
-        entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
-        className="mt-20 px-10"
-      >
-        <EmptyState
-          icon="clock"
-          title={Strings.history.emptySales}
-          description={Strings.history.emptySalesHint}
-        />
-      </Animated.View>
-    ),
-    []
+  const ListEmptyComponent = (
+    <Animated.View
+      entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
+      className="mt-20 px-10"
+    >
+      <EmptyState
+        icon="clock"
+        title={Strings.history.emptySales}
+        description={Strings.history.emptySalesHint}
+      />
+    </Animated.View>
   );
 
   if (loading) {

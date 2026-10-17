@@ -1,5 +1,5 @@
 import type { RangeCalendarProps } from "@/interface/product-search";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import {
   DAY_HEADERS,
@@ -23,18 +23,15 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
   const [viewYear, setViewYear] = useState(ref.getFullYear());
   const [viewMonth, setViewMonth] = useState(ref.getMonth());
   const [calendarView, setCalendarView] = useState<CalendarView>("days");
-  const [selectingEnd, setSelectingEnd] = useState(false);
+  const selectingEnd = useRef(false);
 
   const inicioKey = rango.inicio?.getTime() ?? null;
-  const [trackedInicioKey, setTrackedInicioKey] = useState<number | null>(inicioKey);
 
-  if (inicioKey !== trackedInicioKey) {
-    setTrackedInicioKey(inicioKey);
-    if (rango.inicio && !selectingEnd) {
-      setViewYear(rango.inicio.getFullYear());
-      setViewMonth(rango.inicio.getMonth());
-    }
-  }
+  useEffect(() => {
+    if (!rango.inicio || selectingEnd.current) return;
+    setViewYear(rango.inicio.getFullYear());
+    setViewMonth(rango.inicio.getMonth());
+  }, [inicioKey, rango.inicio]);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
@@ -44,18 +41,18 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
 
     if (!rango.inicio || (rango.inicio && rango.fin)) {
       onRangoChange({ inicio: tapped, fin: null });
-      setSelectingEnd(true);
+      selectingEnd.current = true;
       return;
     }
 
     if (tapped < rango.inicio) {
       onRangoChange({ inicio: tapped, fin: null });
-      setSelectingEnd(true);
+      selectingEnd.current = true;
       return;
     }
 
     onRangoChange({ inicio: rango.inicio, fin: tapped });
-    setSelectingEnd(false);
+    selectingEnd.current = false;
   };
 
   const getDayStatus = (day: number) => {
@@ -96,16 +93,14 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
 
   if (calendarView === "years") {
     return (
-      <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
+      <View className="rounded-2xl bg-surface-hover p-3">
         <Pressable
           onPress={() => setCalendarView("days")}
           className="mb-3 items-center"
           accessibilityRole="button"
           accessibilityLabel="Volver al calendario de días"
         >
-          <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
-            Seleccionar Año
-          </Text>
+          <Text className="text-base font-bold text-accent">Seleccionar Año</Text>
         </Pressable>
         <View className="flex-row flex-wrap justify-center gap-2">
           {yearsList.map((y) => {
@@ -117,16 +112,14 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
                   setViewYear(y);
                   setCalendarView("months");
                 }}
-                className={`rounded-xl px-3 py-2 ${
-                  active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
-                }`}
+                className={`rounded-xl px-3 py-2 ${active ? "bg-accent" : "bg-surface-elevated"}`}
                 accessibilityRole="button"
                 accessibilityLabel={`Año ${y}`}
                 accessibilityState={{ selected: active }}
               >
                 <Text
                   className={`text-sm font-semibold ${
-                    active ? "text-white" : "text-gray-700 dark:text-gray-300"
+                    active ? "text-white" : "text-content-secondary"
                   }`}
                 >
                   {y}
@@ -141,16 +134,14 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
 
   if (calendarView === "months") {
     return (
-      <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
+      <View className="rounded-2xl bg-surface-hover p-3">
         <Pressable
           onPress={() => setCalendarView("years")}
           className="mb-3 items-center"
           accessibilityRole="button"
           accessibilityLabel="Seleccionar año"
         >
-          <Text className="text-base font-bold text-orange-600 dark:text-orange-400">
-            {viewYear}
-          </Text>
+          <Text className="text-base font-bold text-accent">{viewYear}</Text>
         </Pressable>
         <View className="flex-row flex-wrap gap-2">
           {MONTH_NAMES.map((m, idx) => {
@@ -164,7 +155,7 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
                 }}
                 style={{ width: "31%" }}
                 className={`items-center rounded-xl py-2.5 ${
-                  active ? "bg-orange-600" : "bg-white dark:bg-neutral-800"
+                  active ? "bg-accent" : "bg-surface-elevated"
                 }`}
                 accessibilityRole="button"
                 accessibilityLabel={`Mes ${MONTH_FULL[idx]} de ${viewYear}`}
@@ -172,7 +163,7 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
               >
                 <Text
                   className={`text-sm font-semibold ${
-                    active ? "text-white" : "text-gray-700 dark:text-gray-300"
+                    active ? "text-white" : "text-content-secondary"
                   }`}
                 >
                   {m}
@@ -186,15 +177,15 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
   }
 
   return (
-    <View className="rounded-2xl bg-neutral-50 p-3 dark:bg-neutral-900">
+    <View className="rounded-2xl bg-surface-hover p-3">
       <View className="mb-3 flex-row items-center justify-between">
         <Pressable
           onPress={() => navigateMonth(-1)}
-          className="h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-surface-elevated"
           accessibilityRole="button"
           accessibilityLabel="Mes anterior"
         >
-          <Text className="text-lg font-bold text-gray-600 dark:text-gray-300">‹</Text>
+          <Text className="text-lg font-bold text-content-secondary">‹</Text>
         </Pressable>
         <Pressable
           onPress={() => setCalendarView("months")}
@@ -202,26 +193,24 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
           accessibilityLabel="Cambiar mes"
           accessibilityHint="Abre la selección de mes"
         >
-          <Text className="text-[15px] font-bold text-gray-800 dark:text-gray-100">
+          <Text className="text-[15px] font-bold text-content-primary">
             {MONTH_FULL[viewMonth]} {viewYear}
           </Text>
         </Pressable>
         <Pressable
           onPress={() => navigateMonth(1)}
-          className="h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-neutral-800"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-surface-elevated"
           accessibilityRole="button"
           accessibilityLabel="Mes siguiente"
         >
-          <Text className="text-lg font-bold text-gray-600 dark:text-gray-300">›</Text>
+          <Text className="text-lg font-bold text-content-secondary">›</Text>
         </Pressable>
       </View>
 
       <View className="mb-1 flex-row">
         {DAY_HEADERS.map((d) => (
           <View key={d} style={{ width: "14.28%" }} className="items-center py-1">
-            <Text className="text-[11px] font-semibold text-gray-400 uppercase dark:text-gray-500">
-              {d}
-            </Text>
+            <Text className="text-[11px] font-semibold text-content-muted">{d}</Text>
           </View>
         ))}
       </View>
@@ -234,12 +223,10 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
           const { isStart, isEnd, inRange, isToday } = getDayStatus(day);
           const isEndpoint = isStart || isEnd;
 
-          const rangeBg = inRange && !isEndpoint ? "bg-orange-100 dark:bg-orange-900/25" : "";
+          const rangeBg = inRange && !isEndpoint ? "bg-accent-soft" : "";
 
-          const startEdge =
-            isStart && rango.fin ? "rounded-l-full bg-orange-100 dark:bg-orange-900/25" : "";
-          const endEdge =
-            isEnd && rango.inicio ? "rounded-r-full bg-orange-100 dark:bg-orange-900/25" : "";
+          const startEdge = isStart && rango.fin ? "rounded-l-full bg-accent-soft" : "";
+          const endEdge = isEnd && rango.inicio ? "rounded-r-full bg-accent-soft" : "";
           const edgeBg = startEdge || endEdge;
 
           return (
@@ -251,11 +238,7 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
               <Pressable
                 onPress={() => handleDayPress(day)}
                 className={`h-9 w-9 items-center justify-center rounded-full ${
-                  isEndpoint
-                    ? "bg-orange-600"
-                    : isToday
-                      ? "border border-orange-400 dark:border-orange-500"
-                      : ""
+                  isEndpoint ? "bg-accent" : isToday ? "border border-accent" : ""
                 }`}
                 accessibilityRole="button"
                 accessibilityLabel={formatDateA11y(new Date(viewYear, viewMonth, day))}
@@ -267,10 +250,10 @@ export function RangeCalendar({ rango, onRangoChange }: RangeCalendarProps) {
                     isEndpoint
                       ? "font-bold text-white"
                       : isToday
-                        ? "font-bold text-orange-600 dark:text-orange-400"
+                        ? "font-bold text-accent"
                         : inRange
-                          ? "font-medium text-orange-700 dark:text-orange-300"
-                          : "font-medium text-gray-700 dark:text-gray-300"
+                          ? "font-medium text-accent"
+                          : "font-medium text-content-secondary"
                   }`}
                 >
                   {day}

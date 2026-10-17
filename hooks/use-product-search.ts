@@ -35,12 +35,8 @@ export const useProductSearch = (contextId: SearchContextId) => {
         const nombreLower = product.nombre.toLowerCase();
         const marcaLower = (product.marca || "").toLowerCase();
         const categoriaNombre = categoriaMap.get(product.categoria_id) || "";
-        return searchTerms.every(
-          (term) =>
-            nombreLower.includes(term) ||
-            marcaLower.includes(term) ||
-            categoriaNombre.includes(term)
-        );
+        const haystack = `${nombreLower} ${marcaLower} ${categoriaNombre}`;
+        return searchTerms.every((term) => haystack.indexOf(term) !== -1);
       });
     }
 

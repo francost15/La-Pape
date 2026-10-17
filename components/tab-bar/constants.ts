@@ -1,20 +1,14 @@
 import { AppColors } from "@/constants/colors";
-import { DesignSystem } from "@/constants/design-system";
 import { TAB_BAR_THEME } from "@/constants/tab-bar-theme";
 import type { IconSymbolName } from "@/interface/ui/icons";
 import { Platform } from "react-native";
-import { Easing } from "react-native-reanimated";
 
 export type { TabTheme } from "@/interface/layout";
-
-export const PC_ONLY_ROUTES: readonly string[] = [];
 
 export const ACTIVE_BG = AppColors.primary;
 export const ACTIVE_ICON_COLOR = "#ffffff";
 
 export const THEME = TAB_BAR_THEME;
-
-export const COLOR_EASING = Easing.bezier(...DesignSystem.easingCurve.strongOut);
 
 export const ICON_MAP: Record<string, IconSymbolName> = {
   ventas: "cart.fill",

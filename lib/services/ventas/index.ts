@@ -1,4 +1,5 @@
 import { Venta } from "@/interface";
+import type { VentasQueryOptions } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
 import { createConverter } from "@/lib/utils/firestore-converter";
 import {
@@ -13,21 +14,15 @@ import {
   where,
 } from "firebase/firestore";
 
-const ventaConverter = createConverter<Venta>();
+export type { VentasQueryOptions };
 
-/** Opciones para acotar el listener de ventas en el servidor. */
-export interface VentasQueryOptions {
-  /** Límite inferior del rango de fechas (inclusivo). */
-  desde?: Date;
-  /** Límite superior del rango de fechas (inclusivo). */
-  hasta?: Date;
-  /** Máximo de documentos a escuchar cuando no hay rango de fechas. */
-  limitCount?: number;
-}
+const ventaConverter = createConverter<Venta>();
 
 // Tope por defecto: evita descargar el historial completo de negocios con años
 // de ventas cuando el consumidor no acota por fechas.
 const DEFAULT_VENTAS_LIMIT = 200;
+// ponytail: tope fijo, subir si un período real lo rebalsa
+const RANGO_VENTAS_LIMIT = 500;
 
 /**
  * Sets up a real-time listener for the sales of a specific business, ordered
@@ -63,10 +58,8 @@ export function onVentasByNegocio(
   if (options.hasta) {
     constraints.push(where("fecha", "<=", Timestamp.fromDate(options.hasta)));
   }
-  // Sin rango de fechas se necesita un tope duro para no descargar todo el historial.
-  if (options.limitCount || (!options.desde && !options.hasta)) {
-    constraints.push(limit(options.limitCount ?? DEFAULT_VENTAS_LIMIT));
-  }
+  const cap = options.desde || options.hasta ? RANGO_VENTAS_LIMIT : DEFAULT_VENTAS_LIMIT;
+  constraints.push(limit(options.limitCount ?? cap));
 
   const q = query(collection(db, "ventas").withConverter(ventaConverter), ...constraints);
 

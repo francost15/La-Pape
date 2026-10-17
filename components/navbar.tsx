@@ -44,7 +44,7 @@ export default function Navbar() {
     >
       <Link
         href="/ventas"
-        className={isWeb ? "rounded-lg px-2 py-2 transition-all hover:opacity-80" : ""}
+        className={isWeb ? "rounded-lg px-2 py-2 transition-opacity hover:opacity-80" : ""}
       >
         <Image
           source={require("@/assets/images/pape.webp")}
@@ -106,7 +106,7 @@ export default function Navbar() {
                     marginBottom: 20,
                     opacity: 0.2,
                   }}
-                  className="bg-gray-900 dark:bg-white"
+                  className="bg-content-primary"
                 />
 
                 <View className="mb-5 flex-row items-center gap-3">
