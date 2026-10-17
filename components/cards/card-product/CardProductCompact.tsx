@@ -50,11 +50,7 @@ export function CardProductCompact({
     </Text>
   );
 
-  if (mode === "stock") return stockBody();
-  if (mode === "ranking") return rankingBody();
-  return mobileBody();
-
-  function stockBody() {
+  const stockBody = () => {
     const stockCantidad = stockData?.cantidad ?? product.cantidad;
     const stockMinimo = stockData?.stockMinimo ?? product.stock_minimo ?? 0;
     return (
@@ -98,9 +94,9 @@ export function CardProductCompact({
         </View>
       </View>
     );
-  }
+  };
 
-  function rankingBody() {
+  const rankingBody = () => {
     return (
       <View
         className="overflow-hidden rounded-xl"
@@ -146,9 +142,9 @@ export function CardProductCompact({
         </Pressable>
       </View>
     );
-  }
+  };
 
-  function mobileBody() {
+  const mobileBody = () => {
     return (
       <TouchableOpacity
         activeOpacity={0.7}
@@ -191,5 +187,9 @@ export function CardProductCompact({
         </View>
       </TouchableOpacity>
     );
-  }
+  };
+
+  if (mode === "stock") return stockBody();
+  if (mode === "ranking") return rankingBody();
+  return mobileBody();
 }
