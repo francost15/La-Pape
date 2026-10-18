@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import CircleIconButton from "@/components/ui/CircleIconButton";
 import EmptyState from "@/components/ui/EmptyState";
 import { Bone, ProductListSkeleton } from "@/components/ui/skeletons";
-import { Product } from "@/interface";
+import { Product, type Categoria } from "@/interface";
 import { AppColors } from "@/constants/colors";
 import { Strings } from "@/constants/strings";
 import { useProductSearch } from "@/hooks/use-product-search";
@@ -42,7 +42,7 @@ function ProductosHeader({
   searchInputRef: React.RefObject<TextInput | null>;
   searchText: string;
   setSearchText: (text: string) => void;
-  categories: { id: string; nombre: string }[];
+  categories: Categoria[];
   selectedCategoryId: string | null;
   setSelectedCategoryId: (id: string | null) => void;
   goToCreateProduct: () => void;

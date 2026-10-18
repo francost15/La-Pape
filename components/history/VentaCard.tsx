@@ -15,6 +15,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  type AnimatedStyle,
 } from "react-native-reanimated";
 
 /**
@@ -35,7 +36,7 @@ function VentaDetails({
   "venta" | "detalles" | "productNames" | "isReembolso" | "onVerRecibo" | "onReembolso"
 > & {
   colors: ReturnType<typeof useThemeColors>["colors"];
-  animatedStyle: { opacity: number };
+  animatedStyle: AnimatedStyle<{ opacity: number }>;
 }) {
   return (
     <Animated.View style={animatedStyle}>

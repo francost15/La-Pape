@@ -190,7 +190,8 @@ export function useEditProduct() {
         stock_minimo: data.stock_minimo != null ? data.stock_minimo : null,
       } as UpdateProductInput;
 
-      await updateProduct(id, updateData);
+      const uid = auth.currentUser?.uid;
+      await updateProduct(id, updateData, uid ? { negocioId, userId: uid } : undefined);
 
       const user = auth.currentUser;
       if (user) {

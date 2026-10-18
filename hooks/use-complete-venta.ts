@@ -2,7 +2,7 @@ import { labelMetodoPago, METODOS_PAGO, parseMonto } from "@/constants/pagos";
 import { notify } from "@/lib/notify";
 import { formatCurrency, formatDate, formatTime } from "@/lib/utils/format";
 import { Strings } from "@/constants/strings";
-import { completeVentaFlow } from "@/lib/services/ventas/complete-venta";
+import { completeVentaFlow, reserveVentaId } from "@/lib/services/ventas/complete-venta";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useProductosStore } from "@/store/productos-store";
 import { useSessionStore } from "@/store/session-store";
@@ -53,8 +53,15 @@ export function useCompleteVenta(onSuccess?: () => void) {
     setProcessing(true);
     closeConfirm();
 
+    let ventaId = useCheckoutStore.getState().pendingVentaId;
+    if (!ventaId) {
+      ventaId = reserveVentaId();
+      useCheckoutStore.setState({ pendingVentaId: ventaId });
+    }
+
     try {
       const result = await completeVentaFlow({
+        ventaId,
         items,
         negocioId,
         sucursalId,
@@ -65,13 +72,14 @@ export function useCompleteVenta(onSuccess?: () => void) {
         montoRecibido: monto,
       });
 
-      // Actualiza el stock local de forma optimista
-      const products = useProductosStore.getState().products;
-      const updated = products.map((p) => {
-        const cartItem = items.find((i) => i.productId === p.id);
-        return cartItem ? { ...p, cantidad: p.cantidad - cartItem.quantity } : p;
-      });
-      useProductosStore.getState().setProducts(updated);
+      if (!result.alreadyCharged) {
+        const products = useProductosStore.getState().products;
+        const updated = products.map((p) => {
+          const cartItem = items.find((i) => i.productId === p.id);
+          return cartItem ? { ...p, cantidad: p.cantidad - cartItem.quantity } : p;
+        });
+        useProductosStore.getState().setProducts(updated);
+      }
 
       onSuccess?.();
 

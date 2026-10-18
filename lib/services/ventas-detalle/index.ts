@@ -6,13 +6,12 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 const IN_QUERY_MAX = 10;
 
 /**
- * Obtiene los detalles de varias ventas en lotes (`where venta_id in [...]`),
- * evitando el patrón N+1 de una consulta por venta.
- *
- * @param ventaIds - IDs de las ventas a consultar
- * @returns Mapa venta_id → detalles (las ventas sin detalles no aparecen en el mapa)
+ * Detalles de varias ventas.
+ * Índice compuesto: ventas_detalle (negocio_id ASC, venta_id ASC).
+ * El filtro de negocio deja que la query cumpla las reglas y no mezcle tenants.
  */
 export const getDetallesByVentaIds = async (
+  negocioId: string,
   ventaIds: string[]
 ): Promise<Record<string, VentaDetalle[]>> => {
   if (ventaIds.length === 0) return {};
@@ -25,7 +24,13 @@ export const getDetallesByVentaIds = async (
 
     const snapshots = await Promise.all(
       chunks.map((chunk) =>
-        getDocs(query(collection(db, "ventas_detalle"), where("venta_id", "in", chunk)))
+        getDocs(
+          query(
+            collection(db, "ventas_detalle"),
+            where("negocio_id", "==", negocioId),
+            where("venta_id", "in", chunk)
+          )
+        )
       )
     );
 
@@ -48,9 +53,16 @@ export const getDetallesByVentaIds = async (
   }
 };
 
-export const getDetallesByVenta = async (venta_id: string): Promise<VentaDetalle[]> => {
+export const getDetallesByVenta = async (
+  ventaId: string,
+  negocioId: string
+): Promise<VentaDetalle[]> => {
   try {
-    const q = query(collection(db, "ventas_detalle"), where("venta_id", "==", venta_id));
+    const q = query(
+      collection(db, "ventas_detalle"),
+      where("negocio_id", "==", negocioId),
+      where("venta_id", "==", ventaId)
+    );
 
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => {

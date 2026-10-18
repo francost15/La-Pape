@@ -10,7 +10,7 @@ import { SkipLink } from "@/components/ui/SkipLink";
 import AddProductsSheet from "@/components/ventas/AddProductsSheet";
 import VentaExitosaOverlay from "@/components/ventas/VentaExitosaOverlay";
 import { useTheme } from "@/hooks/useTheme";
-import { logger } from "@/lib/utils/logger";
+import { logError } from "@/lib/utils/logger";
 import { initSessionListener } from "@/store/session-store";
 import { useVentasStore } from "@/store/ventas-store";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
@@ -94,7 +94,7 @@ export default function RootLayout() {
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <ErrorBoundary
         onError={(error, info) => {
-          logger.error("Layout error", { error: error.message, stack: info.componentStack });
+          logError("Layout error", { error: error.message, stack: info.componentStack });
         }}
       >
         <SkipLink targetId="main-content">Saltar al contenido principal</SkipLink>

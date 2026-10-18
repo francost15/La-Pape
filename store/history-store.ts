@@ -60,7 +60,12 @@ export const useHistoryStore = create<HistoryStore>((set, get) => ({
     }
     set({ refunding: true });
     try {
-      await refundVentaFlow({ ventaId: refundTarget.id, sucursalId, userId });
+      await refundVentaFlow({
+        ventaId: refundTarget.id,
+        negocioId: refundTarget.negocio_id,
+        sucursalId,
+        userId,
+      });
 
       // Repone el stock localmente para reflejar el reembolso sin esperar al listener.
       const detalles = detallesMap[refundTarget.id] ?? [];

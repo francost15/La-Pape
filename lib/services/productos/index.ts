@@ -15,10 +15,12 @@ import {
   Timestamp,
   updateDoc,
   where,
+  writeBatch,
   type WithFieldValue,
 } from "firebase/firestore";
 import { getCategoriasByNegocio } from "../categorias";
 import { getNegocioIdByUsuario } from "../usuarios-negocios";
+import { appendAudit } from "../auditoria";
 
 const productConverter = createConverter<Product>();
 
@@ -142,7 +144,23 @@ export function onProductosByNegocio(
  * @param productData - The fields to update
  * @throws AppError if the update operation fails
  */
-export const updateProduct = async (id: string, productData: UpdateProductInput): Promise<void> => {
+const TRACKED_PRODUCT_FIELDS = [
+  "precio_venta",
+  "precio_mayoreo",
+  "costo_promedio",
+  "cantidad",
+] as const;
+
+interface ProductActor {
+  negocioId: string;
+  userId: string;
+}
+
+export const updateProduct = async (
+  id: string,
+  productData: UpdateProductInput,
+  actor?: ProductActor
+): Promise<void> => {
   try {
     const docRef = doc(db, "productos", id);
 
@@ -166,6 +184,27 @@ export const updateProduct = async (id: string, productData: UpdateProductInput)
       }
     });
 
+    const diff: Record<string, number> = {};
+    for (const key of TRACKED_PRODUCT_FIELDS) {
+      const value = updateData[key];
+      if (typeof value === "number") diff[key] = value;
+    }
+
+    if (actor && Object.keys(diff).length > 0) {
+      const batch = writeBatch(db);
+      batch.update(docRef, updateData);
+      appendAudit(batch, {
+        negocio_id: actor.negocioId,
+        usuario_id: actor.userId,
+        accion: "actualizar_producto",
+        entidad: "productos",
+        entidad_id: id,
+        diff,
+      });
+      await batch.commit();
+      return;
+    }
+
     await updateDoc(docRef, updateData);
   } catch (error) {
     console.error("Error al actualizar producto:", error);
@@ -179,9 +218,22 @@ export const updateProduct = async (id: string, productData: UpdateProductInput)
  * @param id - The Firestore document ID of the product
  * @throws AppError if the deletion fails
  */
-export const deleteProduct = async (id: string): Promise<void> => {
+export const deleteProduct = async (id: string, actor?: ProductActor): Promise<void> => {
   try {
     const docRef = doc(db, "productos", id);
+    if (actor) {
+      const batch = writeBatch(db);
+      batch.delete(docRef);
+      appendAudit(batch, {
+        negocio_id: actor.negocioId,
+        usuario_id: actor.userId,
+        accion: "eliminar_producto",
+        entidad: "productos",
+        entidad_id: id,
+      });
+      await batch.commit();
+      return;
+    }
     await deleteDoc(docRef);
   } catch (error) {
     console.error("Error al eliminar producto:", error);

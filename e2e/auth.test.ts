@@ -1,5 +1,3 @@
-import { describe, it, expect } from "@jest/globals";
-
 describe("Auth Flow E2E", () => {
   it("should login with email", async () => {
     // await element(by.id('email-input')).typeText('test@example.com');

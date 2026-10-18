@@ -8,12 +8,9 @@ rules_version = '2';
 //    scripts/migrate-usuarios-negocios.ts o los usuarios existentes pierden
 //    acceso. createUsuarioNegocio ya crea los nuevos con ID determinístico.
 //
-// 2. Backfill de negocio_id en ventas_detalle (mismo script): en Firestore
-//    las reglas no filtran — una query debe PROBAR que cumple la regla. Las
-//    queries de detalles (where venta_id in [...]) necesitan además
-//    where('negocio_id','==',X), y eso solo funciona cuando todos los docs
-//    legacy tengan el campo. Tras el backfill, añadir el filtro en
-//    lib/services/ventas-detalle (getDetallesByVentaIds / getDetallesByVenta).
+// 2. Backfill de negocio_id en ventas_detalle (mismo script). Las queries
+//    filtran negocio_id + venta_id (lib/services/ventas-detalle). El script
+//    también copia el rol del usuario a la membresía.
 //
 // 3. Probar en el emulador (firebase emulators:start --only firestore) los
 //    flujos: login/hydrate, venta, reembolso, historial, resumen y equipo.
@@ -48,6 +45,17 @@ service cloud.firestore {
       return isMember(request.resource.data.negocio_id);
     }
 
+    function isAdmin(negocioId) {
+      return isMember(negocioId)
+        && get(membershipPath(negocioId)).data.rol == 'ADMIN';
+    }
+
+    function priceUnchanged() {
+      return request.resource.data.precio_venta == resource.data.precio_venta
+        && request.resource.data.precio_mayoreo == resource.data.precio_mayoreo
+        && request.resource.data.costo_promedio == resource.data.costo_promedio;
+    }
+
     // En updates el negocio_id no puede cambiar (evita mover docs de tenant)
     function tenantUnchanged() {
       return request.resource.data.negocio_id == resource.data.negocio_id;
@@ -71,10 +79,9 @@ service cloud.firestore {
       allow read: if isAuthenticated()
         && (resource.data.usuario_id == request.auth.uid
           || isMember(resource.data.negocio_id));
-      // Solo un miembro existente del negocio puede agregar/editar miembros.
-      // Ajustar a rol ADMIN cuando el rol viva en esta relación.
-      allow create: if isMember(request.resource.data.negocio_id);
-      allow update: if isMember(resource.data.negocio_id) && tenantUnchanged();
+      // Alta de miembros y cambios de rol: solo admin del negocio.
+      allow create: if isAdmin(request.resource.data.negocio_id);
+      allow update: if isAdmin(resource.data.negocio_id) && tenantUnchanged();
       allow delete: if false;
     }
 
@@ -102,8 +109,9 @@ service cloud.firestore {
         && tenantUnchanged()
         && request.resource.data.precio_venta is number
         && request.resource.data.cantidad is number
-        && request.resource.data.cantidad >= 0;
-      allow delete: if canReadTenantDoc(); // Ajustar a solo admins
+        && request.resource.data.cantidad >= 0
+        && (isAdmin(resource.data.negocio_id) || priceUnchanged());
+      allow delete: if isAdmin(resource.data.negocio_id);
     }
 
     match /categorias/{categoriaId} {
@@ -148,6 +156,12 @@ service cloud.firestore {
     match /inventario_movimientos/{movId} {
       allow read: if ('negocio_id' in resource.data)
         && isMember(resource.data.negocio_id);
+      allow create: if isMember(request.resource.data.negocio_id);
+      allow update, delete: if false;
+    }
+
+    match /auditoria/{entryId} {
+      allow read: if isMember(resource.data.negocio_id);
       allow create: if isMember(request.resource.data.negocio_id);
       allow update, delete: if false;
     }

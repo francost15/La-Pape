@@ -50,6 +50,7 @@ export const createUserWithAuthAndLink = async (
     await createUsuarioNegocio({
       negocio_id: input.negocioId,
       usuario_id: uid,
+      rol: input.rol,
     });
   } catch (err) {
     // Rollback: sin la cuenta Auth borrada, el email queda bloqueado

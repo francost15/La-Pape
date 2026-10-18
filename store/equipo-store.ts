@@ -1,8 +1,12 @@
 import type { UserRole } from "@/interface";
 import type { AuthUserOverride, EquipoStore, MiembroConUsuario } from "@/interface/equipo";
 import { notify } from "@/lib/notify";
+import { appendAudit } from "@/lib/services/auditoria";
 import { getUsuariosByNegocio, updateUsuarioNegocio } from "@/lib/services/usuarios-negocios";
-import { getUsuarioByEmail, getUsuarioById, updateUsuario } from "@/lib/services/usuarios";
+import { getUsuarioByEmail, getUsuarioById } from "@/lib/services/usuarios";
+import { useSessionStore } from "@/store/session-store";
+import { writeBatch, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { create } from "zustand";
 
 const initialState = {
@@ -35,7 +39,7 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
             u?.email?.split("@")[0] ||
             "Usuario";
           const email = u?.email ?? "";
-          const rol: UserRole = u?.rol ?? "VENDEDOR";
+          const rol: UserRole = rel.rol ?? "VENDEDOR";
           const inicial = (nombre[0] ?? "?").toUpperCase();
           const foto =
             u?.foto ??
@@ -61,14 +65,26 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
     }
   },
 
-  // NOTA(modelo): el rol se guarda en el doc global `usuarios`, no en la relación
-  // `usuarios_negocios`. Contradice el modelo multi-tenant (un usuario podría
-  // tener roles distintos por negocio). Migrar el rol a la relación requiere la
-  // migración de Firestore pendiente (ver firestore.rules) — decisión abierta.
-  updateRol: async (relId, userId, email, rol) => {
+  updateRol: async (relId, userId, _email, rol) => {
+    const miembro = get().miembros.find((m) => m.relacion.id === relId);
+    const negocioId = miembro?.relacion.negocio_id;
+    const actorId = useSessionStore.getState().userId ?? userId;
     try {
-      await updateUsuario(userId, { rol }, email);
-      // Solo mutar el estado local si la escritura remota tuvo éxito.
+      if (negocioId) {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "usuarios_negocios", relId), { rol });
+        appendAudit(batch, {
+          negocio_id: negocioId,
+          usuario_id: actorId,
+          accion: "cambiar_rol",
+          entidad: "usuarios_negocios",
+          entidad_id: relId,
+          diff: { rol },
+        });
+        await batch.commit();
+      } else {
+        await updateUsuarioNegocio(relId, { rol });
+      }
       set((state) => ({
         miembros: state.miembros.map((m) => (m.relacion.id === relId ? { ...m, rol } : m)),
       }));
@@ -78,8 +94,23 @@ export const useEquipoStore = create<EquipoStore>((set, get) => ({
   },
 
   removeMiembro: async (relId) => {
+    const miembro = get().miembros.find((m) => m.relacion.id === relId);
+    const actorId = useSessionStore.getState().userId ?? miembro?.relacion.usuario_id ?? "";
     try {
-      await updateUsuarioNegocio(relId, { activo: false });
+      if (miembro) {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "usuarios_negocios", relId), { activo: false });
+        appendAudit(batch, {
+          negocio_id: miembro.relacion.negocio_id,
+          usuario_id: actorId,
+          accion: "quitar_miembro",
+          entidad: "usuarios_negocios",
+          entidad_id: relId,
+        });
+        await batch.commit();
+      } else {
+        await updateUsuarioNegocio(relId, { activo: false });
+      }
       set((state) => ({
         miembros: state.miembros.filter((m) => m.relacion.id !== relId),
       }));

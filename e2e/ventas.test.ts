@@ -1,5 +1,3 @@
-import { describe, it, expect, beforeAll } from "@jest/globals";
-
 describe("Ventas Flow E2E", () => {
   beforeAll(async () => {
     //await device.launchApp();

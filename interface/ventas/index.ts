@@ -31,6 +31,8 @@ export interface CheckoutStore {
   successVenta: VentaCompletada | null;
   metodoPago: MetodoPago;
   montoRecibido: string;
+  /** Id fijo del intento de cobro. Un reintento escribe la misma venta. */
+  pendingVentaId: string | null;
 
   openConfirm: () => void;
   closeConfirm: () => void;
@@ -260,6 +262,7 @@ export interface HistoryStore extends HistoryState {
 }
 
 export interface CompleteVentaParams {
+  ventaId: string;
   items: CartItem[];
   negocioId: string;
   sucursalId?: string | null;
@@ -275,10 +278,13 @@ export interface CompleteVentaResult {
   fecha: Date;
   total: number;
   metodoPago: MetodoPago;
+  /** True cuando el id ya estaba cobrado y no se volvió a mover stock. */
+  alreadyCharged?: boolean;
 }
 
 export interface RefundVentaParams {
   ventaId: string;
+  negocioId: string;
   sucursalId?: string | null;
   userId: string;
 }

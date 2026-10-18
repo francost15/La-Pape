@@ -1,64 +1,44 @@
 {
   "version": 1,
   "transcripts": {
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/d95dce72-a751-4152-895a-5ede58c148e4/d95dce72-a751-4152-895a-5ede58c148e4.jsonl": {
-      "mtimeMs": 1783834439846.442,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c.jsonl": {
-      "mtimeMs": 1783496145955.1414,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/81b51502-e80c-4468-9a05-ee1b0178d71d.jsonl": {
-      "mtimeMs": 1771991754374.5557,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/38304c86-d47f-4684-87db-acf5637606c7/38304c86-d47f-4684-87db-acf5637606c7.jsonl": {
-      "mtimeMs": 1772778715339.8208,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/0ab48368-153f-4694-bd6d-7c764e6b01c9/0ab48368-153f-4694-bd6d-7c764e6b01c9.jsonl": {
       "mtimeMs": 1771469190475.1833,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/ddad1049-ade7-4fc5-958d-f77a6a81e093/ddad1049-ade7-4fc5-958d-f77a6a81e093.jsonl": {
-      "mtimeMs": 1771392435780.333,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/1c17d62c-733f-4463-97cf-eb828f92db04/1c17d62c-733f-4463-97cf-eb828f92db04.jsonl": {
+      "mtimeMs": 1792249166350.4397,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/23a8957f-64ba-48ee-8110-c6038adaa385/23a8957f-64ba-48ee-8110-c6038adaa385.jsonl": {
+      "mtimeMs": 1792245318662.3003,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613.jsonl": {
       "mtimeMs": 1772424992703.4727,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/dda4bd17-0926-489f-a53f-f0144a41385d/dda4bd17-0926-489f-a53f-f0144a41385d.jsonl": {
-      "mtimeMs": 1771383212497.8586,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/b9f1dfc7-41e2-4fa9-be80-47e591822f05.jsonl": {
-      "mtimeMs": 1772423368865.6426,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/569c6b4c-7f05-4547-87ed-115d7b30e5ef.jsonl": {
-      "mtimeMs": 1772255452424.306,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/f10291c4-9adf-4b9b-9c8c-3112a7b7adac.jsonl": {
-      "mtimeMs": 1772419844368.3008,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/bbcbeaeb-7226-4f1e-8e4f-5777c0f1fb21.jsonl": {
-      "mtimeMs": 1772419827537.0557,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/046457e8-296f-459d-9ef8-2fc4de0c7013.jsonl": {
       "mtimeMs": 1772420842796.0525,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/a1e507a9-e3c7-4210-ab33-374737b95112.jsonl": {
-      "mtimeMs": 1772423475539.0056,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/04fd4398-e2b6-4796-9bb2-0a6e6e601de0.jsonl": {
+      "mtimeMs": 1772420707610.7153,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/28a098f6-14a6-4792-bb68-4c4ddc3ba5c1.jsonl": {
       "mtimeMs": 1772423698390.1362,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/345347ed-8704-495f-8e39-85f57fc5f5eb.jsonl": {
+      "mtimeMs": 1772419858118.5007,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/43e23a33-25cc-41f2-a236-d0c6eae4c0bf.jsonl": {
+      "mtimeMs": 1772419831221.1094,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/569c6b4c-7f05-4547-87ed-115d7b30e5ef.jsonl": {
+      "mtimeMs": 1772255452424.306,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/5f004f80-db9b-4cd0-b21f-6d16c0e68464.jsonl": {
@@ -69,84 +49,144 @@
       "mtimeMs": 1772419973546.1802,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/a1e507a9-e3c7-4210-ab33-374737b95112.jsonl": {
+      "mtimeMs": 1772423475539.0056,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/b9f1dfc7-41e2-4fa9-be80-47e591822f05.jsonl": {
+      "mtimeMs": 1772423368865.6426,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/bbcbeaeb-7226-4f1e-8e4f-5777c0f1fb21.jsonl": {
+      "mtimeMs": 1772419827537.0557,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/c6da1233-735a-40ec-92b1-e5e3314c73db.jsonl": {
       "mtimeMs": 1772423680522.344,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/04fd4398-e2b6-4796-9bb2-0a6e6e601de0.jsonl": {
-      "mtimeMs": 1772420707610.7153,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/43e23a33-25cc-41f2-a236-d0c6eae4c0bf.jsonl": {
-      "mtimeMs": 1772419831221.1094,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
-    },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/345347ed-8704-495f-8e39-85f57fc5f5eb.jsonl": {
-      "mtimeMs": 1772419858118.5007,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/f10291c4-9adf-4b9b-9c8c-3112a7b7adac.jsonl": {
+      "mtimeMs": 1772419844368.3008,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/258bf4e1-3f49-4f2b-9e17-32ad8d6b4613/subagents/fed9ae07-e293-4b78-a0e5-1ba212261ad3.jsonl": {
       "mtimeMs": 1772420827367.5479,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/beeda08e-4536-4814-9cbc-830fc15048ca.jsonl": {
-      "mtimeMs": 1771569868733.0623,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/38304c86-d47f-4684-87db-acf5637606c7/38304c86-d47f-4684-87db-acf5637606c7.jsonl": {
+      "mtimeMs": 1772778715339.8208,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/1e1fef92-5ad5-44b4-b1e1-c0e6464fc357.jsonl": {
-      "mtimeMs": 1771567319962.3757,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/40fef302-be35-49a7-bc0a-880b77caba89/40fef302-be35-49a7-bc0a-880b77caba89.jsonl": {
+      "mtimeMs": 1792249309233.9478,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/edbd6adc-478b-4b58-900e-a8a729e06deb.jsonl": {
-      "mtimeMs": 1771900099507.254,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/40fef302-be35-49a7-bc0a-880b77caba89/subagents/6a309a47-6cc9-46db-80c1-4544172b0bed.jsonl": {
+      "mtimeMs": 1792249413590.9363,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/6b72e610-9d4f-4cfe-8dd6-51cafe49fe40.jsonl": {
-      "mtimeMs": 1771990549937.9263,
-      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/80c4b238-cc36-4465-a98c-e53f99b59809.jsonl": {
+      "mtimeMs": 1792242981464.348,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/483f45ea-e093-4a1b-9328-10ca909b5bee.jsonl": {
-      "mtimeMs": 1771566305923.04,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/subagents/2226dea2-7bbf-4de7-a300-0f0b14e1fc7d.jsonl": {
+      "mtimeMs": 1792208614099.6838,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/subagents/3f9511da-3825-4f41-a50a-6335e1ca469c.jsonl": {
+      "mtimeMs": 1792208589261.8271,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/subagents/5fdfa854-5c07-49d3-b570-1ea9ed7a2975.jsonl": {
+      "mtimeMs": 1792208538719.3538,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/subagents/98972e34-20df-4d39-9c62-b839b249ca67.jsonl": {
+      "mtimeMs": 1792210896792.9814,
+      "lastProcessedAt": "2026-10-17T09:03:47-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/80c4b238-cc36-4465-a98c-e53f99b59809/subagents/b1e9bc74-8bc6-4fd8-975d-30152622ceed.jsonl": {
+      "mtimeMs": 1792209325893.4304,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/81b51502-e80c-4468-9a05-ee1b0178d71d.jsonl": {
+      "mtimeMs": 1771991754374.5557,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/19c3aebb-f52b-41fd-9aeb-ea0179d92c3a.jsonl": {
       "mtimeMs": 1771566312256.1697,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/e2c823f9-88d7-4dfa-8259-f50ab72d5577.jsonl": {
-      "mtimeMs": 1783495163551.6484,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/1e1fef92-5ad5-44b4-b1e1-c0e6464fc357.jsonl": {
+      "mtimeMs": 1771567319962.3757,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/d9bea167-5ccf-4147-bf26-57665a9c18d5.jsonl": {
-      "mtimeMs": 1783495186192.9456,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/483f45ea-e093-4a1b-9328-10ca909b5bee.jsonl": {
+      "mtimeMs": 1771566305923.04,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/5a66612a-e6df-4498-b8e4-7d48f3195528.jsonl": {
-      "mtimeMs": 1783495158995.9646,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/6b72e610-9d4f-4cfe-8dd6-51cafe49fe40.jsonl": {
+      "mtimeMs": 1771990549937.9263,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/f2945762-5ef8-46a9-8b79-c52edd854afc.jsonl": {
-      "mtimeMs": 1783495172157.2222,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/beeda08e-4536-4814-9cbc-830fc15048ca.jsonl": {
+      "mtimeMs": 1771569868733.0623,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/81b51502-e80c-4468-9a05-ee1b0178d71d/subagents/edbd6adc-478b-4b58-900e-a8a729e06deb.jsonl": {
+      "mtimeMs": 1771900099507.254,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c.jsonl": {
+      "mtimeMs": 1783496145955.1414,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/1fc800c7-3de6-449d-8e33-ff8c010276e1.jsonl": {
       "mtimeMs": 1783495155686.2378,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/da733412-40be-425c-9b8d-7c2f4ee37f36.jsonl": {
-      "mtimeMs": 1783495197828.0447,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/4873446a-666b-4ee6-a6b2-490f5a668b08.jsonl": {
+      "mtimeMs": 1783495175282.1187,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/5a66612a-e6df-4498-b8e4-7d48f3195528.jsonl": {
+      "mtimeMs": 1783495158995.9646,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/af789a3d-bda4-4841-a4f7-a7db668d97c9.jsonl": {
       "mtimeMs": 1783495161987.7493,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
-    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/4873446a-666b-4ee6-a6b2-490f5a668b08.jsonl": {
-      "mtimeMs": 1783495175282.1187,
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/d9bea167-5ccf-4147-bf26-57665a9c18d5.jsonl": {
+      "mtimeMs": 1783495186192.9456,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/da733412-40be-425c-9b8d-7c2f4ee37f36.jsonl": {
+      "mtimeMs": 1783495197828.0447,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/e2c823f9-88d7-4dfa-8259-f50ab72d5577.jsonl": {
+      "mtimeMs": 1783495163551.6484,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/9f6f2d3c-e750-47bd-9cae-eb96f22bb63c/subagents/f2945762-5ef8-46a9-8b79-c52edd854afc.jsonl": {
+      "mtimeMs": 1783495172157.2222,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/d95dce72-a751-4152-895a-5ede58c148e4/d95dce72-a751-4152-895a-5ede58c148e4.jsonl": {
+      "mtimeMs": 1783834718083.53,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
     "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/d95dce72-a751-4152-895a-5ede58c148e4/subagents/82d90d63-621a-4d55-ada8-d3056a0c7497.jsonl": {
-      "mtimeMs": 1783834451114.3865,
+      "mtimeMs": 1783834483830.2356,
+      "lastProcessedAt": "2026-10-16T22:21:25-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/dda4bd17-0926-489f-a53f-f0144a41385d/dda4bd17-0926-489f-a53f-f0144a41385d.jsonl": {
+      "mtimeMs": 1771383212497.8586,
+      "lastProcessedAt": "2026-07-11T23:34:39-0600"
+    },
+    "/home/franco-ubuntu/.cursor/projects/home-franco-ubuntu-Desktop-la-pape/agent-transcripts/ddad1049-ade7-4fc5-958d-f77a6a81e093/ddad1049-ade7-4fc5-958d-f77a6a81e093.jsonl": {
+      "mtimeMs": 1771392435780.333,
       "lastProcessedAt": "2026-07-11T23:34:39-0600"
     }
   }

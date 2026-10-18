@@ -15,5 +15,6 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts",
     "src/test/setup.ts"
-  ]
+  ],
+  "exclude": ["e2e", "node_modules"]
 }

@@ -9,6 +9,7 @@ import { useCallback } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { CrearUsuarioForm } from "./equipo/CrearUsuarioForm";
 import { MiembroRow } from "./equipo/MiembroRow";
+import { AuditoriaList } from "./equipo/AuditoriaList";
 
 export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
   const negocioId = useSessionStore((s) => s.negocioId);
@@ -42,6 +43,8 @@ export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
     },
     [removeMiembro]
   );
+
+  const me = miembros.find((m) => m.relacion.usuario_id === userId);
 
   return (
     <View className="gap-6">
@@ -84,6 +87,7 @@ export default function ConfigTabEquipo({ onRefresh }: ConfigTabEquipoProps) {
 
       {/* Crear usuario nuevo */}
       <CrearUsuarioForm negocioId={negocioId} onCreated={onRefresh} />
+      {me?.rol === "ADMIN" && negocioId ? <AuditoriaList negocioId={negocioId} /> : null}
     </View>
   );
 }

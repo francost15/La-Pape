@@ -46,7 +46,7 @@ export function createVentasDetallesListener(
   // Una sola tanda de consultas 'in' por lote de ventas, en vez de una consulta por venta.
   // Devuelve los ids que siguen sin detalles y si el cache cambió.
   const fetchDetalles = async (ids: string[]) => {
-    const detallesPorVenta = await getDetallesByVentaIds(ids);
+    const detallesPorVenta = await getDetallesByVentaIds(negocioId, ids);
     const stillEmpty: string[] = [];
     let changed = false;
     for (const id of ids) {

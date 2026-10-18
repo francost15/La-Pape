@@ -1,6 +1,7 @@
 import { isMetodoPago } from "@/constants/pagos";
 import type { CartItem, CompleteVentaParams, CompleteVentaResult } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
+import { appendAudit } from "@/lib/services/auditoria";
 import {
   InsufficientStockError,
   InvalidQuantityError,
@@ -10,6 +11,11 @@ import {
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 
 export type { CompleteVentaParams, CompleteVentaResult };
+
+/** Id de documento reservado al abrir la confirmación. El reintento usa el mismo. */
+export function reserveVentaId(): string {
+  return doc(collection(db, "ventas")).id;
+}
 
 /**
  * Orchestrates the full transactional flow of a sale.
@@ -36,7 +42,7 @@ export type { CompleteVentaParams, CompleteVentaResult };
  * @throws InsufficientStockError if there isn't enough stock to fulfill the order
  */
 export async function completeVentaFlow(params: CompleteVentaParams): Promise<CompleteVentaResult> {
-  const { items, negocioId, sucursalId, userId, metodoPago, montoRecibido } = params;
+  const { ventaId, items, negocioId, sucursalId, userId, metodoPago, montoRecibido } = params;
   if (!isMetodoPago(metodoPago)) {
     throw new VentaError("El medio de pago no es válido");
   }
@@ -60,6 +66,17 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
   }
 
   const charged = await runTransaction(db, async (transaction) => {
+    const ventaRef = doc(db, "ventas", ventaId);
+    const existing = await transaction.get(ventaRef);
+    if (existing.exists() && existing.data().estado === "PAGADA") {
+      const prev = existing.data();
+      return {
+        ventaId,
+        total: Number(prev.total ?? 0),
+        alreadyCharged: true as const,
+      };
+    }
+
     // Phase 1: Read all necessary data first (Firestore transaction rule)
     const stockByProduct = new Map<string, number>();
     const priceByProduct = new Map<string, number>();
@@ -98,7 +115,6 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
     }
 
     // Phase 2: Perform all write operations
-    const ventaRef = doc(collection(db, "ventas"));
     transaction.set(ventaRef, {
       negocio_id: negocioId,
       ...sucursalField,
@@ -163,10 +179,25 @@ export async function completeVentaFlow(params: CompleteVentaParams): Promise<Co
       });
     }
 
-    return { ventaId: ventaRef.id, total: serverTotal };
+    appendAudit(transaction, {
+      negocio_id: negocioId,
+      usuario_id: userId,
+      accion: "venta",
+      entidad: "ventas",
+      entidad_id: ventaId,
+      diff: { total: serverTotal, metodo_pago: metodoPago },
+    });
+
+    return { ventaId, total: serverTotal, alreadyCharged: false as const };
   });
 
-  return { ventaId: charged.ventaId, fecha, total: charged.total, metodoPago };
+  return {
+    ventaId: charged.ventaId,
+    fecha,
+    total: charged.total,
+    metodoPago,
+    alreadyCharged: charged.alreadyCharged,
+  };
 }
 
 /**

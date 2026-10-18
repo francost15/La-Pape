@@ -113,7 +113,11 @@ export function useProductoDetail() {
           onPress: async () => {
             try {
               setDeleting(true);
-              await deleteProduct(product.id);
+              const uid = auth.currentUser?.uid;
+              await deleteProduct(
+                product.id,
+                uid ? { negocioId: product.negocio_id, userId: uid } : undefined
+              );
               const user = auth.currentUser;
               if (user) {
                 const storeData = await getProductosScreenData(user.uid, user.email || "");

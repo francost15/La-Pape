@@ -1,6 +1,7 @@
 import type { VentaDetalle } from "@/interface";
 import type { RefundVentaParams, RefundVentaResult } from "@/interface/ventas";
 import { db } from "@/lib/firebase";
+import { appendAudit } from "@/lib/services/auditoria";
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 import { getDetallesByVenta } from "../ventas-detalle";
 
@@ -14,11 +15,10 @@ export type { RefundVentaParams, RefundVentaResult };
  * 4. Registra movimientos de inventario tipo ENTRADA
  */
 export async function refundVentaFlow(params: RefundVentaParams): Promise<RefundVentaResult> {
-  const { ventaId, sucursalId, userId } = params;
+  const { ventaId, negocioId, sucursalId, userId } = params;
   const now = Timestamp.now();
-  // Solo incluir sucursal_id cuando existe: evita escribir "" (dato corrupto).
   const sucursalField = sucursalId ? { sucursal_id: sucursalId } : {};
-  const detalles = await getDetallesByVenta(ventaId);
+  const detalles = await getDetallesByVenta(ventaId, negocioId);
   if (!detalles.length) {
     throw new Error("La venta no tiene detalles para reembolso");
   }
@@ -38,7 +38,6 @@ export async function refundVentaFlow(params: RefundVentaParams): Promise<Refund
     if (estado === "REEMBOLSO") {
       throw new Error("La venta ya fue reembolsada");
     }
-    const negocioId = ventaSnap.data().negocio_id as string | undefined;
 
     // Agregamos por producto: una venta puede tener varias líneas del mismo
     // producto y el stock debe reponerse una sola vez con la suma.
@@ -80,7 +79,7 @@ export async function refundVentaFlow(params: RefundVentaParams): Promise<Refund
       const movimientoRef = doc(collection(db, "inventario_movimientos"));
       transaction.set(movimientoRef, {
         producto_id: detalle.producto_id,
-        negocio_id: negocioId ?? null,
+        negocio_id: negocioId,
         ...sucursalField,
         tipo: "ENTRADA",
         cantidad: detalle.cantidad,
@@ -90,6 +89,14 @@ export async function refundVentaFlow(params: RefundVentaParams): Promise<Refund
         createdAt: now,
       });
     }
+
+    appendAudit(transaction, {
+      negocio_id: negocioId,
+      usuario_id: userId,
+      accion: "reembolso",
+      entidad: "ventas",
+      entidad_id: ventaId,
+    });
   });
 
   return { ventaId, detalles };

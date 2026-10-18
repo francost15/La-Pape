@@ -47,6 +47,12 @@ async function commitInChunks(
 }
 
 async function migrateMemberships() {
+  const usuariosSnap = await getDocs(collection(db, "usuarios"));
+  const rolByUser = new Map();
+  for (const u of usuariosSnap.docs) {
+    if (u.data().rol) rolByUser.set(u.id, u.data().rol);
+  }
+
   const snap = await getDocs(collection(db, "usuarios_negocios"));
   const ops: ((batch: ReturnType<typeof writeBatch>) => void)[] = [];
 
@@ -57,10 +63,16 @@ async function migrateMemberships() {
       continue;
     }
     const canonicalId = `${data.usuario_id}_${data.negocio_id}`;
-    if (d.id === canonicalId) continue;
+    const rol = data.rol || rolByUser.get(data.usuario_id) || "VENDEDOR";
+    if (d.id === canonicalId) {
+      if (!data.rol) {
+        ops.push((batch) => batch.update(d.ref, { rol }));
+      }
+      continue;
+    }
 
     ops.push((batch) => {
-      batch.set(doc(db, "usuarios_negocios", canonicalId), data);
+      batch.set(doc(db, "usuarios_negocios", canonicalId), { ...data, rol });
       batch.delete(d.ref);
     });
   }

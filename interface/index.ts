@@ -1,3 +1,4 @@
+export * from "./auditoria";
 export * from "./categorias";
 export * from "./equipo";
 export * from "./filtros";

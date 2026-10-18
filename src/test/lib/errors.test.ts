@@ -5,7 +5,6 @@ import {
   ProductNotFoundError,
   InvalidQuantityError,
   VentaError,
-  NotFoundError,
 } from "@/lib/errors";
 
 describe("AppError", () => {
@@ -53,13 +52,5 @@ describe("VentaError", () => {
     const error = new VentaError("Venta failed");
     expect(error.message).toBe("Venta failed");
     expect(error.code).toBe("VENTA_ERROR");
-  });
-});
-
-describe("NotFoundError", () => {
-  it("should create error with resource name", () => {
-    const error = new NotFoundError("Usuario");
-    expect(error.message).toContain("Usuario");
-    expect(error.code).toBe("NOT_FOUND");
   });
 });

@@ -1,12 +1,20 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useCheckoutStore } from "@/store/checkout-store";
+
+vi.mock("@/lib/firebase", () => ({ db: {}, auth: {} }));
+vi.mock("firebase/firestore", () => ({
+  collection: vi.fn(() => ({})),
+  doc: vi.fn(() => ({ id: "pending-venta" })),
+  runTransaction: vi.fn(),
+  Timestamp: { now: vi.fn(), fromDate: vi.fn() },
+}));
 
 describe("CheckoutStore", () => {
   beforeEach(() => {
     useCheckoutStore.setState({
       confirmVisible: false,
       processing: false,
-      successVenta: null,
+      pendingVentaId: null,
     });
   });
 
@@ -16,9 +24,13 @@ describe("CheckoutStore", () => {
     expect(useCheckoutStore.getState().successVenta).toBe(null);
   });
 
-  it("should open confirm modal", () => {
+  it("reutiliza el id de venta mientras el intento no termina", () => {
     useCheckoutStore.getState().openConfirm();
-    expect(useCheckoutStore.getState().confirmVisible).toBe(true);
+    const first = useCheckoutStore.getState().pendingVentaId;
+    useCheckoutStore.getState().closeConfirm();
+    useCheckoutStore.getState().openConfirm();
+    expect(useCheckoutStore.getState().pendingVentaId).toBe(first);
+    expect(first).toBe("pending-venta");
   });
 
   it("should close confirm modal", () => {

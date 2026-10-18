@@ -60,13 +60,14 @@ Recent history shows short, imperative commit subjects, often in Spanish (e.g., 
 
 - Manejar estado de dominio y compartido con Zustand; evitar `useState` para ese tipo de estado.
 - Interfaces y tipos de dominio/props viven en `interface/`, no en `store/` ni embebidos en TSX.
-- Preferir Tailwind (`className`) frente a StyleSheet inline o tamaños en px.
+- Preferir Tailwind (`className`) y los tokens del design system; evitar StyleSheet inline, tamaños en px y colores hex arbitrarios.
 - Reutilizar hooks y componentes existentes y minimizar código duplicado; evitar capas de abstracción nuevas.
 - Preferencia visual: UI limpia estilo Apple, acento naranja, animaciones suaves con Reanimated. No usar texto de UI en mayúsculas.
 - No hacer push a `origin` (`FrancoSanchezTrinidadIdea15/La-Pape`); el remoto del usuario es `upstream` (`francost15/La-Pape`).
 - En Ventas no mostrar stock ni precio de mayoreo; en Productos sí.
 - DynamicIslandTabBar sin etiquetas de texto; debe respetar correctamente light/dark.
 - Título de documento unificado en toda la app: "Punto de Venta La Pape".
+- Antes de cada push, React Doctor debe quedar en 100; el control está en `scripts/react-doctor-gate.sh`.
 
 ## Learned Workspace Facts
 
@@ -75,3 +76,4 @@ Recent history shows short, imperative commit subjects, often in Spanish (e.g., 
 - Catálogo y ventas filtrados por `negocio_id`; historial de ventas vía listeners Firestore en tiempo real.
 - PeriodFilter reutilizable entre historial y resumen, con estado en el store de filtros.
 - Recibos de venta se generan como PDF; productos pueden tener QR para agregar al carrito por escaneo.
+- Pruebas con Vitest (`npm test`): unitarias, de stores y de integración (ventas, sesión, productos), más e2e de auth y ventas.

@@ -13,7 +13,7 @@ vi.mock("@/lib/firebase", () => ({
 
 vi.mock("firebase/firestore", () => ({
   collection: vi.fn().mockReturnValue({}),
-  doc: vi.fn().mockReturnValue({ id: "venta-id-123" }),
+  doc: vi.fn((_db: unknown, _col?: string, id?: string) => ({ id: id ?? "venta-id-123" })),
   runTransaction: (...args: unknown[]) => mockRunTransaction(...args),
   Timestamp: {
     now: vi.fn().mockReturnValue({ toDate: () => new Date() }),
@@ -58,6 +58,7 @@ describe("Ventas Service Integration", () => {
   describe("completeVentaFlow", () => {
     it("should throw VentaError when cart is empty", async () => {
       const params: CompleteVentaParams = {
+        ventaId: "venta-id-123",
         items: [],
         negocioId: "negocio-1",
         sucursalId: "sucursal-1",
@@ -73,6 +74,7 @@ describe("Ventas Service Integration", () => {
 
     it("should throw InvalidQuantityError when item has zero quantity", async () => {
       const params: CompleteVentaParams = {
+        ventaId: "venta-id-123",
         items: [
           {
             productId: "prod-1",
@@ -95,6 +97,7 @@ describe("Ventas Service Integration", () => {
 
     it("should throw InvalidQuantityError when item has negative quantity", async () => {
       const params: CompleteVentaParams = {
+        ventaId: "venta-id-123",
         items: [
           {
             productId: "prod-1",
@@ -147,6 +150,7 @@ describe("Ventas Service Integration", () => {
       });
 
       const params: CompleteVentaParams = {
+        ventaId: "venta-id-123",
         items,
         negocioId: "negocio-1",
         sucursalId: "sucursal-1",
@@ -183,6 +187,7 @@ describe("Ventas Service Integration", () => {
       });
 
       const result = await completeVentaFlow({
+        ventaId: "venta-id-123",
         items,
         negocioId: "negocio-1",
         sucursalId: "sucursal-1",
@@ -195,6 +200,44 @@ describe("Ventas Service Integration", () => {
       expect(result.total).toBe(80);
       const line = set.mock.calls.map((call) => call[1]).find((doc) => doc.precio_unitario != null);
       expect(line).toMatchObject({ precio_unitario: 80, total_linea: 80 });
+    });
+
+    it("no vuelve a mover stock si la venta ya está pagada", async () => {
+      const set = vi.fn();
+      const update = vi.fn();
+      mockRunTransaction.mockImplementation(async (_db, callback) =>
+        callback({
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ estado: "PAGADA", total: 80 }),
+          }),
+          set,
+          update,
+        })
+      );
+
+      const result = await completeVentaFlow({
+        ventaId: "venta-id-123",
+        items: [
+          {
+            productId: "prod-1",
+            product: createMockProduct("prod-1", "Test Product", 10),
+            quantity: 1,
+            unitPrice: 80,
+          },
+        ],
+        negocioId: "negocio-1",
+        sucursalId: "sucursal-1",
+        userId: "user-1",
+        total: 80,
+        subtotal: 80,
+        metodoPago: "DEBITO",
+      });
+
+      expect(result.alreadyCharged).toBe(true);
+      expect(result.total).toBe(80);
+      expect(set).not.toHaveBeenCalled();
+      expect(update).not.toHaveBeenCalled();
     });
   });
 
@@ -216,6 +259,7 @@ describe("Ventas Service Integration", () => {
       await expect(
         refundVentaFlow({
           ventaId: "non-existent",
+          negocioId: "negocio-1",
           sucursalId: "sucursal-1",
           userId: "user-1",
         })
@@ -240,6 +284,7 @@ describe("Ventas Service Integration", () => {
       await expect(
         refundVentaFlow({
           ventaId: "already-refunded",
+          negocioId: "negocio-1",
           sucursalId: "sucursal-1",
           userId: "user-1",
         })
